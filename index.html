@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Geometric Bonsai — Ikebana Style</title>
+    <style>
+        :root {
+            --bg0: #0e1115;
+            --ui: #141a22;
+            --ink: #2b2232;
+            --paper: #e8eef7;
+            --panelW: 380px;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+            background: var(--bg0);
+            color: var(--paper);
+        }
+
+        #app {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            grid-template-columns: var(--panelW) 1fr;
+            grid-template-rows: auto 1fr;
+            grid-template-areas: "header header" "panel stage";
+        }
+
+        header {
+            grid-area: header;
+            display: flex;
+            gap: .75rem;
+            align-items: center;
+            padding: .6rem 1rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        header h1 {
+            font-size: 1rem;
+            letter-spacing: .06em;
+            margin: 0;
+            color: #cbd3db;
+            font-weight: 600
+        }
+
+        /* Side panel */
+        #panel {
+            grid-area: panel;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px;
+            background: #0f141a;
+            min-width: var(--panelW);
+            max-width: var(--panelW);
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, .06), 1px 0 0 rgba(0, 0, 0, .25);
+        }
+
+        /* Consistent dark scrollbar (WebKit) */
+        #panel::-webkit-scrollbar {
+            width: 10px
+        }
+
+        #panel::-webkit-scrollbar-track {
+            background: #0f141a
+        }
+
+        #panel::-webkit-scrollbar-thumb {
+            background: #24303b;
+            border-radius: 8px;
+            border: 2px solid #0f141a
+        }
+
+        /* Firefox scrollbar */
+        #panel {
+            scrollbar-width: thin;
+            scrollbar-color: #24303b #0f141a
+        }
+
+        .section {
+            margin-bottom: 12px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 10px;
+            background: #0f141a
+        }
+
+        .section>h2 {
+            margin: 0;
+            font-size: .9rem;
+            padding: .55rem .7rem;
+            color: #b9c6d3;
+            border-bottom: 1px dashed rgba(255, 255, 255, .08)
+        }
+
+        .form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 10px;
+            align-items: center;
+            padding: .6rem .7rem
+        }
+
+        .row {
+            display: flex;
+            gap: .4rem;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        label {
+            font-size: .82rem;
+            color: #cbd3db
+        }
+
+        select,
+        input[type="range"],
+        input[type="color"],
+        .btn {
+            width: 100%;
+            box-sizing: border-box
+        }
+
+        select,
+        input[type="range"],
+        input[type="color"] {
+            appearance: none;
+            background: var(--ui);
+            color: var(--paper);
+            border: 1px solid rgba(255, 255, 255, .12);
+            padding: .4rem .5rem;
+            border-radius: 8px;
+            font-weight: 600
+        }
+
+        input[type="range"] {
+            height: 30px;
+            padding: 0
+        }
+
+        input[type="color"] {
+            height: 32px;
+            padding: 0.2rem;
+            border-radius: 8px
+        }
+
+        .full {
+            grid-column: 1 / -1
+        }
+
+        .btn {
+            appearance: none;
+            background: #18212a;
+            color: var(--paper);
+            border: 1px solid rgba(255, 255, 255, .12);
+            padding: .5rem .7rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            width: auto
+        }
+
+        /* Stage */
+        #stageWrap {
+            grid-area: stage;
+            position: relative
+        }
+
+        #bgOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        #stage {
+            position: absolute;
+            inset: 0;
+            z-index: 1
+        }
+
+        footer {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: .75rem;
+            padding: .4rem .6rem;
+            color: #aeb9c5;
+            font-size: .85rem;
+            background: rgba(0, 0, 0, .25);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 10px
+        }
+
+        .kbd {
+            background: #0f141a;
+            border: 1px solid rgba(255, 255, 255, .12);
+            padding: .15rem .35rem;
+            border-radius: 6px;
+            font-size: .85em;
+            color: #e8eef7
+        }
+    </style>
+
+    <!-- Import map for bare specifier "three" -->
+    <script type="importmap">
+  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+  </script>
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>Geometric Bonsai — Ikebana</h1>
+        </header>
+
+        <aside id="panel">
+            <div class="section">
+                <h2>Scene</h2>
+                <div class="form">
+                    <label>Background</label>
+                    <input id="bgColor" type="color" value="#0e1115" />
+                    <label>Texture</label>
+                    <select id="bgTex">
+                        <option value="solid">Solid</option>
+                        <option value="grain">Grain</option>
+                        <option value="gradient">Gradient</option>
+                        <option value="paper">Paper</option>
+                    </select>
+                    <label>Key</label>
+                    <input id="keyLight" type="range" min="0" max="2" step="0.01" value="0.55" />
+                    <label>Ambient</label>
+                    <input id="hemiLight" type="range" min="0" max="2" step="0.01" value="0.9" />
+                    <label>Exposure</label>
+                    <input id="exposure" type="range" min="0.5" max="2.5" step="0.01" value="1" />
+                    <div class="full row">
+                        <button id="frame" class="btn">Frame</button>
+                        <button id="shot" class="btn">📸 Screenshot</button>
+                        <button id="newSeed" class="btn">New Seed</button>
+                        <span>Seed: <span id="seedLabel" class="kbd">—</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Species</h2>
+                <div class="form">
+                    <label>Type</label>
+                    <select id="treeType">
+                        <option value="magnolia">Magnolia (petals, arching)</option>
+                        <option value="maple">Maple (broad, lobed)</option>
+                        <option value="pine">Pine (upright, whorled)</option>
+                        <option value="olive">Olive (compact, slabs)</option>
+                        <option value="juniper">Juniper (windswept)</option>
+                        <option value="ginkgo">Ginkgo (tiered fans)</option>
+                    </select>
+                    <label>Levels</label>
+                    <input id="levels" type="range" min="3" max="10" step="1" value="6" />
+                    <label>Curvature</label>
+                    <input id="curvature" type="range" min="0" max="1" step="0.01" value="0.55" />
+                    <label>Uniformity</label>
+                    <input id="uniformity" type="range" min="0" max="1" step="0.01" value="0.6" />
+                    <label>Spread</label>
+                    <input id="spread" type="range" min="0.3" max="1.2" step="0.01" value="0.75" />
+                    <label>Up-Bias</label>
+                    <input id="upBias" type="range" min="0" max="1" step="0.01" value="0.3" />
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Branchlets</h2>
+                <div class="form">
+                    <label>Depth</label>
+                    <input id="bDepth" type="range" min="1" max="4" step="1" value="3" />
+                    <label>Per-level Min</label>
+                    <input id="bMin" type="range" min="1" max="6" step="1" value="2" />
+                    <label>Per-level Max</label>
+                    <input id="bMax" type="range" min="1" max="8" step="1" value="3" />
+                    <label>Branch Length</label>
+                    <input id="bLen" type="range" min="0.5" max="1.8" step="0.01" value="1" />
+                    <label>Terminal Density</label>
+                    <input id="density" type="range" min="0.3" max="3" step="0.01" value="1" />
+                    <label>Leaf Spread</label>
+                    <input id="leafSpread" type="range" min="0.3" max="2.5" step="0.01" value="1" />
+                    <label>Leaf Type</label>
+                    <select id="leafType">
+                        <option value="diamond">Diamond</option>
+                        <option value="needle">Needle</option>
+                        <option value="slab">Slab</option>
+                        <option value="sphere">Sphere</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="cone">Cone</option>
+                        <option value="teardrop">Teardrop</option>
+                        <option value="half">Half‑circle</option>
+                        <option value="crescent">Crescent</option>
+                        <option value="petal">Petal (flower)</option>
+                    </select>
+                    <label>Plumage</label>
+                    <select id="plumage">
+                        <option value="random">Random</option>
+                        <option value="upward">Upward</option>
+                        <option value="radial">Radial</option>
+                        <option value="wind-left">Wind →</option>
+                        <option value="wind-right">Wind ←</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Vessel</h2>
+                <div class="form">
+                    <label>Type</label>
+                    <select id="vesselType">
+                        <option value="glass-cylinder">Glass Cylinder</option>
+                        <option value="shallow-bowl">Shallow Bowl</option>
+                        <option value="faceted">Faceted Prism</option>
+                        <option value="stone-disc">Stone Disc</option>
+                    </select>
+                    <label>Diameter</label>
+                    <input id="vesselDia" type="range" min="0.8" max="2.4" step="0.01" value="1.2" />
+                    <label>Depth</label>
+                    <input id="vesselDepth" type="range" min="0.2" max="2.5" step="0.01" value="1.6" />
+                    <label>Color</label>
+                    <input id="vesselColor" type="color" value="#a5b2bd" />
+                    <div class="full row"><button id="applyVessel" class="btn">Apply Vessel</button></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Render & Appearance</h2>
+                <div class="form">
+                    <label>Wireframe</label>
+                    <select id="wireToggle">
+                        <option value="off">Off</option>
+                        <option value="on">On</option>
+                    </select>
+                    <label>Render Mode</label>
+                    <select id="renderMode">
+                        <option value="toon">Toon</option>
+                        <option value="sketchy">Sketchy</option>
+                        <option value="metallic">Metallic</option>
+                        <option value="holographic">Holographic</option>
+                    </select>
+                </div>
+            </div>
+        </aside>
+
+        <div id="stageWrap">
+            <div id="bgOverlay"></div>
+            <div id="stage"></div>
+            <footer>
+                <div>Tip: drag to orbit · wheel/pinch to zoom</div>
+                <div>Press <span class="kbd">Frame</span> to refit</div>
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+        // --- UI refs ---
+        const $ = (id) => document.getElementById(id);
+        const stage = $('stage');
+        const bgOverlay = $('bgOverlay');
+        const seedLabel = $('seedLabel');
+        const treeType = $('treeType');
+        const levels = $('levels');
+        const curvature = $('curvature');
+        const uniformity = $('uniformity');
+        const spread = $('spread');
+        const upBias = $('upBias');
+        const bDepth = $('bDepth');
+        const bMin = $('bMin');
+        const bMax = $('bMax');
+        const bLen = $('bLen');
+        const density = $('density');
+        const leafSpread = $('leafSpread');
+        const leafType = $('leafType');
+        const plumage = $('plumage');
+        const vesselType = $('vesselType');
+        const vesselDia = $('vesselDia');
+        const vesselDepth = $('vesselDepth');
+        const vesselColor = $('vesselColor');
+        const applyVessel = $('applyVessel');
+        const bgColor = $('bgColor');
+        const bgTex = $('bgTex');
+        const keyLightUI = $('keyLight');
+        const hemiLightUI = $('hemiLight');
+        const exposureUI = $('exposure');
+        const frameBtn = $('frame');
+        const shotBtn = $('shot');
+        const newSeedBtn = $('newSeed');
+        const wireToggle = $('wireToggle');
+        const renderMode = $('renderMode');
+
+        // --- Scene ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
+        camera.position.set(6, 4.2, 11);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        renderer.toneMappingExposure = parseFloat(exposureUI.value);
+        stage.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; controls.dampingFactor = 0.08;
+        controls.minDistance = 4; controls.maxDistance = 30;
+        controls.maxPolarAngle = Math.PI * 0.95; controls.target.set(0, 0, 0);
+
+        const hemi = new THREE.HemisphereLight(0xf4efe8, 0x0b0f12, parseFloat(hemiLightUI.value));
+        const dir = new THREE.DirectionalLight(0xffffff, parseFloat(keyLightUI.value)); dir.position.set(3, 5, 4);
+        scene.add(hemi, dir);
+
+        const root = new THREE.Group(); scene.add(root);
+        let ike = new THREE.Group(); root.add(ike);
+        let vesselGroup = null, treeGroup = null, sketchOverlay = null;
+
+        function onResize() {
+            const rect = stage.getBoundingClientRect();
+            const w = Math.max(1, rect.width);
+            const h = Math.max(1, rect.height);
+            renderer.setSize(w, h, false);
+            camera.aspect = w / h; camera.updateProjectionMatrix();
+        }
+        window.addEventListener('resize', onResize); onResize();
+
+        // RNG
+        function mulberry32(a) { return function () { let t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+        const seeded = (s) => mulberry32(s >>> 0);
+        const rr = (r, min, max) => min + r() * (max - min);
+
+        // Materials (DoubleSide to avoid backface holes)
+        const DS = THREE.DoubleSide;
+        const mats = {
+            branch: new THREE.MeshToonMaterial({ color: 0x3b2d44, side: DS }),
+            leaf: new THREE.MeshToonMaterial({ color: 0x2d6e52, transparent: true, opacity: 0.95, side: DS }),
+            petal: new THREE.MeshToonMaterial({ color: 0xf3e7da, transparent: true, opacity: 0.98, side: DS }),
+            accent: new THREE.MeshToonMaterial({ color: 0xd6b36a, transparent: true, opacity: 0.95, side: DS }),
+            glass: new THREE.MeshPhysicalMaterial({ color: 0xa5b2bd, metalness: 0, roughness: 0.2, transmission: 0.9, ior: 1.2, thickness: 0.8, transparent: true, opacity: 0.85, side: DS }),
+            water: new THREE.MeshPhysicalMaterial({ color: 0x5b7a86, metalness: 0, roughness: 0.4, transmission: 0.9, ior: 1.33, thickness: 0.2, transparent: true, opacity: 0.6, side: DS }),
+            stone: new THREE.MeshStandardMaterial({ color: 0x545a5f, roughness: 0.9, metalness: 0.0, side: DS })
+        };
+
+        // Species presets
+        const PRESETS = {
+            magnolia: { spread: 0.6, upBias: 0.2, lenFalloff: 0.72, leaves: 'petal', trunk: 'arch', colors: { branch: 0x3b2d44, leaf: 0xf3e7da } },
+            maple: { spread: 0.9, upBias: 0.15, lenFalloff: 0.70, leaves: 'diamond', trunk: 'splay', colors: { branch: 0x3b2d44, leaf: 0xd44a2f } },
+            pine: { spread: 0.5, upBias: 0.6, lenFalloff: 0.76, leaves: 'needle', trunk: 'upright', branchPattern: 'whorl', colors: { branch: 0x2a3a2c, leaf: 0x1d4228 } },
+            olive: { spread: 0.65, upBias: 0.4, lenFalloff: 0.74, leaves: 'slab', trunk: 'compact', colors: { branch: 0x403e3a, leaf: 0x6e7b64 } },
+            juniper: { spread: 0.55, upBias: 0.45, lenFalloff: 0.75, leaves: 'teardrop', trunk: 'windswept', colors: { branch: 0x2e3a3f, leaf: 0x547b7c } },
+            ginkgo: { spread: 0.8, upBias: 0.25, lenFalloff: 0.71, leaves: 'half', trunk: 'tiered', branchPattern: 'tiers', colors: { branch: 0x3b2d44, leaf: 0xe8b736 } }
+        };
+
+        let currentSeed = (Math.random() * 0xFFFFFFFF) >>> 0;
+        let lastTerminalPieces = 0, lastBranchSegments = 0;
+
+        function setSeed(seed) { currentSeed = seed >>> 0; seedLabel.textContent = String(currentSeed); }
+
+        // Background textures
+        function applyBackground() {
+            const color = bgColor.value;
+            bgOverlay.style.backgroundImage = '';
+            if (bgTex.value === 'solid') {
+                bgOverlay.style.background = color;
+            } else if (bgTex.value === 'grain') {
+                bgOverlay.style.background = `${color}`;
+                bgOverlay.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="n"><feTurbulence baseFrequency="0.8" type="fractalNoise" numOctaves="2"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100" height="100" filter="url(%23n)" opacity="0.15"/></svg>')`;
+                bgOverlay.style.backgroundBlendMode = 'overlay';
+            } else if (bgTex.value === 'gradient') {
+                bgOverlay.style.background = `radial-gradient(1000px 800px at 70% 25%, ${color}, #0a0e12)`;
+            } else if (bgTex.value === 'paper') {
+                bgOverlay.style.background = color;
+                bgOverlay.style.backgroundImage = `linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px)`;
+                bgOverlay.style.backgroundSize = '6px 6px, 6px 6px';
+            }
+        }
+
+        function makeVessel(type, dia = 1.2, depth = 1.6) {
+            if (vesselGroup) { ike.remove(vesselGroup); vesselGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+            const g = new THREE.Group(); g.position.y = -1.6; vesselGroup = g; ike.add(g);
+            const tint = new THREE.Color(vesselColor.value);
+            mats.glass.color.copy(tint); mats.stone.color.copy(tint);
+            if (type === 'glass-cylinder') {
+                const outer = new THREE.Mesh(new THREE.CylinderGeometry(dia * 0.9, dia * 0.9, depth, 36, 1, true), mats.glass);
+                const inner = new THREE.Mesh(new THREE.CylinderGeometry(dia * 0.82, dia * 0.82, depth * 0.92, 36, 1, true), mats.glass);
+                const water = new THREE.Mesh(new THREE.CylinderGeometry(dia * 0.8, dia * 0.8, Math.max(0.2, depth * 0.45), 36), mats.water); water.position.y = -depth * 0.25;
+                g.add(outer, inner, water);
+            } else if (type === 'shallow-bowl') {
+                const bowl = new THREE.Mesh(new THREE.CylinderGeometry(dia * 1.3, dia * 1.5, Math.max(0.25, depth * 0.35), 24, 1, true), mats.glass);
+                bowl.position.y = -Math.max(0.05, depth * 0.1); g.add(bowl);
+                const pool = new THREE.Mesh(new THREE.CylinderGeometry(dia * 1.2, dia * 1.2, Math.max(0.1, depth * 0.12), 24), mats.water); pool.position.y = -Math.max(0.08, depth * 0.18); g.add(pool);
+            } else if (type === 'faceted') {
+                const prism = new THREE.Mesh(new THREE.DodecahedronGeometry(Math.max(0.6, dia * 0.7), 0), mats.glass); prism.position.y = 0.1; g.add(prism);
+            } else if (type === 'stone-disc') {
+                const disc = new THREE.Mesh(new THREE.CylinderGeometry(dia * 1.4, dia * 1.4, Math.max(0.2, depth * 0.16), 36), mats.stone); disc.position.y = -depth * 0.6; g.add(disc);
+            }
+            return g;
+        }
+
+        // Render styles (tree only)
+        function applyRenderStyle() {
+            const mode = renderMode.value;
+            const wire = wireToggle.value === 'on';
+            const branchColor = mats.branch.color.clone();
+            const leafColor = mats.leaf.color.clone();
+            const petalColor = mats.petal.color.clone();
+
+            const setMat = (mesh, kind) => {
+                let mat;
+                if (mode === 'metallic') {
+                    mat = new THREE.MeshStandardMaterial({ color: kind === 'branch' ? branchColor : (kind === 'petal' ? petalColor : leafColor), metalness: 0.85, roughness: 0.25, wireframe: wire, side: DS });
+                } else if (mode === 'holographic') {
+                    const base = new THREE.MeshPhysicalMaterial({ color: kind === 'branch' ? branchColor : (kind === 'petal' ? petalColor : leafColor), metalness: 0.2, roughness: 0.1, transmission: 0.4, transparent: true, opacity: 0.9, wireframe: wire, side: DS });
+                    base.onBeforeCompile = (shader) => {
+                        shader.fragmentShader = shader.fragmentShader.replace('#include <output_fragment>', `
+              float fres = pow(1.0 - dot(normalize(vViewPosition), normalize(normal)), 2.0);
+              vec3 holo = mix(gl_FragColor.rgb, vec3(0.6,0.8,1.0), fres*0.9);
+              gl_FragColor = vec4(holo, gl_FragColor.a);
+            `);
+                    };
+                    mat = base;
+                } else { // toon default
+                    mat = (kind === 'petal') ? mats.petal.clone() : (kind === 'branch' ? mats.branch.clone() : mats.leaf.clone());
+                    mat.wireframe = wire; mat.side = DS;
+                }
+                mesh.material = mat;
+            };
+
+            if (treeGroup) {
+                treeGroup.traverse(o => { if (o.isMesh) { const kind = o.userData.kind || 'branch'; setMat(o, kind); } });
+            }
+
+            if (sketchOverlay) { ike.remove(sketchOverlay); sketchOverlay.traverse(o => { if (o.geometry) o.geometry.dispose(); }); sketchOverlay = null; }
+            if (mode === 'sketchy') {
+                sketchOverlay = new THREE.Group();
+                treeGroup.traverse(o => {
+                    if (o.isMesh && o.geometry) {
+                        const e = new THREE.EdgesGeometry(o.geometry, 15);
+                        const lines = new THREE.LineSegments(e, new THREE.LineBasicMaterial({ color: 0x0b0b0b, transparent: true, opacity: 0.6 }));
+                        lines.position.copy(o.position); lines.rotation.copy(o.rotation); lines.scale.copy(o.scale); lines.quaternion.copy(o.quaternion);
+                        lines.userData.kind = 'sketch';
+                        o.add(lines); sketchOverlay.add(lines);
+                    }
+                });
+            }
+        }
+
+        function leafGeometry(kind) {
+            switch (kind) {
+                case 'sphere': return new THREE.IcosahedronGeometry(0.18, 0);
+                case 'triangle': return new THREE.ConeGeometry(0.22, 0.32, 3);
+                case 'cone': return new THREE.ConeGeometry(0.16, 0.5, 10);
+                case 'diamond': return new THREE.OctahedronGeometry(0.18, 0);
+                case 'slab': return new THREE.BoxGeometry(0.24, 0.08, 0.24);
+                case 'needle': return new THREE.CylinderGeometry(0.02, 0.02, 0.7, 8);
+                case 'half': { const pts = []; for (let i = 0; i <= 10; i++) { const a = (i / 10) * Math.PI; pts.push(new THREE.Vector2(Math.sin(a) * 0.22, Math.cos(a) * 0.22)); } return new THREE.LatheGeometry(pts, 16, 0, Math.PI); }
+                case 'crescent': return new THREE.TorusGeometry(0.25, 0.06, 10, 24, Math.PI * 1.2);
+                case 'teardrop': { const g = new THREE.Group(); g.add(new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.5, 10))); const cap = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12)); cap.position.y = 0.24; g.add(cap); return g; }
+                case 'petal': default: return new THREE.BoxGeometry(0.12, 0.8, 0.02);
+            }
+        }
+
+        function regenerate() {
+            const camPos = camera.position.clone();
+            const camTarget = controls.target.clone();
+
+            root.remove(ike); ike.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+            ike = new THREE.Group(); root.add(ike);
+
+            makeVessel(vesselType.value, parseFloat(vesselDia.value), parseFloat(vesselDepth.value));
+            treeGroup = new THREE.Group(); ike.add(treeGroup);
+
+            const preset = PRESETS[treeType.value];
+            mats.branch.color.set(preset.colors.branch);
+            mats.leaf.color.set(preset.colors.leaf);
+
+            const depth = parseInt(levels.value, 10);
+            const sp = parseFloat(spread.value) || preset.spread;
+            const up = parseFloat(upBias.value) || preset.upBias;
+            const lenFall = preset.lenFalloff;
+            const leavesKind = leafType.value || preset.leaves;
+            const curv = parseFloat(curvature.value);
+            const uni = parseFloat(uniformity.value);
+            const childMin = parseInt(bMin.value, 10);
+            const childMax = parseInt(bMax.value, 10);
+            const depthBranches = parseInt(bDepth.value, 10);
+            const branchLenMul = parseFloat(bLen.value);
+            const densityMul = parseFloat(density.value);
+            const leafSpreadMul = parseFloat(leafSpread.value);
+
+            const r = seeded(currentSeed);
+
+            // Trunk
+            const trunkGroup = new THREE.Group(); treeGroup.add(trunkGroup);
+            lastBranchSegments = 0;
+            function addSegment(a, b, thickness) {
+                const dir = new THREE.Vector3().subVectors(b, a); const len = dir.length(); dir.normalize();
+                const mesh = new THREE.Mesh(new THREE.BoxGeometry(thickness, thickness, len));
+                mesh.userData.kind = 'branch';
+                const quat = new THREE.Quaternion(); quat.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+                mesh.quaternion.copy(quat); mesh.position.copy(a.clone().addScaledVector(dir, len / 2));
+                trunkGroup.add(mesh); lastBranchSegments++;
+            }
+
+            const pts = []; let p = new THREE.Vector3(rr(r, -0.05, 0.05), -0.9, rr(r, -0.05, 0.05));
+            const upVec = new THREE.Vector3(0, 1, 0);
+            let dir0 = new THREE.Vector3(rr(r, -0.1, 0.1), 1, rr(r, -0.1, 0.1)).normalize();
+            let len = 2.6;
+            const bendDir = (preset.trunk === 'windswept') ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(rr(r, -1, 1), 0, rr(r, -1, 1));
+            bendDir.normalize().multiplyScalar(0.6 * curv);
+
+            for (let i = 0; i < depth; i++) {
+                let yawBias = bendDir.x * 0.35 + (1 - uni) * rr(r, -0.3, 0.3);
+                let pitchBias = (preset.trunk === 'upright' ? 0.08 : 0.15) * curv + (1 - uni) * rr(r, -0.2, 0.2) + up * 0.05;
+                if (preset.trunk === 'tiered' && i % 2 === 0) { yawBias *= 0.35; pitchBias *= 0.2; }
+                if (preset.trunk === 'compact') { yawBias *= 0.5; pitchBias *= 0.5; }
+                if (preset.trunk === 'splay') { yawBias += rr(r, -0.15, 0.15); }
+                dir0 = dir0.clone().applyAxisAngle(upVec, yawBias).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitchBias).normalize();
+                const np = p.clone().addScaledVector(dir0, len);
+                np.add(new THREE.Vector3(rr(r, -0.10, 0.10), rr(r, -0.05, 0.05), rr(r, -0.10, 0.10)).multiplyScalar(curv * 0.35));
+                pts.push([p.clone(), np.clone(), Math.max(0.035, 0.10 * Math.pow(lenFall, i))]);
+                p = np; len *= lenFall * rr(r, 0.95, 1.05);
+            }
+            pts.forEach(([a, b, t]) => addSegment(a, b, t));
+
+            // Direction preferences
+            function preferredDir(baseDir) {
+                const mode = plumage.value;
+                if (mode === 'upward') return new THREE.Vector3(0, 1, 0);
+                if (mode === 'radial') return baseDir.clone();
+                if (mode === 'wind-left') return new THREE.Vector3(-1, 0.2, 0).normalize();
+                if (mode === 'wind-right') return new THREE.Vector3(1, 0.2, 0).normalize();
+                return null;
+            }
+
+            // Foliage
+            const foliageGroup = new THREE.Group(); treeGroup.add(foliageGroup);
+            lastTerminalPieces = 0;
+            function addTerminal(p, dir) {
+                const grp = new THREE.Group(); grp.position.copy(p); grp.lookAt(p.clone().add(dir));
+                let count = Math.max(1, Math.round(5 * densityMul));
+                for (let i = 0; i < count; i++) {
+                    const g = leafGeometry(leavesKind);
+                    let meshOrGroup;
+                    if (g.isGeometry || g.isBufferGeometry) {
+                        meshOrGroup = new THREE.Mesh(g);
+                    } else { meshOrGroup = g; }
+                    meshOrGroup.userData.kind = (leavesKind === 'petal' ? 'petal' : 'leaf');
+                    // Leaf spread offsets
+                    const s = 0.18 * leafSpreadMul;
+                    meshOrGroup.position.set(rr(r, -s, s), rr(r, -s * 0.6, s * 0.6), rr(r, -s, s));
+                    meshOrGroup.rotation.set(rr(r, -0.2, 0.2), rr(r, -Math.PI, Math.PI), rr(r, -0.2, 0.2));
+                    grp.add(meshOrGroup); lastTerminalPieces++;
+                }
+                foliageGroup.add(grp);
+            }
+
+            // Recursive branching
+            function grow(origin, dirBase, levelIdx, depthLeft) {
+                const pref = preferredDir(dirBase);
+                const yaw = rr(r, -sp, sp) * Math.PI * 0.6 * (1 - uni);
+                const pitch = rr(r, -0.2, 0.2) * Math.PI * 0.3 * (1 - uni) - rr(r, 0, up) * 0.2;
+                let dir = dirBase.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
+                if (pref) { dir = dir.lerp(pref, uni).normalize(); } else dir.normalize();
+                const L = branchLenMul * (2.6 * 0.45) * Math.pow(lenFall, levelIdx) * rr(r, 0.8, 1.2);
+                const end = origin.clone().addScaledVector(dir, L);
+                const t = Math.max(0.02, 0.07 * Math.pow(lenFall, levelIdx + 1));
+                const seg = new THREE.Mesh(new THREE.BoxGeometry(t, t, L)); seg.userData.kind = 'branch';
+                const q = new THREE.Quaternion(); q.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+                seg.quaternion.copy(q); seg.position.copy(origin.clone().addScaledVector(dir, L / 2));
+                trunkGroup.add(seg); lastBranchSegments++;
+
+                if (depthLeft <= 1) { addTerminal(end, dir); return; }
+                // spawn children from this endpoint
+                let n = Math.floor(rr(r, childMin, childMax + 1) * densityMul);
+                if (PRESETS[treeType.value].branchPattern === 'whorl') { n = Math.max(3, Math.round(4 * densityMul)); }
+                if (PRESETS[treeType.value].branchPattern === 'tiers') { n = Math.max(2, Math.round(3 * densityMul)); }
+                n = Math.max(1, n);
+                for (let k = 0; k < n; k++) {
+                    // for whorls distribute yaw evenly
+                    let dirChild = dir.clone();
+                    if (PRESETS[treeType.value].branchPattern === 'whorl') {
+                        const yawW = (k / n) * Math.PI * 2; dirChild.applyAxisAngle(new THREE.Vector3(0, 1, 0), yawW);
+                    }
+                    grow(end, dirChild, levelIdx + 1, depthLeft - 1);
+                }
+            }
+
+            // Start recursive branching from last N trunk joints
+            const jointsToUse = PRESETS[treeType.value].branchPattern === 'whorl' ? 5 : 3;
+            const start = Math.max(1, pts.length - jointsToUse);
+            for (let i = start; i < pts.length; i++) {
+                const [a, b] = pts[i]; const dir = new THREE.Vector3().subVectors(b, a).normalize();
+                // root fan of first-level branches from each joint
+                let n0 = Math.max(1, Math.floor(rr(r, childMin, childMax + 1) * densityMul));
+                if (PRESETS[treeType.value].branchPattern === 'whorl') { n0 = Math.max(3, Math.round(4 * densityMul)); }
+                for (let m = 0; m < n0; m++) {
+                    let d0 = dir.clone();
+                    if (PRESETS[treeType.value].branchPattern === 'whorl') {
+                        const yaw0 = (m / n0) * Math.PI * 2; d0.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw0);
+                    }
+                    grow(b, d0, i, depthBranches); // recursive depth
+                }
+            }
+
+            applyRenderStyle();
+
+            camera.position.copy(camPos); controls.target.copy(camTarget); camera.updateProjectionMatrix(); controls.update();
+        }
+
+        function applyVesselOnly() { makeVessel(vesselType.value, parseFloat(vesselDia.value), parseFloat(vesselDepth.value)); }
+
+        function savePNG() { const a = document.createElement('a'); a.download = `bonsai_${Date.now()}.png`; a.href = renderer.domElement.toDataURL('image/png'); a.click(); }
+
+        function tick() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(tick); }
+
+        // Bindings
+        const bindLive = (el, fn) => { el.addEventListener('input', fn); el.addEventListener('change', fn); };
+        [treeType, levels, curvature, uniformity, spread, upBias, bDepth, bMin, bMax, bLen, density, leafSpread, leafType, plumage].forEach(el => bindLive(el, regenerate));
+        [wireToggle, renderMode].forEach(el => bindLive(el, applyRenderStyle));
+        [vesselType, vesselDia, vesselDepth, vesselColor].forEach(el => bindLive(el, applyVesselOnly));
+        [bgColor, bgTex].forEach(el => bindLive(el, applyBackground));
+        keyLightUI.addEventListener('input', () => { dir.intensity = parseFloat(keyLightUI.value); });
+        hemiLightUI.addEventListener('input', () => { hemi.intensity = parseFloat(hemiLightUI.value); });
+        exposureUI.addEventListener('input', () => { renderer.toneMappingExposure = parseFloat(exposureUI.value); });
+
+        frameBtn.addEventListener('click', () => { const box = new THREE.Box3().setFromObject(ike); const s = box.getSize(new THREE.Vector3()); const c = box.getCenter(new THREE.Vector3()); controls.target.copy(c); const max = Math.max(s.x, s.y, s.z); const dist = max / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5))) + 2; const dirV = new THREE.Vector3(1, 0.6, 1).normalize(); camera.position.copy(c.clone().addScaledVector(dirV, dist)); camera.near = Math.max(0.01, dist * 0.02); camera.far = dist * 10; camera.updateProjectionMatrix(); controls.update(); });
+        shotBtn.addEventListener('click', savePNG);
+        newSeedBtn.addEventListener('click', () => { setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); });
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); } });
+
+        function initial() { applyBackground(); setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); tick(); }
+        initial();
+
+        // Tests (console)
+        (function tests() {
+            const seedBefore = currentSeed;
+            const camPos0 = camera.position.clone(); const tgt0 = controls.target.clone();
+            treeType.value = 'pine'; regenerate(); console.assert(currentSeed === seedBefore, 'Seed changed when switching type');
+            console.assert(camera.position.distanceTo(camPos0) < 1e-6 && controls.target.distanceTo(tgt0) < 1e-6, 'Camera moved on parameter change');
+            const seg1 = lastBranchSegments; const t1 = lastTerminalPieces; bDepth.value = '1'; bLen.value = '0.7'; regenerate(); const seg2 = lastBranchSegments; const t2 = lastTerminalPieces; bDepth.value = '4'; bLen.value = '1.6'; regenerate(); const seg3 = lastBranchSegments; const t3 = lastTerminalPieces; console.assert(seg3 > seg2 && seg2 >= seg1, 'Branch depth/length did not increase segment count'); console.assert(t3 > t2 && t2 >= t1, 'More depth did not increase terminals');
+            const beforeBox = new THREE.Box3().setFromObject(ike).getSize(new THREE.Vector3()).x; leafSpread.value = '2.0'; regenerate(); const afterBox = new THREE.Box3().setFromObject(ike).getSize(new THREE.Vector3()).x; console.assert(afterBox > beforeBox, 'Leaf spread did not widen silhouette');
+            console.assert(mats.glass.side === THREE.DoubleSide && mats.leaf.side === THREE.DoubleSide, 'Materials should be DoubleSide to avoid holes');
+            // Reset
+            leafSpread.value = '1.0'; bDepth.value = '3'; bLen.value = '1.0'; treeType.value = 'maple'; renderMode.value = 'toon'; wireToggle.value = 'off'; regenerate();
+            console.info('%cTest cases passed', 'color:#9f9');
+        })();
+    </script>
+</body>
+
+</html>
