@@ -208,6 +208,52 @@
             font-size: .85em;
             color: #e8eef7
         }
+
+        #hud {
+            position: absolute;
+            top: 42px;
+            left: 380px;
+            max-width: 380px;
+            max-height: 60vh;
+            overflow: auto;
+            padding: 10px 12px;
+            border: 1px solid rgba(0, 255, 187, 0.35);
+            background: linear-gradient(180deg, rgba(6, 14, 18, 0.75), rgba(6, 14, 18, 0.55));
+            box-shadow: 0 0 12px rgba(0, 255, 187, 0.18), inset 0 0 12px rgba(0, 255, 187, 0.08);
+            border-radius: 8px;
+            font: 12px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            color: #a7ffe9;
+            letter-spacing: 0.2px;
+            backdrop-filter: blur(3px);
+            display: none;
+            /* toggled on/off */
+            z-index: 10;
+        }
+
+        #hud .hdr {
+            color: #5df0c9;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin: 8px 0 4px;
+            border-bottom: 1px dashed rgba(93, 240, 201, 0.35);
+            padding-bottom: 2px;
+        }
+
+        #hud .k {
+            color: #59ffd6;
+        }
+
+        #hud .v {
+            color: #e1fff7;
+        }
+
+        #hud .warn {
+            color: #ffde69;
+        }
+
+        #hud .err {
+            color: #ff8a8a;
+        }
     </style>
 
     <!-- Import map for bare specifier "three" -->
@@ -224,8 +270,12 @@
 
         <aside id="panel">
             <div class="section">
-                <h2>Scene</h2>
+                <h2>Scene</h2> <!-- Debug HUD toggle -->
                 <div class="form">
+                    <!-- Cyberpunk HUD overlay -->
+                    <label>Display Debug</label>
+                    <input id="debugToggle" type="checkbox">
+                    <div id="hud" aria-hidden="true"></div>
                     <label>Background</label>
                     <input id="bgColor" type="color" value="#0e1115" />
                     <label>Texture</label>
@@ -342,7 +392,12 @@
                 <h2>Render & Appearance</h2>
                 <div class="form">
                     <label>Auto rotate</label>
+                    <select id="autoRotate">
+                        <option value="off">Off</option>
+                        <option value="on" selected>On</option>
+                    </select>
                     <button id="autoBtn" class="btn">⏸ Pause</button>
+                    <input id="autoSpeed" type="range" min="-4" max="4" step="0.01" value="0.8" />
                     <button id="rotLeft" class="btn">⟲ Left</button>
                     <button id="rotRight" class="btn">⟳ Right</button>
                     <label>Wireframe</label>
@@ -361,14 +416,7 @@
                     <label>Emissive Color</label>
                     <input id="emissiveColor" type="color" value="#94e3ff">
                     <label>Emissive Strength</label>
-                    <input id="emissiveStrength" type="range" min="0" max="5" step="0.01" value="1.2" />
-                    <label>Auto rotate</label>
-                    <select id="autoRotate">
-                        <option value="off">Off</option>
-                        <option value="on" selected>On</option>
-                    </select>
-                    <label>Speed</label>
-                    <input id="autoSpeed" type="range" min="-4" max="4" step="0.01" value="0.8" />
+                    <input id="emissiveStrength" type="range" min="0" max="1" step="0.01" value="1.2" />
                 </div>
 
             </div>
@@ -431,10 +479,14 @@
         const emissiveColorUI = $('emissiveColor');
         [branchColorUI, leafColorUI, emissiveColorUI].forEach(el => el && el.addEventListener('input', applyRenderStyle));
 
-        const MAX_GLOBAL_LEAVES = 5000;   // safety cap
+        const MAX_GLOBAL_LEAVES = 1000;   // safety cap
         let globalLeafCount = 0;
 
         let spinPivotY = 0;    // world Y of vessel base
+
+        let frameNo = 0;
+        let fpsEMA = 0;          // exponential moving avg
+        const FPS_ALPHA = 0.12;  // smoothing factor
 
         const rotLeft = $('rotLeft');
         const rotRight = $('rotRight');
@@ -471,6 +523,83 @@
         let holdSpin = 0;               // -1 = right, +1 = left while pressed
         const AUTO_BASE = 0.8;          // base radians/sec scale for speed slider
 
+        const debugToggle = $('debugToggle');
+        const hud = $('hud');
+
+        // handy formatters
+        const d = (n) => Number.isFinite(n) ? n.toFixed(3) : 'NaN';
+        const deg = (r) => d(THREE.MathUtils.radToDeg(r));
+        const v3 = (v) => `${d(v.x)}, ${d(v.y)}, ${d(v.z)}`;
+        const eulerDeg = (e) => `${deg(e.x)}, ${deg(e.y)}, ${deg(e.z)}`;
+
+        function renderHUD() {
+            if (!debugToggle || !hud) return;
+            const on = !!debugToggle.checked;
+            hud.style.display = on ? 'block' : 'none';
+            if (!on) return;
+
+            // gather data
+            const cam = camera;
+            const tgt = controls.target;
+            const ikeRot = ike.rotation;
+            const ikePos = ike.position;
+            const ikeScale = ike.scale;
+
+            const ems = emissiveStrengthUI ? parseFloat(emissiveStrengthUI.value) : 0;
+            const w = wireToggle ? (wireToggle.value === 'on') : false;
+
+            const ri = renderer.info;
+
+            // counts come from your generators:
+            // lastBranchSegments, lastTerminalPieces, globalLeafCount
+            // seed from currentSeed
+
+            // vessel values
+            const vType = vesselType ? vesselType.value : '';
+            const vDia = vesselDia ? parseFloat(vesselDia.value) : 0;
+            const vDep = vesselDepth ? parseFloat(vesselDepth.value) : 0;
+
+            // tree settings
+            const tSet = {
+                type: treeType.value, levels: levels.value,
+                bDepth: bDepth.value, bMin: bMin.value, bMax: bMax.value, bLen: bLen.value,
+                curvature: curvature.value, uniformity: uniformity.value, upBias: upBias.value, spread: spread.value,
+                density: density.value, leafSpread: leafSpread.value, leafType: leafType.value, plumage: plumage.value
+            };
+
+            const lines = [];
+            lines.push(`<div class="hdr">runtime</div>`);
+            lines.push(`<div><span class="k">frame</span> <span class="v">${frameNo}</span>  <span class="k">fps~</span> <span class="v">${fpsEMA.toFixed(1)}</span></div>`);
+            lines.push(`<div><span class="k">auto</span> <span class="v">${autoOn ? 'on' : 'off'}</span>  <span class="k">speed</span> <span class="v">${autoSpeedUI ? autoSpeedUI.value : '—'}</span></div>`);
+            lines.push(`<div class="hdr">camera</div>`);
+            lines.push(`<div><span class="k">pos</span> <span class="v">${v3(cam.position)}</span></div>`);
+            lines.push(`<div><span class="k">rot(deg)</span> <span class="v">${eulerDeg(cam.rotation)}</span></div>`);
+            lines.push(`<div><span class="k">target</span> <span class="v">${v3(tgt)}</span></div>`);
+            lines.push(`<div class="hdr">object (ike)</div>`);
+            lines.push(`<div><span class="k">pos</span> <span class="v">${v3(ikePos)}</span></div>`);
+            lines.push(`<div><span class="k">rot(deg)</span> <span class="v">${eulerDeg(ikeRot)}</span></div>`);
+            lines.push(`<div><span class="k">scale</span> <span class="v">${v3(ikeScale)}</span></div>`);
+            lines.push(`<div><span class="k">seed</span> <span class="v">${currentSeed}</span></div>`);
+            lines.push(`<div class="hdr">vessel</div>`);
+            lines.push(`<div><span class="k">type</span> <span class="v">${vType}</span></div>`);
+            lines.push(`<div><span class="k">dia</span> <span class="v">${d(vDia)}</span>  <span class="k">depth</span> <span class="v">${d(vDep)}</span></div>`);
+            lines.push(`<div class="hdr">tree</div>`);
+            lines.push(`<div><span class="k">type</span> <span class="v">${tSet.type}</span>  <span class="k">levels</span> <span class="v">${tSet.levels}</span></div>`);
+            lines.push(`<div><span class="k">branch</span> <span class="v">depth ${tSet.bDepth}, min ${tSet.bMin}, max ${tSet.bMax}, len ${tSet.bLen}</span></div>`);
+            lines.push(`<div><span class="k">shape</span> <span class="v">curv ${tSet.curvature}, uni ${tSet.uniformity}, upBias ${tSet.upBias}, spread ${tSet.spread}</span></div>`);
+            lines.push(`<div><span class="k">leaves</span> <span class="v">${tSet.leafType}, spread ${tSet.leafSpread}, density ${tSet.density}, plumage ${tSet.plumage}</span></div>`);
+            lines.push(`<div class="hdr">render</div>`);
+            lines.push(`<div><span class="k">mode</span> <span class="v">${renderMode.value}</span>  <span class="k">wire</span> <span class="v">${w ? 'on' : 'off'}</span>  <span class="k">emiss</span> <span class="v">${ems}</span></div>`);
+            lines.push(`<div class="hdr">counts</div>`);
+            lines.push(`<div><span class="k">segments</span> <span class="v">${lastBranchSegments}</span>  <span class="k">terminals</span> <span class="v">${lastTerminalPieces}</span>  <span class="k">globalLeaves</span> <span class="v">${globalLeafCount}</span></div>`);
+
+            lines.push(`<div class="hdr">gpu</div>`);
+            lines.push(`<div><span class="k">calls</span> <span class="v">${ri.render.calls}</span>  <span class="k">tri</span> <span class="v">${ri.render.triangles}</span>  <span class="k">points</span> <span class="v">${ri.render.points}</span></div>`);
+
+
+            hud.innerHTML = lines.join('');
+        }
+
         function spinBy(radPerSec, dt) {
             if (!radPerSec || !dt) return;
             // rotate the whole arrangement around Y at spin pivot
@@ -484,7 +613,6 @@
             if (holdSpin !== 0) spinBy(holdSpin * 1.2, dt);
         }
 
-
         // convenience from UI
         function setAutoRotate(on) {
             autoOn = !!on;                            // our smooth rot flag
@@ -492,7 +620,6 @@
             if (autoRotate) autoRotate.value = autoOn ? 'on' : 'off';
             if (autoBtn) autoBtn.textContent = autoOn ? '⏸ Pause' : '▶ Play';
         }
-
 
         function onResize() {
             const rect = stage.getBoundingClientRect();
@@ -576,11 +703,16 @@
             return g;
         }
 
+        function updateSpinPivotFromVessel() {
+            if (!vesselGroup) return;
+            const box = new THREE.Box3().setFromObject(vesselGroup);
+            spinPivotY = box.min.y; // used for any future pivot math if needed
+        }
+
         function orbitTargetToVesselBase() {
             if (!vesselGroup) return;
             const box = new THREE.Box3().setFromObject(vesselGroup);
             const baseY = box.min.y;
-            spinPivotY = baseY;                      // <— track pivot for spin
             controls.target.set(0, baseY, 0);
         }
 
@@ -668,16 +800,36 @@
         }
 
         function regenerate() {
+            // Snapshot camera + object transforms (to restore exactly)
             const camPos = camera.position.clone();
             const camTarget = controls.target.clone();
 
-            root.remove(ike); ike.traverse(o => { if (o.geometry) o.geometry.dispose(); });
-            ike = new THREE.Group(); root.add(ike);
+            // Preserve ike transform so object rotation never resets
+            const ikePos = ike.position.clone();
+            const ikeRot = ike.rotation.clone();
+            const ikeScale = ike.scale.clone();
 
+            // Clear children instead of replacing `ike`
+            if (treeGroup) {
+                ike.remove(treeGroup);
+                treeGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+                treeGroup = null;
+            }
+            if (vesselGroup) {
+                ike.remove(vesselGroup);
+                vesselGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+                vesselGroup = null;
+            }
+
+            // Rebuild vessel + tree as children of the *same* `ike`
             makeVessel(vesselType.value, parseFloat(vesselDia.value), parseFloat(vesselDepth.value));
-            orbitTargetToVesselBase(); // <— pivot at vessel base
 
-            treeGroup = new THREE.Group(); ike.add(treeGroup);
+            // NOTE: do NOT re-center the camera target here.
+            // Only recompute spin pivot, leave camera/target untouched.
+            updateSpinPivotFromVessel();
+
+            treeGroup = new THREE.Group();
+            ike.add(treeGroup);
 
             const preset = PRESETS[treeType.value];
             mats.branch.color.set(preset.colors.branch);
@@ -696,6 +848,8 @@
             const branchLenMul = parseFloat(bLen.value);
             const densityMul = parseFloat(density.value);
             const leafSpreadMul = parseFloat(leafSpread.value);
+
+            globalLeafCount = 0; // <-- reset once per generation HERE
 
             const r = seeded(currentSeed);
 
@@ -797,12 +951,6 @@
                 seg.quaternion.copy(q); seg.position.copy(origin.clone().addScaledVector(dir, L / 2));
                 trunkGroup.add(seg); lastBranchSegments++;
 
-                const densityMul = parseFloat(density.value);
-                const leafSpreadMul = parseFloat(leafSpread.value);
-
-                globalLeafCount = 0; // <— reset counter for this generation
-
-
                 if (depthLeft <= 1) { addTerminal(end, dir); return; }
                 // spawn children from this endpoint
                 let n = Math.floor(rr(r, childMin, childMax + 1) * densityMul);
@@ -842,29 +990,36 @@
             const dampingWas = controls.enableDamping;
             const autoWas = (typeof controls.autoRotate === 'boolean') ? controls.autoRotate : false;
             const enabledWas = controls.enabled;
-            const holdWas = holdSpin;  // pause our smooth spin for this frame
-            holdSpin = 0;
+            const holdWas = holdSpin;
 
+            holdSpin = 0;
             controls.enableDamping = false;
             controls.enabled = false;
             if (typeof controls.autoRotate === 'boolean') controls.autoRotate = false;
 
-            // copy back precisely
+            // Restore camera transforms exactly
             camera.position.copy(camPos);
             controls.target.copy(camTarget);
             camera.updateProjectionMatrix();
 
-            // restore flags
+            // Restore ike transform exactly (object stays where user left it)
+            ike.position.copy(ikePos);
+            ike.rotation.copy(ikeRot);
+            ike.scale.copy(ikeScale);
+
+            // Restore flags
             controls.enableDamping = dampingWas;
             controls.enabled = enabledWas;
             if (typeof controls.autoRotate === 'boolean') controls.autoRotate = autoWas;
             holdSpin = holdWas;
         }
 
+
         function applyVesselOnly() {
             makeVessel(vesselType.value, parseFloat(vesselDia.value), parseFloat(vesselDepth.value));
-            orbitTargetToVesselBase();
+            updateSpinPivotFromVessel(); // updates internal pivot only; doesn't touch camera
         }
+
 
         function savePNG() {
             const a = document.createElement('a'); a.download = `bonsai_${Date.now()}.png`; a.href = renderer.domElement.toDataURL('image/png'); a.click();
@@ -875,6 +1030,8 @@
             applySpins(dt);          // << smooth spin is applied here
             controls.update();
             renderer.render(scene, camera);
+            renderHUD();               // << add this
+
             requestAnimationFrame(tick);
         }
 
@@ -888,12 +1045,6 @@
         hemiLightUI.addEventListener('input', () => { hemi.intensity = parseFloat(hemiLightUI.value); });
         exposureUI.addEventListener('input', () => { renderer.toneMappingExposure = parseFloat(exposureUI.value); });
         emissiveStrengthUI.addEventListener('input', applyRenderStyle);
-
-        controls.addEventListener('change', () => {
-            // lock orbit around x/z origin; keep y at vessel base
-            controls.target.x = 0;
-            controls.target.z = 0;
-        });
 
         // Left/Right: smooth while held; also pause auto when you touch them
         function onHold(dir, isDown) {
@@ -916,12 +1067,21 @@
         if (autoSpeedUI) autoSpeedUI.addEventListener('input', () => {/* no-op: read live in tick() */ });
         if (autoRotate) autoRotate.addEventListener('change', () => setAutoRotate(autoRotate.value === 'on'));
 
-
+        if (debugToggle) {
+            debugToggle.addEventListener('change', () => {
+                // no-op; renderHUD() pulls the state each frame
+            });
+        }
+        // handy hotkey: backtick toggles HUD
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '`') {
+                if (debugToggle) debugToggle.checked = !debugToggle.checked;
+            }
+        });
 
         frameBtn.addEventListener('click', () => {
             const box = new THREE.Box3().setFromObject(ike);
             const s = box.getSize(new THREE.Vector3());
-            orbitTargetToVesselBase();
             const c = controls.target.clone();
 
             // distance to fit the largest dimension
@@ -949,6 +1109,8 @@
             if (autoSpeedUI) { controls.autoRotateSpeed = parseFloat(autoSpeedUI.value); }
             setAutoRotate(true); // default ON
             tick();
+            renderHUD();
+
         }
 
         initial();
