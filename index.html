@@ -778,6 +778,17 @@
 
         // --- Scene ---
         const scene = new THREE.Scene();
+
+        // Debug target gizmo (shows camera focus)
+        const gizmo = new THREE.Group();
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(0.05, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+        const axes = new THREE.AxesHelper(0.4);
+        gizmo.add(axes, sphere);
+        scene.add(gizmo);
+
         const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200);
         camera.position.set(6, 4.2, 11);
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
@@ -791,7 +802,7 @@
         controls.enableDamping = true; controls.dampingFactor = 0.08;
         controls.minDistance = 4; controls.maxDistance = 30;
         controls.maxPolarAngle = Math.PI * 0.95; controls.target.set(0, 0, 0);
-
+        controls.autoRotate = false; // disable internal camera spin
 
         const hemi = new THREE.HemisphereLight(0xf4efe8, 0x0b0f12, parseFloat(hemiLightUI.value));
         const dir = new THREE.DirectionalLight(0xffffff, parseFloat(keyLightUI.value)); dir.position.set(3, 5, 4);
@@ -901,7 +912,6 @@
         // convenience from UI
         function setAutoRotate(on) {
             autoOn = !!on;                            // our smooth rot flag
-            controls.autoRotate = autoOn;             // mirror for tests/UI
             if (autoRotate) autoRotate.value = autoOn ? 'on' : 'off';
             if (autoBtn) autoBtn.textContent = autoOn ? '⏸ Pause' : '▶ Play';
         }
@@ -1316,6 +1326,13 @@
             controls.update();
             renderer.render(scene, camera);
             renderHUD();
+            if (debugToggle && debugToggle.checked) {
+                gizmo.visible = true;
+                gizmo.position.copy(controls.target);
+            } else {
+                gizmo.visible = false;
+            }
+
 
             requestAnimationFrame(tick);
         }
@@ -1366,21 +1383,25 @@
 
         frameBtn.addEventListener('click', () => {
             const box = new THREE.Box3().setFromObject(ike);
-            const s = box.getSize(new THREE.Vector3());
-            const c = controls.target.clone();
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
 
-            // distance to fit the largest dimension
-            const max = Math.max(s.x, s.y, s.z);
-            const dist = max / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5))) + 2;
+            // Update orbit target to true center
+            controls.target.copy(center);
 
-            // view direction slightly elevated
-            const dirV = new THREE.Vector3(1, 0.6, 1).normalize();
-            camera.position.copy(c).addScaledVector(dirV, dist);
+            // Compute camera distance to fit object
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const dist = maxDim / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) + 2;
+
+            // Move camera back along a fixed direction
+            const viewDir = new THREE.Vector3(1, 0.6, 1).normalize();
+            camera.position.copy(center).addScaledVector(viewDir, dist);
             camera.near = Math.max(0.01, dist * 0.02);
             camera.far = dist * 10;
             camera.updateProjectionMatrix();
             controls.update();
         });
+
 
         shotBtn.addEventListener('click', savePNG);
         newSeedBtn.addEventListener('click', () => { setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); });
@@ -1418,9 +1439,9 @@
             applyBackground();
             setSeed((Math.random() * 0xFFFFFFFF) >>> 0);
             regenerate();
-            if (!didInitialFrame) { frameBtn.click(); didInitialFrame = true; }
             if (autoSpeedUI) { controls.autoRotateSpeed = parseFloat(autoSpeedUI.value); }
             setAutoRotate(true);
+            frameBtn.click(); // ensures correct centering on first render
             tick();
             renderHUD();
 
