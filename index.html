@@ -4,145 +4,291 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Geometric Bonsai — Ikebana Style</title>
+    <title>POLYGON BONSAI / Ikebana Style</title>
     <style>
-        /* =========================================================
+        /* =======================================================================
    GEOMETRIC BONSAI — Unified Design System (Techno Minimal)
-   ========================================================= */
+   - Hue-driven accent themes
+   - Light/Dark mode aware
+   - Role-based component styling
+   ======================================================================= */
 
-        /* =============== PRIMITIVES =============== */
+        /* -----------------------------------------------------------------------------
+   1) PRIMITIVES (mode-agnostic)
+   ----------------------------------------------------------------------------- */
         :root {
-            /* Base surfaces */
-            --c-bg-0: #0e1115;
-            /* canvas */
-            --c-bg-1: #0f141a;
-            /* surface/panel */
-            --c-bg-2: #141a22;
-            /* controls */
+            /* Typography & layout */
+            --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
-            /* Text ramps */
-            --c-text-strong: #e8eef7;
-            --c-text-heading: #cbd3db;
-            --c-text-subtle: #b9c6d3;
-            --c-text-dim: #aeb9c5;
-
-            /* Lines */
-            --c-line: rgba(255, 255, 255, .08);
-            --c-line-strong: rgba(255, 255, 255, .12);
-
-            /* Accent generation (HSL-based; themes override these three) */
-            --accent-h: 170;
-            /* hue */
-            --accent-s: 100%;
-            /* saturation */
-            --accent-l: 64%;
-            /* base lightness */
-
-            /* Derived accent palette (single hue, varied tones) */
-            --accent-900: hsl(var(--accent-h) 90% 25%);
-            --accent-700: hsl(var(--accent-h) 85% 40%);
-            --accent-600: hsl(var(--accent-h) 85% 50%);
-            --accent-500: hsl(var(--accent-h) 85% var(--accent-l));
-            --accent-400: hsl(var(--accent-h) 88% 58%);
-            /* main */
-            --accent-300: hsl(var(--accent-h) 90% 78%);
-            --accent-200: hsl(var(--accent-h) 90% 88%);
-            --accent-100: hsl(var(--accent-h) 90% 94%);
-            --accent-aura-outer: color-mix(in oklab, var(--accent-500) 22%, transparent);
-            --accent-aura-inner: color-mix(in oklab, var(--accent-500) 10%, transparent);
-
-            /* Layout & radii */
             --panel-w: 380px;
             --r-1: 6px;
             --r-2: 8px;
             --r-3: 10px;
-
-            /* Spacing */
             --s-1: .35rem;
             --s-2: .6rem;
             --s-3: .7rem;
             --s-4: .75rem;
             --s-5: 1rem;
 
-            /* Shadows/borders/glow */
-            --bd-weak: 1px solid var(--c-line);
-            --bd-strong: 1px solid var(--c-line-strong);
-            --inset-col: var(--c-line);
-            --shadow-inset: inset -1px 0 0 var(--inset-col), 1px 0 0 rgba(0, 0, 0, .25);
-            --glow-outer: 0 0 12px var(--accent-aura-outer);
-            --glow-inner: inset 0 0 12px var(--accent-aura-inner);
-            --focus-ring: 0 0 0 2px var(--accent-aura-outer), 0 0 0 1px var(--accent-500);
+            /* Fallback neutrals (will be mapped by mode) */
+            --surface-0-base: #0e1115;
+            /* canvas */
+            --surface-1-base: #0f141a;
+            /* panel */
+            --surface-2-base: #141a22;
+            /* controls */
 
-            /* Effects */
-            --blur: 3px;
+            /* Lines (base) */
+            --c-line: rgba(255, 255, 255, .08);
+            --c-line-strong: rgba(255, 255, 255, .12);
 
-            /* Typography */
-            --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-            --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+            /* Accent ramp (will be overridden by [data-accent]) */
+            --accent-100: #e4fff8;
+            --accent-200: #cafff1;
+            --accent-300: #a7ffe9;
+            --accent-400: #5df0c9;
+            --accent-500: #38ffd8;
+            --accent-600: #1ce3bf;
+            --accent-700: #12b69b;
+            --accent-800: #0b8d78;
+            --accent-900: #0a6d5d;
+
+
+            /* Interaction timing */
+            --t-fast: 120ms;
+            --t-med: 220ms;
+            --t-slow: 360ms;
+            --e-out: cubic-bezier(.17, .67, .2, 1);
+            --e-in: cubic-bezier(.4, 0, .7, .2);
+
+            /* On-accent text (set precisely by JS; fallback to near-black) */
+            --text-on-accent: #0b0f12;
 
             /* Z */
             --z-stage: 1;
             --z-hud: 10;
+        }
 
-            /* Semantic aliases */
-            --bg-canvas: var(--c-bg-0);
-            --bg-surface: var(--c-bg-1);
-            --bg-control: var(--c-bg-2);
-            --text-strong: var(--c-text-strong);
-            --text-heading: var(--c-text-heading);
-            --text-subtle: var(--c-text-subtle);
-            --text-dim: var(--c-text-dim);
+        /* -----------------------------------------------------------------------------
+   2) ACCENT FAMILIES (hue groups) — set via #app[data-accent="..."]
+   ----------------------------------------------------------------------------- */
+        /* Cyan */
+        #app[data-accent="cyan"] {
+            --accent-100: #e4fff8;
+            --accent-200: #cafff1;
+            --accent-300: #a7ffe9;
+            --accent-400: #5df0c9;
+            --accent-500: #38ffd8;
+            --accent-600: #1ce3bf;
+            --accent-700: #12b69b;
+            --accent-800: #0b8d78;
+            --accent-900: #0a6d5d;
+            --accent-on: #0b0f12;
+        }
+
+        /* Magenta */
+        #app[data-accent="magenta"] {
+            --accent-100: #fff1fb;
+            --accent-200: #ffd5f5;
+            --accent-300: #ffc4f6;
+            --accent-400: #ff86f0;
+            --accent-500: #ff5bea;
+            --accent-600: #e544d1;
+            --accent-700: #c22eb1;
+            --accent-800: #97238a;
+            --accent-900: #701a67;
+            --accent-on: #0b0f12;
+        }
+
+        /* Amber */
+        #app[data-accent="amber"] {
+            --accent-100: #fff9e6;
+            --accent-200: #fff1cc;
+            --accent-300: #ffe8a1;
+            --accent-400: #ffd46a;
+            --accent-500: #ffcc4d;
+            --accent-600: #f2b83a;
+            --accent-700: #d19a25;
+            --accent-800: #a9791a;
+            --accent-900: #7f5914;
+            --accent-on: #0b0f12;
+        }
+
+        /* Lime */
+        #app[data-accent="lime"] {
+            --accent-100: #f3ffe3;
+            --accent-200: #e7ffc8;
+            --accent-300: #e9ffc8;
+            --accent-400: #cdfb89;
+            --accent-500: #b7ff64;
+            --accent-600: #9deb49;
+            --accent-700: #79c52e;
+            --accent-800: #5a9a23;
+            --accent-900: #3f6f19;
+            --accent-on: #0b0f12;
+        }
+
+        /* Black (Monochrome high-contrast) */
+        #app[data-accent="black"] {
+            --accent-100: #f5f5f5;
+            --accent-200: #e0e0e0;
+            --accent-300: #c2c2c2;
+            --accent-400: #9e9e9e;
+            --accent-500: #757575;
+            --accent-600: #555555;
+            --accent-700: #333333;
+            --accent-800: #1f1f1f;
+            --accent-900: #000000;
+            --accent-on: #ffffff;
+        }
+
+        /* White (inverse monochrome) */
+        #app[data-accent="white"] {
+            --accent-100: #ffffff;
+            --accent-200: #fafafa;
+            --accent-300: #f5f5f5;
+            --accent-400: #e0e0e0;
+            --accent-500: #cccccc;
+            --accent-600: #aaaaaa;
+            --accent-700: #888888;
+            --accent-800: #555555;
+            --accent-900: #222222;
+            --accent-on: #0b0f12;
+        }
+
+        /* -----------------------------------------------------------------------------
+   3) MODE MAPS (dark/light) — surfaces, borders, text roles
+   ----------------------------------------------------------------------------- */
+        /* DARK */
+        #app[data-mode="dark"] {
+            /* Surfaces (subtle accent tint) */
+            --surface-0: color-mix(in oklab, var(--surface-0-base) 96%, var(--accent-900));
+            --surface-1: color-mix(in oklab, var(--surface-1-base) 96%, var(--accent-900));
+            --surface-2: color-mix(in oklab, var(--surface-2-base) 96%, var(--accent-900));
+
+            /* Borders */
+            --outline: color-mix(in oklab, var(--accent-600) 14%, var(--surface-1));
+            --outline-strong: color-mix(in oklab, var(--accent-600) 22%, var(--surface-1));
+
+            /* Text by surface */
+            --text-on-surface-0: color-mix(in oklab, var(--accent-100) 88%, transparent);
+            --text-on-surface-1: color-mix(in oklab, var(--accent-100) 84%, transparent);
+            --text-on-surface-2: color-mix(in oklab, var(--accent-100) 92%, transparent);
+
+            /* Accent-tinted text choices (use light end for dark mode) */
+            --text-accent-strong: var(--accent-300);
+            --text-accent: var(--accent-200);
+            --text-accent-muted: color-mix(in oklab, var(--accent-200) 70%, var(--text-on-surface-1));
+
+            /* Role aliases used by UI */
+            --text-strong: var(--text-on-surface-2);
+            --text-heading: var(--text-accent-strong);
+            --text-subtle: var(--text-accent);
+            --text-dim: var(--text-accent-muted);
 
             /* HUD */
             --hud-border: 1px solid color-mix(in oklab, var(--accent-500) 35%, transparent);
             --hud-bg: linear-gradient(180deg,
-                    color-mix(in oklab, var(--c-bg-1) 78%, transparent),
-                    color-mix(in oklab, var(--c-bg-1) 58%, transparent));
+                    color-mix(in oklab, var(--surface-1) 76%, transparent),
+                    color-mix(in oklab, var(--surface-1) 56%, transparent));
             --hud-text: var(--accent-200);
             --hud-key: var(--accent-300);
+
+            /* Controls */
+            --ctl-bg: color-mix(in oklab, var(--surface-2) 92%, black 8%);
+            --ctl-bg-hover: color-mix(in oklab, var(--surface-2) 88%, var(--accent-700) 12%);
+            --ctl-bg-active: color-mix(in oklab, var(--surface-2) 84%, var(--accent-700) 16%);
+            --ctl-bd: 1px solid color-mix(in oklab, var(--accent-600) 22%, var(--outline-strong));
+            --ctl-bd-hover: 1px solid color-mix(in oklab, var(--accent-600) 42%, var(--outline-strong));
+            --ctl-bd-active: 1px solid color-mix(in oklab, var(--accent-600) 55%, var(--outline-strong));
+
+            /* Text inside controls */
+            --text-on-control: var(--text-on-surface-2);
+
+            /* Primary buttons */
+            --btn-primary-bg: linear-gradient(180deg, var(--accent-600), var(--accent-700));
+            --btn-primary-border: 1px solid var(--accent-700);
+            --btn-primary-text: var(--accent-on);
+
+            --glow-outer: 0 0 12px color-mix(in oklab, var(--accent-500) 16%, transparent);
+            --glow-inner: inset 0 0 12px color-mix(in oklab, var(--accent-500) 8%, transparent);
+            --focus-ring: 0 0 0 2px color-mix(in oklab, var(--accent-500) 28%, transparent);
+            --blur: 3px;
         }
 
-        /* =============== THEMES (Hue-only overrides) ===============
-   Use one of: theme-cyan | theme-magenta | theme-amber | theme-lime
-   You can add more by changing only HSL (hue + optional s/l).
-*/
-        /* THEMES (apply to html or #app) */
-        html.theme-cyan,
-        #app.theme-cyan {
-            --accent-h: 170;
-            --accent-s: 100%;
-            --accent-l: 64%;
+        /* LIGHT */
+        #app[data-mode="light"] {
+            /* Base neutrals */
+            --surface-0-base: #f6f8fb;
+            --surface-1-base: #eef2f7;
+            --surface-2-base: #e7edf5;
+
+            /* Surfaces (subtle accent tint) */
+            --surface-0: color-mix(in oklab, var(--surface-0-base) 96%, var(--accent-200));
+            --surface-1: color-mix(in oklab, var(--surface-1-base) 96%, var(--accent-200));
+            --surface-2: color-mix(in oklab, var(--surface-2-base) 96%, var(--accent-200));
+
+            /* Borders */
+            --outline: color-mix(in oklab, var(--accent-700) 16%, #b7c4d6);
+            --outline-strong: color-mix(in oklab, var(--accent-700) 26%, #a5b4c8);
+
+            /* Text on each surface */
+            --text-on-surface-0: color-mix(in oklab, var(--accent-900) 90%, transparent);
+            --text-on-surface-1: color-mix(in oklab, var(--accent-900) 86%, transparent);
+            --text-on-surface-2: color-mix(in oklab, var(--accent-900) 92%, transparent);
+
+            /* Accent-tinted text choices (use dark end for light mode) */
+            --text-accent-strong: var(--accent-800);
+            --text-accent: var(--accent-700);
+            --text-accent-muted: color-mix(in oklab, var(--accent-700) 65%, var(--text-on-surface-1));
+
+            /* Role aliases used by UI */
+            --text-strong: var(--text-on-surface-2);
+            --text-heading: var(--text-accent-strong);
+            --text-subtle: var(--text-accent);
+            --text-dim: var(--text-accent-muted);
+
+            /* HUD */
+            --hud-border: 1px solid color-mix(in oklab, var(--accent-600) 40%, transparent);
+            --hud-bg: linear-gradient(180deg,
+                    color-mix(in oklab, var(--surface-1) 88%, transparent),
+                    color-mix(in oklab, var(--surface-1) 70%, transparent));
+            --hud-text: var(--accent-800);
+            --hud-key: var(--accent-700);
+
+            /* Controls */
+            --ctl-bg: color-mix(in oklab, var(--surface-2) 96%, white 4%);
+            --ctl-bg-hover: color-mix(in oklab, var(--surface-2) 92%, var(--accent-400) 12%);
+            --ctl-bg-active: color-mix(in oklab, var(--surface-2) 88%, var(--accent-400) 18%);
+            --ctl-bd: 1px solid color-mix(in oklab, var(--accent-600) 26%, var(--outline-strong));
+            --ctl-bd-hover: 1px solid color-mix(in oklab, var(--accent-600) 42%, var(--outline-strong));
+            --ctl-bd-active: 1px solid color-mix(in oklab, var(--accent-600) 55%, var(--outline-strong));
+
+            /* Text inside controls */
+            --text-on-control: var(--text-on-surface-2);
+
+            /* Primary buttons */
+            --btn-primary-bg: linear-gradient(180deg, var(--accent-600), var(--accent-700));
+            --btn-primary-border: 1px solid var(--accent-700);
+            --btn-primary-text: var(--accent-on);
+
+            --glow-outer: 0 0 12px color-mix(in oklab, var(--accent-900) 16%, transparent);
+            --glow-inner: inset 0 0 12px color-mix(in oklab, var(--accent-900) 8%, transparent);
+            --focus-ring: 0 0 0 2px color-mix(in oklab, var(--accent-900) 28%, transparent);
+            --blur: 3px;
         }
 
-        html.theme-magenta,
-        #app.theme-magenta {
-            --accent-h: 308;
-            --accent-s: 95%;
-            --accent-l: 64%;
-        }
-
-        html.theme-amber,
-        #app.theme-amber {
-            --accent-h: 44;
-            --accent-s: 100%;
-            --accent-l: 60%;
-        }
-
-        html.theme-lime,
-        #app.theme-lime {
-            --accent-h: 95;
-            --accent-s: 92%;
-            --accent-l: 62%;
-        }
-
-        /* =============== BASE =============== */
+        /* -----------------------------------------------------------------------------
+   4) GLOBAL BASE / LAYOUT
+   ----------------------------------------------------------------------------- */
         html,
         body {
             height: 100%;
             margin: 0;
-            background: var(--bg-canvas);
-            color: var(--text-strong);
-            font-family: var(--font-sans);
+            background: var(--surface-0);
+            color: var(--text-on-surface-0);
+            font-family: var(--font-mono);
         }
 
         #app {
@@ -151,91 +297,75 @@
             display: grid;
             grid-template-columns: var(--panel-w) 1fr;
             grid-template-rows: auto 1fr;
-            grid-template-areas: "header header" "panel stage";
+            grid-template-areas:
+                "header header"
+                "panel stage";
+            background: var(--surface-0);
+            color: var(--text-on-surface-0);
         }
 
-        /* =============== HEADER =============== */
+        /* -----------------------------------------------------------------------------
+   5) HEADER
+   ----------------------------------------------------------------------------- */
         header {
             grid-area: header;
             display: flex;
-            gap: var(--s-4);
             align-items: center;
-            padding: .6rem var(--s-5);
-            background:
-                linear-gradient(180deg, color-mix(in oklab, var(--accent-500) 8%, transparent), transparent);
-            border-bottom: var(--bd-weak);
-            box-shadow: 0 1px 0 color-mix(in oklab, var(--accent-500) 10%, transparent);
+            gap: var(--s-4);
+            padding: .65rem var(--s-5);
+            background: linear-gradient(180deg,
+                    color-mix(in oklab, var(--surface-1) 96%, transparent),
+                    transparent);
+            border-bottom: 1px solid var(--outline);
         }
 
         header h1 {
             font-size: 1rem;
             letter-spacing: .06em;
             margin: 0;
-            color: var(--text-heading);
+            color: var(--hud-key);
             font-weight: 600;
         }
 
-        /* =============== SIDE PANEL =============== */
+        /* Right-side header tools (theme selectors, etc.) */
+        header .header-tools {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        /* -----------------------------------------------------------------------------
+   6) PANEL (side)
+   ----------------------------------------------------------------------------- */
         #panel {
             grid-area: panel;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 12px 16px 12px 12px;
-            /* add right padding */
+            overflow: auto;
+            background: var(--surface-1);
+            box-shadow: inset -1px 0 0 var(--outline);
+            padding: 16px;
             box-sizing: border-box;
-            background: var(--bg-surface);
-            min-width: var(--panel-w);
-            max-width: var(--panel-w);
-            box-shadow: var(--shadow-inset);
         }
 
-        /* Scrollbars (WebKit) */
-        #panel::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        #panel::-webkit-scrollbar-track {
-            background: color-mix(in oklab, var(--bg-surface) 92%, black);
-            border-left: 1px solid var(--c-line);
-        }
-
-        #panel::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg,
-                    var(--accent-700),
-                    var(--accent-500));
-            border-radius: var(--r-2);
-            border: 2px solid var(--bg-surface);
-            box-shadow: 0 0 6px color-mix(in oklab, var(--accent-500) 25%, transparent);
-        }
-
-        #panel::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--accent-600), var(--accent-400));
-        }
-
-        /* Scrollbars (Firefox) */
-        #panel {
-            scrollbar-width: thin;
-            scrollbar-color: var(--accent-600) var(--bg-surface);
-        }
-
-
+        /* Section */
         .section {
-            margin-bottom: 12px;
-            border: var(--bd-weak);
+            margin-bottom: 14px;
+            border: 1px solid var(--outline);
             border-radius: var(--r-3);
-            background: color-mix(in oklab, var(--bg-surface) 92%, black 8%);
-            box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent-500) 6%, transparent);
+            background: var(--surface-1);
+            box-shadow: var(--glow-outer), var(--glow-inner);
         }
 
         .section>h2 {
             margin: 0;
             font-size: .9rem;
             padding: .55rem var(--s-3);
-            color: var(--text-subtle);
-            border-bottom: 1px dashed color-mix(in oklab, var(--accent-500) 18%, var(--c-line));
+            color: var(--hud-key);
+            border-bottom: 1px dashed var(--outline);
+            letter-spacing: .03em;
         }
 
-        /* =============== FORMS (Unified Controls) =============== */
+        /* Form grid */
         .form {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -244,191 +374,274 @@
             padding: var(--s-2) var(--s-3);
         }
 
-        .row {
-            display: flex;
-            gap: .4rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        label {
-            font-size: .82rem;
-            color: var(--text-subtle);
-        }
-
-        select,
-        input[type="range"],
-        input[type="color"],
-        input[type="text"],
-        input[type="number"],
-        .btn {
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* Inputs: base */
-        select,
-        input[type="text"],
-        input[type="number"] {
-            appearance: none;
-            background: var(--bg-control);
-            color: var(--text-strong);
-            border: var(--bd-strong);
-            padding: .45rem .55rem;
-            border-radius: var(--r-2);
-            font-weight: 600;
-            transition: box-shadow .15s ease, border-color .15s ease;
-        }
-
-        select:hover,
-        input[type="text"]:hover,
-        input[type="number"]:hover {
-            border-color: color-mix(in oklab, var(--accent-500) 22%, var(--c-line-strong));
-        }
-
-        select:focus-visible,
-        input[type="text"]:focus-visible,
-        input[type="number"]:focus-visible {
-            outline: none;
-            box-shadow: var(--focus-ring);
-            border-color: var(--accent-500);
-        }
-
-        /* Color input */
-        input[type="color"] {
-            height: 34px;
-            padding: .2rem;
-            border-radius: var(--r-2);
-            background: linear-gradient(180deg, var(--bg-control), color-mix(in oklab, var(--bg-control) 85%, black));
-            border: var(--bd-strong);
-        }
-
-        input[type="color"]:focus-visible {
-            outline: none;
-            box-shadow: var(--focus-ring);
-        }
-
-        /* Range: track/thumb themed */
-        input[type="range"] {
-            appearance: none;
-            height: 30px;
-            padding: 0;
-            background: transparent;
-        }
-
-        input[type="range"]:focus-visible {
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-runnable-track {
-            height: 6px;
-            border-radius: 999px;
-            background:
-                linear-gradient(90deg,
-                    color-mix(in oklab, var(--accent-500) 22%, transparent),
-                    color-mix(in oklab, var(--accent-500) 8%, transparent));
-            border: 1px solid color-mix(in oklab, var(--accent-500) 25%, var(--c-line-strong));
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            margin-top: -6px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, var(--accent-300), var(--accent-500));
-            border: 1px solid var(--accent-700);
-            box-shadow: var(--glow-outer), 0 0 0 1px color-mix(in oklab, var(--accent-500) 35%, transparent);
-        }
-
-        input[type="range"]::-moz-range-track {
-            height: 6px;
-            border-radius: 999px;
-            background:
-                linear-gradient(90deg,
-                    color-mix(in oklab, var(--accent-500) 22%, transparent),
-                    color-mix(in oklab, var(--accent-500) 8%, transparent));
-            border: 1px solid color-mix(in oklab, var(--accent-500) 25%, var(--c-line-strong));
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, var(--accent-300), var(--accent-500));
-            border: 1px solid var(--accent-700);
-            box-shadow: var(--glow-outer), 0 0 0 1px color-mix(in oklab, var(--accent-500) 35%, transparent);
-        }
-
-        /* Buttons */
-        .btn {
-            appearance: none;
-            background:
-                linear-gradient(180deg,
-                    color-mix(in oklab, var(--bg-control) 92%, black),
-                    color-mix(in oklab, var(--bg-control) 84%, black));
-            color: var(--text-strong);
-            border: var(--bd-strong);
-            padding: .5rem var(--s-3);
-            border-radius: var(--r-3);
-            font-weight: 700;
-            cursor: pointer;
-            width: auto;
-            transition: box-shadow .15s ease, border-color .15s ease, transform .05s ease;
-        }
-
-        .btn:hover {
-            border-color: color-mix(in oklab, var(--accent-500) 30%, var(--c-text-strong) 0%);
-            box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent-500) 18%, transparent), var(--glow-outer);
-        }
-
-        .btn:active {
-            transform: translateY(1px);
-        }
-
-        .btn.primary {
-            border-color: color-mix(in oklab, var(--accent-500) 35%, var(--c-line-strong));
-            background:
-                linear-gradient(180deg, var(--accent-700), var(--accent-500));
-            color: #061417;
-            text-shadow: 0 1px 0 color-mix(in oklab, white 20%, transparent);
-        }
-
-        /* Helpers */
         .full {
             grid-column: 1 / -1;
         }
 
-        .theme-label {
-            font-size: .85rem;
-            color: var(--text-subtle);
-            margin-right: .5rem;
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+            align-items: center;
         }
 
-        .theme-dropdown {
-            appearance: none;
-            background: var(--bg-control);
-            color: var(--text-strong);
-            border: var(--bd-strong);
+        .form label,
+        .section label,
+        label {
+            color: var(--accent-300) !important;
+        }
+
+        /* -----------------------------------------------------------------------------
+   7) SHARED CONTROL BASE (inputs/buttons/selects)
+   ----------------------------------------------------------------------------- */
+        .control,
+        select,
+        input[type="text"],
+        input[type="number"],
+        input[type="color"],
+        input[type="range"],
+        .button,
+        .btn {
+            width: 100%;
+            box-sizing: border-box;
+            background: var(--surface-2);
+            color: var(--text-on-surface-2);
+            border: 1px solid var(--outline-strong);
             border-radius: var(--r-2);
-            padding: .4rem .8rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 0 4px color-mix(in oklab, var(--accent-500) 15%, transparent);
-            transition: box-shadow .15s ease, border-color .15s ease;
+            transition: background var(--t-med) var(--e-out),
+                border-color var(--t-med) var(--e-out),
+                box-shadow var(--t-med) var(--e-out),
+                transform var(--t-fast) var(--e-out);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, .04), inset 0 1px 0 rgba(255, 255, 255, .03);
         }
 
-        .theme-dropdown:hover {
-            border-color: color-mix(in oklab, var(--accent-500) 30%, var(--c-line-strong));
-            box-shadow: 0 0 8px color-mix(in oklab, var(--accent-500) 25%, transparent);
+        .control:hover,
+        select:hover,
+        input[type="text"]:hover,
+        input[type="number"]:hover,
+        input[type="color"]:hover,
+        .button:hover,
+        .btn:hover {
+            border-color: color-mix(in oklab, var(--accent-600) 42%, var(--outline-strong));
         }
 
-        .theme-dropdown:focus-visible {
+        .control:active,
+        select:active,
+        input[type="text"]:active,
+        input[type="number"]:active,
+        input[type="color"]:active,
+        .button:active,
+        .btn:active {
+            transform: translateY(.5px);
+        }
+
+        .control:focus-visible,
+        select:focus-visible,
+        input[type="text"]:focus-visible,
+        input[type="number"]:focus-visible,
+        input[type="color"]:focus-visible,
+        input[type="range"]:focus-visible,
+        .button:focus-visible,
+        .btn:focus-visible {
             outline: none;
             box-shadow: var(--focus-ring);
         }
 
-        /* =============== STAGE =============== */
+        /* Select */
+        select {
+            padding: .45rem .6rem;
+        }
+
+        /* Text/number */
+        input[type="text"],
+        input[type="number"] {
+            padding: .45rem .6rem;
+        }
+
+        /* Color */
+        input[type="color"] {
+            padding: .2rem;
+        }
+
+        /* Buttons */
+        .btn,
+        .button {
+            padding: .55rem var(--s-3);
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Button variants */
+        .btn-primary {
+            background: var(--accent-600);
+            border: 1px solid color-mix(in oklab, var(--accent-700) 60%, var(--accent-500));
+            color: var(--btn-primary-text);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-500);
+            color: var(--text-on-accent);
+        }
+
+        .btn-primary:active {
+            background: var(--accent-700);
+            color: var(--text-on-accent);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px dashed color-mix(in oklab, var(--accent-600) 45%, var(--outline));
+            color: var(--hud-key);
+        }
+
+        .btn-ghost:hover {
+            background: color-mix(in oklab, var(--accent-600) 12%, transparent);
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: grid;
+            place-items: center;
+        }
+
+        /* -----------------------------------------------------------------------------
+   8) RANGE SLIDER
+   ----------------------------------------------------------------------------- */
+        input[type="range"] {
+            height: 28px;
+            width: 100%;
+            padding: 0;
+            background: transparent;
+            border: none;
+            box-shadow: none !important;
+            -webkit-appearance: none;
+            appearance: none;
+            /* prevent UA accent fill */
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent-700), var(--accent-500));
+            border-radius: 999px;
+            border: none;
+            box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent-600) 40%, var(--outline-strong));
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-200);
+            border: 2px solid var(--accent-600);
+            margin-top: -5px;
+            /* align thumb to track */
+            box-shadow: 0 0 8px color-mix(in oklab, var(--accent-500) 50%, transparent);
+            transition: transform var(--t-fast) var(--e-out), box-shadow var(--t-med) var(--e-out);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.06);
+            box-shadow: 0 0 14px color-mix(in oklab, var(--accent-500) 70%, transparent);
+        }
+
+        /* ===== Firefox track/thumb/progress ===== */
+        /* In FF, the "progress" (before-thumb) is a separate layer; give both same look to avoid double coloring */
+        input[type="range"]::-moz-range-track,
+        input[type="range"]::-moz-range-progress {
+            height: 6px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent-700), var(--accent-500));
+            border: 1px solid color-mix(in oklab, var(--accent-600) 40%, var(--c-line-strong));
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-200);
+            border: 2px solid var(--accent-600);
+            box-shadow: 0 0 8px color-mix(in oklab, var(--accent-500) 50%, transparent);
+        }
+
+
+        /* -----------------------------------------------------------------------------
+   9) SWITCH / TOGGLE
+   ----------------------------------------------------------------------------- */
+        .switch {
+            --sw-w: 42px;
+            --sw-h: 24px;
+            position: relative;
+            display: inline-block;
+            width: var(--sw-w);
+            height: var(--sw-h);
+            background: var(--surface-2);
+            border: 1px solid var(--outline-strong);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background var(--t-med) var(--e-out), border-color var(--t-med) var(--e-out);
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .switch .knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: calc(var(--sw-h) - 4px);
+            height: calc(var(--sw-h) - 4px);
+            background: var(--accent-200);
+            border-radius: 50%;
+            box-shadow: 0 0 8px color-mix(in oklab, var(--accent-500) 50%, transparent);
+            transition: transform var(--t-med) var(--e-out), box-shadow var(--t-med) var(--e-out);
+        }
+
+        .switch input:checked+.knob {
+            transform: translateX(calc(var(--sw-w) - var(--sw-h)));
+            background: var(--accent-100);
+            box-shadow: 0 0 14px color-mix(in oklab, var(--accent-500) 70%, transparent);
+        }
+
+        /* -----------------------------------------------------------------------------
+   10) SEGMENTED CONTROL
+   ----------------------------------------------------------------------------- */
+        .segmented {
+            display: inline-grid;
+            grid-auto-flow: column;
+            gap: 6px;
+            padding: 6px;
+            border-radius: var(--r-3);
+            background: color-mix(in oklab, var(--surface-2) 85%, var(--accent-900));
+            border: 1px solid color-mix(in oklab, var(--accent-600) 25%, var(--outline-strong));
+        }
+
+        .segmented .seg {
+            padding: .35rem .6rem;
+            border-radius: var(--r-2);
+            background: transparent;
+            color: var(--hud-key);
+            border: 1px dashed color-mix(in oklab, var(--accent-600) 35%, var(--outline));
+            cursor: pointer;
+            user-select: none;
+            transition: background var(--t-med) var(--e-out), border-color var(--t-med) var(--e-out);
+        }
+
+        .segmented .seg[aria-pressed="true"],
+        .segmented .seg.is-active {
+            background: color-mix(in oklab, var(--accent-600) 40%, var(--surface-1) 60%);
+            border: 1px solid color-mix(in oklab, var(--accent-600) 60%, var(--outline-strong));
+            color: var(--text-on-accent);
+        }
+
+        /* -----------------------------------------------------------------------------
+   11) STAGE
+   ----------------------------------------------------------------------------- */
         #stageWrap {
             grid-area: stage;
             position: relative;
@@ -446,39 +659,46 @@
             z-index: var(--z-stage);
         }
 
-        /* =============== FOOTER =============== */
+        /* -----------------------------------------------------------------------------
+   12) FOOTER / TIP BAR
+   ----------------------------------------------------------------------------- */
         footer {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
+            bottom: 12px;
+            left: var(--s-5);
+            right: var(--s-5);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: var(--s-4);
+            gap: var(--s-3);
             padding: .4rem .6rem;
-            color: var(--text-dim);
+            color: var(--text-subtle);
             font-size: .85rem;
-            background: rgba(0, 0, 0, .25);
-            border: var(--bd-weak);
+            background: linear-gradient(180deg,
+                    color-mix(in oklab, var(--surface-1) 65%, transparent),
+                    color-mix(in oklab, var(--surface-1) 40%, transparent));
+            border: 1px solid var(--outline);
             border-radius: var(--r-3);
+            box-shadow: var(--glow-outer);
         }
 
         .kbd {
-            background: var(--bg-surface);
-            border: var(--bd-strong);
+            background: var(--surface-1);
+            border: 1px solid color-mix(in oklab, var(--accent-600) 30%, var(--outline-strong));
+            color: var(--hud-key);
             padding: .15rem .35rem;
             border-radius: var(--r-1);
             font-size: .85em;
-            color: var(--text-strong);
         }
 
-        /* =============== HUD (Debug Overlay) =============== */
+        /* -----------------------------------------------------------------------------
+   13) HUD (adaptive position — aligns to panel width)
+   ----------------------------------------------------------------------------- */
         #hud {
             position: absolute;
-            top: 42px;
-            left: var(--panel-w);
-            max-width: 380px;
+            top: 82px;
+            left: calc(var(--panel-w) + 16px);
+            max-width: 360px;
             max-height: 60vh;
             overflow: auto;
             padding: 10px 12px;
@@ -491,11 +711,12 @@
             letter-spacing: .2px;
             backdrop-filter: blur(var(--blur));
             display: none;
+            /* toggle via JS */
             z-index: var(--z-hud);
         }
 
         #hud .hdr {
-            color: var(--accent-200);
+            color: var(--hud-key);
             text-transform: uppercase;
             font-weight: 700;
             margin: 8px 0 4px;
@@ -508,7 +729,7 @@
         }
 
         #hud .v {
-            color: #e1fff7;
+            color: color-mix(in oklab, var(--text-on-surface-1) 92%, var(--accent-200) 8%);
         }
 
         #hud .warn {
@@ -519,7 +740,29 @@
             color: #ff8a8a;
         }
 
-        /* =============== Focus/Reduce Motion =============== */
+        /* -----------------------------------------------------------------------------
+   14) SCROLLBARS (global, accent-tinted)
+   ----------------------------------------------------------------------------- */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: color-mix(in oklab, var(--accent-700) 25%, var(--surface-2)) var(--surface-1);
+        }
+
+        *::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-700), var(--accent-500));
+            border-radius: var(--r-2);
+            border: 2px solid var(--surface-1);
+            box-shadow: var(--glow-inner);
+        }
+
+        /* -----------------------------------------------------------------------------
+   15) ACCESSIBILITY & MOTION
+   ----------------------------------------------------------------------------- */
         *:focus-visible {
             outline: none;
             box-shadow: var(--focus-ring);
@@ -540,16 +783,26 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" data-mode="light" data-accent="cyan">
         <header>
-            <h1>Geometric Bonsai — Ikebana Style</h1>
-            <div style="margin-left:auto;">
-                <select id="themeSelect" class="theme-dropdown">
+            <h1>POLYGON BONSAI / Ikebana Style</h1>
+
+            <div class="header-tools">
+                <!-- Accent theme dropdown -->
+                <label for="themeSelect" class="theme-label">Theme</label>
+                <select id="themeSelect" class="theme-dropdown" aria-label="Accent theme">
                     <option value="cyan">Cyan</option>
                     <option value="magenta">Magenta</option>
                     <option value="amber">Amber</option>
                     <option value="lime">Lime</option>
+                    <option value="black">Black</option>
+                    <option value="white">White</option>
                 </select>
+                <!-- Mode segmented control -->
+                <div id="modeControl" class="segmented" role="group" aria-label="Color scheme">
+                    <button type="button" class="seg" data-mode="dark" aria-pressed="false">Dark</button>
+                    <button type="button" class="seg" data-mode="light" aria-pressed="true">Light</button>
+                </div>
             </div>
         </header>
 
@@ -577,7 +830,7 @@
                     <label>Exposure</label>
                     <input id="exposure" type="range" min="0.5" max="2.5" step="0.01" value="1" />
                     <div class="full row">
-                        <button id="frame" class="btn">Frame</button>
+                        <button id="frame" class="btn btn-primary">Frame</button>
                         <button id="shot" class="btn">📸 Screenshot</button>
                         <button id="newSeed" class="btn">New Seed</button>
                         <span>Seed: <span id="seedLabel" class="kbd">—</span></span>
@@ -609,26 +862,9 @@
                     <input id="upBias" type="range" min="0" max="1" step="0.01" value="0.3" />
                 </div>
             </div>
-
             <div class="section">
-                <h2>Branchlets</h2>
+                <h2>Leaves</h2>
                 <div class="form">
-                    <label>Branch Color</label>
-                    <input id="branchColor" type="color" value="#3b2d44">
-                    <label>Leaf Color</label>
-                    <input id="leafColor" type="color" value="#2d6e52">
-                    <label>Depth</label>
-                    <input id="bDepth" type="range" min="1" max="4" step="1" value="3" />
-                    <label>Per-level Min</label>
-                    <input id="bMin" type="range" min="1" max="6" step="1" value="2" />
-                    <label>Per-level Max</label>
-                    <input id="bMax" type="range" min="1" max="8" step="1" value="3" />
-                    <label>Branch Length</label>
-                    <input id="bLen" type="range" min="0.5" max="1.8" step="0.01" value="1" />
-                    <label>Terminal Density</label>
-                    <input id="density" type="range" min="0.3" max="3" step="0.01" value="1" />
-                    <label>Leaf Spread</label>
-                    <input id="leafSpread" type="range" min="0.3" max="2.5" step="0.01" value="1" />
                     <label>Leaf Type</label>
                     <select id="leafType">
                         <option value="diamond">Diamond</option>
@@ -650,15 +886,40 @@
                         <option value="wind-left">Wind →</option>
                         <option value="wind-right">Wind ←</option>
                     </select>
+                    <label>Leaf Color</label>
+                    <input id="leafColor" type="color" value="#2d6e52">
+                    <label>Per-level Min</label>
+                    <input id="bMin" type="range" min="1" max="6" step="1" value="2" />
+                    <label>Per-level Max</label>
+                    <input id="bMax" type="range" min="1" max="8" step="1" value="3" />
+                    <label>Terminal Density</label>
+                    <input id="density" type="range" min="0.3" max="3" step="0.01" value="1" />
+                    <label>Leaf Spread</label>
+                    <input id="leafSpread" type="range" min="0.3" max="2.5" step="0.01" value="1" />
+
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Branchlets</h2>
+                <div class="form">
+                    <label>Branch Color</label>
+                    <input id="branchColor" type="color" value="#3b2d44">
+
+                    <label>Depth</label>
+                    <input id="bDepth" type="range" min="1" max="4" step="1" value="3" />
+
+                    <label>Branch Length</label>
+                    <input id="bLen" type="range" min="0.5" max="1.8" step="0.01" value="1" />
                 </div>
             </div>
 
             <div class="section">
                 <h2>Vessel</h2>
                 <div class="form">
-                    <label>Type</label>
                     <label>Color</label>
                     <input id="vesselColor" type="color" value="#a5b2bd" />
+                    <label>Type</label>
                     <select id="vesselType">
                         <option value="glass-cylinder">Glass Cylinder</option>
                         <option value="shallow-bowl">Shallow Bowl</option>
@@ -669,7 +930,6 @@
                     <input id="vesselDia" type="range" min="0.8" max="2.4" step="0.01" value="1.2" />
                     <label>Depth</label>
                     <input id="vesselDepth" type="range" min="0.2" max="2.5" step="0.01" value="1.6" />
-                    <div class="full row"><button id="applyVessel" class="btn">Apply Vessel</button></div>
                 </div>
             </div>
 
@@ -715,6 +975,7 @@
                 <div>Press <span class="kbd">Frame</span> to refit</div>
             </footer>
         </div>
+
     </div>
 
     <script type="module">
@@ -1408,32 +1669,85 @@
         window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); } });
 
         // === Theme switching ===
-        const THEMES = ['cyan', 'magenta', 'amber', 'lime'];
-        const rootEl = document.documentElement;   // <html>
-        const themeSelect = document.getElementById('themeSelect');
+        (() => {
+            const app = document.getElementById('app');
+            const themeSelect = document.getElementById('themeSelect');
+            const modeCtrl = document.getElementById('modeControl');
+            const segBtns = [...modeCtrl.querySelectorAll('.seg')];
 
-        function applyTheme(val) {
-            // sanitize
-            const t = THEMES.includes(val) ? val : 'cyan';
-            // remove all, add one
-            rootEl.classList.remove(...THEMES.map(x => `theme-${x}`));
-            rootEl.classList.add(`theme-${t}`);
-            // keep UI + storage in sync
-            if (themeSelect) themeSelect.value = t;
-            localStorage.setItem('bonsaiTheme', t);
-        }
+            // --- helpers ---
+            const setPressed = (val) => {
+                segBtns.forEach(b => {
+                    const on = b.dataset.mode === val;
+                    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+                    b.classList.toggle('is-active', on);
+                });
+            };
 
-        // 1) Startup: apply saved (or default), ensuring we *remove* any previous class
-        document.addEventListener('DOMContentLoaded', () => {
-            applyTheme(localStorage.getItem('bonsaiTheme') || 'cyan');
-        });
+            const setAccentAndMode = (accent, mode) => {
+                if (accent) app.setAttribute('data-accent', accent);
+                if (mode) app.setAttribute('data-mode', mode);
 
-        // 2) Dropdown changes
-        if (themeSelect) {
-            themeSelect.addEventListener('change', (e) => applyTheme(e.target.value));
-        }
+                // Compute --text-on-accent dynamically for readability on buttons
+                requestAnimationFrame(() => {
+                    const cs = getComputedStyle(app);
+                    // Pick a mid-strong swatch to judge contrast
+                    const bg = cs.getPropertyValue('--accent-600').trim() || '#888';
 
+                    const rgb = bg.startsWith('#') ? hexToRgb(bg) : cssColorToRgb(bg);
+                    const L = relLuminance(rgb.r, rgb.g, rgb.b);
+                    // If accent is bright, use near-black text; if dark, use white.
+                    const text = (L > 0.6) ? '#0b0f12' : '#ffffff';
+                    app.style.setProperty('--text-on-accent', text);
+                });
 
+                // Persist
+                localStorage.setItem('bonsai.accent', app.getAttribute('data-accent'));
+                localStorage.setItem('bonsai.mode', app.getAttribute('data-mode'));
+            };
+
+            // luminance utilities
+            function relLuminance(r, g, b) {
+                const sRGB = [r, g, b].map(v => v / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+                return 0.2126 * sRGB[0] + 0.7152 * sRGB[1] + 0.0722 * sRGB[2];
+            }
+            function hexToRgb(h) {
+                const m = h.replace('#', '');
+                const v = (m.length === 3) ? m.split('').map(x => x + x).join('') : m;
+                return { r: parseInt(v.slice(0, 2), 16), g: parseInt(v.slice(2, 4), 16), b: parseInt(v.slice(4, 6), 16) };
+            }
+            function cssColorToRgb(c) {
+                // Handles rgb()/hsl() via a canvas trick
+                const ctx = document.createElement('canvas').getContext('2d');
+                ctx.fillStyle = c;
+                const m = ctx.fillStyle; // normalized to rgb(a)
+                const nums = m.match(/\d+(\.\d+)?/g).map(Number);
+                return { r: nums[0], g: nums[1], b: nums[2] };
+            }
+
+            // --- events ---
+            segBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const mode = btn.dataset.mode;
+                    setPressed(mode);
+                    setAccentAndMode(null, mode);
+                });
+            });
+
+            themeSelect.addEventListener('change', () => {
+                const accent = themeSelect.value;
+                setAccentAndMode(accent, null);
+            });
+
+            // --- initial sync (from storage or existing attrs) ---
+            const storedAccent = localStorage.getItem('bonsai.accent') || app.getAttribute('data-accent') || 'cyan';
+            const storedMode = localStorage.getItem('bonsai.mode') || app.getAttribute('data-mode') || 'light';
+
+            // reflect in UI
+            themeSelect.value = storedAccent;
+            setPressed(storedMode);
+            setAccentAndMode(storedAccent, storedMode);
+        })();
 
         function initial() {
             applyBackground();
