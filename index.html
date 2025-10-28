@@ -902,18 +902,15 @@
                         <input id="maxLeaves" type="range" min="100" max="1000" step="100" value="500">
                         <span id="maxLeaves_val">500</span>
                     </div>
-
                     <div class="field">
                         <label>Lower-Canopy Bias</label>
                         <input id="lowerBias" type="range" min="0" max="1" step="0.01" value="0.35">
                         <span id="lowerBias_val">0.35</span>
                     </div>
-
                     <div class="field">
                         <label>Per-Terminal Min</label>
                         <input id="minPerTerminal" type="number" min="0" max="99" step="1" value="2">
                     </div>
-
                     <div class="field">
                         <label>Per-Terminal Max</label>
                         <input id="maxPerTerminal" type="number" min="1" max="999" step="1" value="60">
@@ -933,7 +930,40 @@
 
                     <label>Branch Length</label>
                     <input id="bLen" type="range" min="0.5" max="1.8" step="0.01" value="1" />
+                    <!-- Phase C.1: Height & Leaf Size Controls -->
+                    <div class="field">
+                        <label>Plant Height</label>
+                        <input id="heightScale" type="range" min="0.3" max="1.6" step="0.01" value="1.00">
+                        <span id="heightScale_val">1.00</span>
+                    </div>
+
+                    <div class="field">
+                        <label>Leaf Size</label>
+                        <input id="leafSize" type="range" min="0.4" max="2.0" step="0.01" value="1.00">
+                        <span id="leafSize_val">1.00</span>
+                    </div>
+
+                    <div class="field">
+                        <label>Leaf Size Variation (±%)</label>
+                        <input id="leafVar" type="range" min="0" max="0.9" step="0.01" value="0.25">
+                        <span id="leafVar_val">0.25</span>
+                    </div>
+
+                    <!-- Phase C: Branch Attachment Controls -->
+                    <div class="field">
+                        <label>Branch Start Height</label>
+                        <input id="branchStart" type="range" min="0" max="1" step="0.01" value="0.15">
+                        <span id="branchStart_val">0.15</span>
+                    </div>
+
+                    <div class="field">
+                        <label>Lower-Branch Bias (attachments)</label>
+                        <input id="branchBias" type="range" min="0" max="1" step="0.01" value="0.45">
+                        <span id="branchBias_val">0.45</span>
+                    </div>
+
                 </div>
+
             </div>
 
             <div class="section">
@@ -1054,7 +1084,7 @@
         const PER_TERM_HARD_MAX = 16;   // ≤16 leaves per terminal
         const CHILDREN_HARD_MAX = 3;    // ≤3 children per joint
         const SEGMENTS_HARD_MAX = 800;  // ≤800 branch segments
-
+        const ATTACH_MAX = 48; // hard cap on number of trunk attachment joints we’ll use
 
         let globalLeafCount = 0;
 
@@ -1632,6 +1662,7 @@
             const upVec = new THREE.Vector3(0, 1, 0);
             let dir0 = new THREE.Vector3(rr(r, -0.1, 0.1), 1, rr(r, -0.1, 0.1)).normalize();
             let len = 2.6;
+            const heightMul = Math.max(0.3, Math.min(1.6, parseFloat($('heightScale').value) || 1.0));
             const bendDir = (preset.trunk === 'windswept') ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(rr(r, -1, 1), 0, rr(r, -1, 1));
             bendDir.normalize().multiplyScalar(0.6 * curv);
 
@@ -1642,7 +1673,7 @@
                 if (preset.trunk === 'compact') { yawBias *= 0.5; pitchBias *= 0.5; }
                 if (preset.trunk === 'splay') { yawBias += rr(r, -0.15, 0.15); }
                 dir0 = dir0.clone().applyAxisAngle(upVec, yawBias).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitchBias).normalize();
-                const np = p.clone().addScaledVector(dir0, len);
+                const np = p.clone().addScaledVector(dir0, len * heightMul);
                 np.add(new THREE.Vector3(rr(r, -0.10, 0.10), rr(r, -0.05, 0.05), rr(r, -0.10, 0.10)).multiplyScalar(curv * 0.35));
                 pts.push([p.clone(), np.clone(), Math.max(0.035, 0.10 * Math.pow(lenFall, i))]);
                 p = np; len *= lenFall * rr(r, 0.95, 1.05);
@@ -1899,7 +1930,14 @@
                         const yaw = (Math.random() - 0.5) * (1 - uni) * 1.2;
                         const pitch = (Math.random() - 0.5) * (1 - uni) * 0.6 - upBiasVal * 0.15;
                         tmp.rotation.set(pitch, yaw, 0);
-                        const s = 0.9 + Math.random() * 0.3;
+                        // Leaf size & variation
+                        const sizeBase = Math.max(0.05, parseFloat($('leafSize').value) || 1.0); // base scale
+                        const sizeVar = Math.max(0, Math.min(0.9, parseFloat($('leafVar').value) || 0.25)); // 0..0.9
+
+                        // random factor in [-sizeVar, +sizeVar]
+                        const jitter = (Math.random() * 2 - 1) * sizeVar;
+                        // final per-leaf scale
+                        const s = sizeBase * (1 + jitter);
                         tmp.scale.set(s, s, s);
                         tmp.updateMatrix();
 
@@ -1915,6 +1953,49 @@
                     }
                 }
             }
+
+            // Phase C: choose trunk joints for first-level branch attachments
+            // pts: array of [a,b] vectors per trunk segment (you already have this in your code)
+            // startNorm: minimum normalized height [0..1] to allow attachments
+            // lowerBias: 0 = uniform, 1 = strongly favors lower joints
+            // maxCount: safety cap
+            function pickAttachmentIndices(pts, startNorm, lowerBias, maxCount) {
+                const N = pts.length;
+                if (N <= 2) return [];
+
+                // Build candidates: use each segment’s END point "b" as the attachment height sample
+                const cand = [];
+                for (let i = 1; i < N; i++) {
+                    // normalized height 0..1 by index along trunk (cheap and robust)
+                    const h = i / (N - 1);
+                    if (h < startNorm) continue; // below start height → skip
+                    cand.push({ i, h });
+                }
+                if (cand.length === 0) return [];
+
+                // Weighting: blend uniform with a simple "favor lower" curve (1 - h)
+                // w = (1 - lowerBias) * 1 + lowerBias * (1 - h)
+                for (const c of cand) {
+                    c.w = (1 - lowerBias) * 1 + lowerBias * (1 - c.h);
+                }
+
+                // Sort by weight desc so the "best" joints come first
+                cand.sort((a, b) => b.w - a.w);
+
+                // Deterministic downsampling: take up to maxCount,
+                // and if there are many, stride through to keep them spread out
+                const take = Math.min(maxCount, cand.length);
+                if (cand.length === take) return cand.map(c => c.i);
+
+                const out = [];
+                const stride = (cand.length - 1) / Math.max(1, take - 1);
+                for (let k = 0; k < take; k++) {
+                    out.push(cand[Math.round(k * stride)].i);
+                }
+                // Ensure unique and sorted increasing (important for levelIdx coherence)
+                return Array.from(new Set(out)).sort((a, b) => a - b);
+            }
+
 
             // Recursive branching
             function grow(origin, dirBase, levelIdx, depthLeft) {
@@ -1961,15 +2042,18 @@
 
             }
 
-            // Start recursive branching from last N trunk joints
-            // Start recursive branching from last N trunk joints
-            const jointsToUse = PRESETS[treeType.value].branchPattern === 'whorl' ? 5 : 3;
-            const start = Math.max(1, pts.length - jointsToUse);
-            for (let i = start; i < pts.length; i++) {
+            // Phase C: choose attachment joints along the trunk using bias + start height
+            const startNorm = Math.max(0, Math.min(1, parseFloat($('branchStart').value) || 0));
+            const attachBias = Math.max(0, Math.min(1, parseFloat($('branchBias').value) || 0));
+            const attachIndices = pickAttachmentIndices(pts, startNorm, attachBias, ATTACH_MAX);
+
+            // Spawn first-level branches from chosen joints
+            for (let ai = 0; ai < attachIndices.length; ai++) {
+                const i = attachIndices[ai];
                 const [a, b] = pts[i];
                 const dir = new THREE.Vector3().subVectors(b, a).normalize();
 
-                // root fan of first-level branches from each joint (no density multiplier here)
+                // root fan of first-level branches from each joint (still capped; no density multiplier)
                 let n0 = Math.max(1, Math.floor(rr(r, childMin, childMax + 1)));
                 if (PRESETS[treeType.value].branchPattern === 'whorl') n0 = Math.max(3, 4);
                 n0 = Math.min(n0, CHILDREN_HARD_MAX);
@@ -1980,10 +2064,10 @@
                         const yaw0 = (m / n0) * Math.PI * 2;
                         d0.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw0);
                     }
-                    grow(b, d0, i, depthBranches); // recursive depth
+                    // Use i as levelIdx anchor (consistent with your existing scheme)
+                    grow(b, d0, i, depthBranches);
                 }
             }
-
 
             // Phase B: allocate and create leaf instance matrices from recorded terminals
             emitLeavesForTerminals();
@@ -2078,8 +2162,11 @@
         const debRegenerate = debounce(regenerate, 120);
 
         [treeType, levels, curvature, uniformity, spread, upBias, bDepth, bMin, bMax, bLen, density, leafSpread, leafType, plumage,
-            $('maxLeaves'), $('lowerBias'), $('minPerTerminal'), $('maxPerTerminal')
+            $('maxLeaves'), $('lowerBias'), $('minPerTerminal'), $('maxPerTerminal'),
+            $('branchStart'), $('branchBias'),
+            $('heightScale'), $('leafSize'), $('leafVar')
         ].forEach(el => bindLive(el, debRegenerate));
+
         [wireToggle, renderMode].forEach(el => bindLive(el, applyRenderStyle));
         [vesselType, vesselDia, vesselDepth, vesselColor].forEach(el => bindLive(el, applyVesselOnly));
         [bgColor, bgTex].forEach(el => bindLive(el, applyBackground));
@@ -2089,6 +2176,13 @@
         emissiveStrengthUI.addEventListener('input', applyRenderStyle);
         $('maxLeaves').addEventListener('input', e => $('maxLeaves_val').textContent = e.target.value);
         $('lowerBias').addEventListener('input', e => $('lowerBias_val').textContent = e.target.value);
+        $('branchStart').addEventListener('input', e => $('branchStart_val').textContent = e.target.value);
+        $('branchBias').addEventListener('input', e => $('branchBias_val').textContent = e.target.value);
+        $('heightScale').addEventListener('input', e => $('heightScale_val').textContent = e.target.value);
+        $('leafSize').addEventListener('input', e => $('leafSize_val').textContent = e.target.value);
+        $('leafVar').addEventListener('input', e => $('leafVar_val').textContent = e.target.value);
+
+
 
         // Left/Right: smooth while held; also pause auto when you touch them
         function onHold(dir, isDown) {
@@ -2238,7 +2332,7 @@
             setAutoRotate(true);
             tick();
             // Defer framing so the first paint happens before the bbox scan
-            //requestAnimationFrame(() => frameBtn.click());
+            requestAnimationFrame(() => frameBtn.click());
             renderHUD();
         }
 
