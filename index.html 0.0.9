@@ -778,19 +778,22 @@
         /* === Floating Canvas Toolbar === */
         #canvasToolbar {
             position: absolute;
-            top: 10px;
-            right: 12px;
+            /* bottom will be set dynamically so it sits above the footer (see JS) */
+            left: 50%;
+            transform: translateX(-50%);
             display: grid;
             grid-auto-flow: column;
             align-items: center;
             gap: 6px;
-            padding: 6px;
+            padding: 6px 8px;
             background: var(--hud-bg);
             border: var(--hud-border);
             border-radius: var(--r-2);
             box-shadow: var(--glow-outer), var(--glow-inner);
             z-index: var(--z-hud);
             backdrop-filter: blur(var(--blur));
+            max-width: calc(100% - 24px);
+            /* keep inside canvas on mobile */
         }
 
         #canvasToolbar .split {
@@ -807,6 +810,7 @@
             font-weight: 700;
             padding: 0;
         }
+
 
         /* === Collapsible Panel (desktop & mobile) === */
         /* When collapsed, hide the left column (settings panel) and expand the stage */
@@ -825,12 +829,22 @@
 
         /* Basic mobile preference: start with panel hidden on smaller screens */
         @media (max-width: 900px) {
+
+            /* Default on small screens: panel is VISIBLE so the toggle can work */
             #app {
-                grid-template-columns: 0 1fr;
-                /* default hidden on small screens */
+                grid-template-columns: var(--panel-w) 1fr;
             }
 
             #panel {
+                display: block;
+            }
+
+            /* When the class is present, THEN hide it */
+            #app.panel-hidden {
+                grid-template-columns: 0 1fr;
+            }
+
+            #app.panel-hidden #panel {
                 display: none;
             }
 
@@ -849,6 +863,8 @@
 <body>
     <div id="app" data-mode="light" data-accent="cyan">
         <header>
+            <button id="panelToggle" class="btn btn-icon" aria-pressed="false" title="Toggle settings">☰</button>
+
             <h1>POLYGON BONSAI / Ikebana Style</h1>
 
             <div class="header-tools">
@@ -867,7 +883,6 @@
                     <button type="button" class="seg" data-mode="dark" aria-pressed="false">Dark</button>
                     <button type="button" class="seg" data-mode="light" aria-pressed="true">Light</button>
                 </div>
-                <button id="panelToggle" class="btn btn-icon" aria-pressed="false" title="Toggle settings">☰</button>
             </div>
         </header>
 
@@ -1104,19 +1119,21 @@
                 <div>Tip: drag to orbit · wheel/pinch to zoom</div>
                 <div>Press <span class="kbd">Frame</span> to refit</div>
             </footer>
+            <!-- Floating canvas toolbar -->
+            <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
+                <button id="tbFrame" class="btn btn-icon" title="Frame (F)">⤢</button>
+                <button id="tbWire" class="btn btn-icon" title="Wireframe (W)">◧</button>
+                <span class="split"></span>
+                <button id="tbSpinL" class="btn btn-icon" title="Rotate Left ([)">⟲</button>
+                <button id="tbSlower" class="btn btn-icon" title="Slower">−</button>
+                <button id="tbAuto" class="btn btn-icon" title="Play/Pause (Space)">⏸</button>
+                <button id="tbFaster" class="btn btn-icon" title="Faster">＋</button>
+                <button id="tbSpinR" class="btn btn-icon" title="Rotate Right (])">⟳</button>
+                <span class="split"></span>
+                <button id="tbShot" class="btn btn-icon" title="Screenshot (X)">📸</button>
+                <button id="tbHelp" class="btn btn-icon" title="Toggle Tip Bar (H)">?</button>
+            </div>
         </div>
-        <!-- Floating canvas toolbar -->
-        <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
-            <button id="tbFrame" class="btn btn-icon" title="Frame (F)">⤢</button>
-            <button id="tbShot" class="btn btn-icon" title="Screenshot (X)">📸</button>
-            <button id="tbWire" class="btn btn-icon" title="Wireframe (W)">◧</button>
-            <span class="split"></span>
-            <button id="tbSpinL" class="btn btn-icon" title="Rotate Left ([)">⟲</button>
-            <button id="tbSpinR" class="btn btn-icon" title="Rotate Right (])">⟳</button>
-            <span class="split"></span>
-            <button id="tbHelp" class="btn btn-icon" title="Toggle Tip Bar (H)">?</button>
-        </div>
-
     </div>
 
     <script type="module">
@@ -1203,6 +1220,9 @@
         const tbShot = document.getElementById('tbShot');
         const tbWire = document.getElementById('tbWire');
         const tbSpinL = document.getElementById('tbSpinL');
+        const tbSlower = document.getElementById('tbSlower');
+        const tbAuto = document.getElementById('tbAuto');
+        const tbFaster = document.getElementById('tbFaster');
         const tbSpinR = document.getElementById('tbSpinR');
         const tbHelp = document.getElementById('tbHelp');
 
@@ -1366,6 +1386,19 @@
             camera.aspect = w / h; camera.updateProjectionMatrix();
         }
         window.addEventListener('resize', onResize); onResize();
+        window.addEventListener('resize', layoutCanvasToolbar);
+
+
+        function layoutCanvasToolbar() {
+            if (!canvasToolbar) return;
+            // If footer is visible, sit a bit above it; else sit near bottom.
+            const footerVisible = tipFooter && tipFooter.style.display !== 'none';
+            const footerH = footerVisible ? tipFooter.offsetHeight : 0;
+            const padding = 14; // extra breathing room above the footer
+            const baseBottom = 12; // match your footer's 12px bottom gap
+            canvasToolbar.style.bottom = (baseBottom + footerH + padding) + 'px';
+        }
+
 
         // RNG
         function mulberry32(a) { return function () { let t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -2351,7 +2384,6 @@
 
         shotBtn.addEventListener('click', savePNG);
         newSeedBtn.addEventListener('click', () => { setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); });
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); } });
 
         // Keyboard shortcuts
         window.addEventListener('keydown', (e) => {
@@ -2359,6 +2391,16 @@
             const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
             const isTyping = (tag === 'input' || tag === 'select' || tag === 'textarea' || e.target.isContentEditable);
             if (isTyping) return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                // CURRENT: reseed
+                // setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate();
+
+                // SWITCH to play/pause instead:
+                setAutoRotate(!autoOn);
+                refreshTbAutoIcon();
+            }
 
             if (e.key === 'f' || e.key === 'F') {
                 e.preventDefault();
@@ -2502,6 +2544,54 @@
             tbSpinR.addEventListener('touchend', () => onHold(-1, false), { passive: true });
         }
 
+        const canvasToolbar = document.getElementById('canvasToolbar');
+
+        function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+        function setAutoSpeed(val) {
+            if (!autoSpeedUI) return;
+            const n = clamp(val, parseFloat(autoSpeedUI.min), parseFloat(autoSpeedUI.max));
+            autoSpeedUI.value = String(n);
+            // no need to call regenerate; tick() reads the live value
+        }
+
+        function refreshTbAutoIcon() {
+            if (!tbAuto) return;
+            tbAuto.textContent = autoOn ? '⏸' : '▶'; // pause/play glyph
+            tbAuto.title = autoOn ? 'Pause (Space)' : 'Play (Space)';
+        }
+
+        if (tbAuto) {
+            tbAuto.addEventListener('click', () => {
+                setAutoRotate(!autoOn);
+                refreshTbAutoIcon();
+            });
+            // also keep icon synced if someone uses the side panel control
+            if (autoRotate) {
+                autoRotate.addEventListener('change', refreshTbAutoIcon);
+            }
+            // initial glyph
+            refreshTbAutoIcon();
+        }
+
+        if (tbSlower) {
+            tbSlower.addEventListener('click', () => {
+                const cur = parseFloat(autoSpeedUI.value || '0');
+                setAutoSpeed(cur - 0.2);
+                setAutoRotate(true);
+                refreshTbAutoIcon();
+            });
+        }
+        if (tbFaster) {
+            tbFaster.addEventListener('click', () => {
+                const cur = parseFloat(autoSpeedUI.value || '0');
+                setAutoSpeed(cur + 0.2);
+                setAutoRotate(true);
+                refreshTbAutoIcon();
+            });
+        }
+
+
         // Toggle the bottom tip footer (help)
         const tipFooter = document.querySelector('footer');
         if (tbHelp && tipFooter) {
@@ -2537,7 +2627,6 @@
             });
         }
 
-
         function initial() {
             applyBackground();
             setSeed((Math.random() * 0xFFFFFFFF) >>> 0);
@@ -2548,6 +2637,7 @@
             // Defer framing so the first paint happens before the bbox scan
             requestAnimationFrame(() => frameBtn.click());
             renderHUD();
+            layoutCanvasToolbar();
         }
 
         initial();
