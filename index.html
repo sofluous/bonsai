@@ -774,6 +774,70 @@
                 animation: none !important;
             }
         }
+
+        /* === Floating Canvas Toolbar === */
+        #canvasToolbar {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            display: grid;
+            grid-auto-flow: column;
+            align-items: center;
+            gap: 6px;
+            padding: 6px;
+            background: var(--hud-bg);
+            border: var(--hud-border);
+            border-radius: var(--r-2);
+            box-shadow: var(--glow-outer), var(--glow-inner);
+            z-index: var(--z-hud);
+            backdrop-filter: blur(var(--blur));
+        }
+
+        #canvasToolbar .split {
+            width: 1px;
+            height: 20px;
+            background: color-mix(in oklab, var(--accent-600) 30%, transparent);
+            margin: 0 2px;
+            border-radius: 1px;
+        }
+
+        #canvasToolbar .btn.btn-icon {
+            width: 34px;
+            height: 34px;
+            font-weight: 700;
+            padding: 0;
+        }
+
+        /* === Collapsible Panel (desktop & mobile) === */
+        /* When collapsed, hide the left column (settings panel) and expand the stage */
+        #app.panel-hidden {
+            grid-template-columns: 0 1fr;
+        }
+
+        #app.panel-hidden #panel {
+            display: none;
+        }
+
+        /* When panel is hidden, shift HUD closer to the left edge */
+        #app.panel-hidden #hud {
+            left: 16px;
+        }
+
+        /* Basic mobile preference: start with panel hidden on smaller screens */
+        @media (max-width: 900px) {
+            #app {
+                grid-template-columns: 0 1fr;
+                /* default hidden on small screens */
+            }
+
+            #panel {
+                display: none;
+            }
+
+            #hud {
+                left: 16px;
+            }
+        }
     </style>
 
     <!-- Import map for bare specifier "three" -->
@@ -789,7 +853,7 @@
 
             <div class="header-tools">
                 <!-- Accent theme dropdown -->
-                <label for="themeSelect" class="theme-label">Theme</label>
+                <label for="themeSelect" class="theme-label">THEME</label>
                 <select id="themeSelect" class="theme-dropdown" aria-label="Accent theme">
                     <option value="cyan">Cyan</option>
                     <option value="magenta">Magenta</option>
@@ -803,12 +867,13 @@
                     <button type="button" class="seg" data-mode="dark" aria-pressed="false">Dark</button>
                     <button type="button" class="seg" data-mode="light" aria-pressed="true">Light</button>
                 </div>
+                <button id="panelToggle" class="btn btn-icon" aria-pressed="false" title="Toggle settings">☰</button>
             </div>
         </header>
 
         <aside id="panel">
             <div class="section">
-                <h2>Scene</h2> <!-- Debug HUD toggle -->
+                <h2>SCENE</h2> <!-- Debug HUD toggle -->
                 <div class="form">
                     <!-- Cyberpunk HUD overlay -->
                     <label>Display Debug</label>
@@ -839,7 +904,7 @@
             </div>
 
             <div class="section">
-                <h2>Species</h2>
+                <h2>SPECIES</h2>
                 <div class="form">
                     <label>Type</label>
                     <select id="treeType">
@@ -850,6 +915,13 @@
                         <option value="juniper">Juniper (windswept)</option>
                         <option value="ginkgo">Ginkgo (tiered fans)</option>
                     </select>
+                    <!-- Phase C.1: Height & Leaf Size Controls -->
+                    <label>Plant Height</label>
+
+                    <div class="field">
+                        <input id="heightScale" type="range" min="0.3" max="1.6" step="0.01" value="1.00" />
+                        <span id="heightScale_val">1.00</span>
+                    </div>
                     <label>Levels</label>
                     <input id="levels" type="range" min="3" max="10" step="1" value="6" />
                     <label>Curvature</label>
@@ -863,7 +935,7 @@
                 </div>
             </div>
             <div class="section">
-                <h2>Leaves</h2>
+                <h2>LEAVES</h2>
                 <div class="form">
                     <label>Leaf Type</label>
                     <select id="leafType">
@@ -894,8 +966,20 @@
                     <input id="bMax" type="range" min="1" max="8" step="1" value="3" />
                     <label>Terminal Density</label>
                     <input id="density" type="range" min="0.3" max="3" step="0.01" value="1" />
-                    <label>Leaf Spread</label>
+                    <label>Spread</label>
                     <input id="leafSpread" type="range" min="0.3" max="2.5" step="0.01" value="1" />
+                    <div class="field">
+                        <label>Size</label>
+                        <input id="leafSize" type="range" min="0.4" max="2.0" step="0.01" value="1.00">
+                        <span id="leafSize_val">1.00</span>
+                    </div>
+
+                    <div class="field">
+                        <label>Variation (±%)</label>
+                        <input id="leafVar" type="range" min="0" max="0.9" step="0.01" value="0.25">
+                        <span id="leafVar_val">0.25</span>
+                    </div>
+
                     <!-- Phase B: Leaf Allocation Controls -->
                     <div class="field">
                         <label>Max Leaves</label>
@@ -920,7 +1004,7 @@
             </div>
 
             <div class="section">
-                <h2>Branchlets</h2>
+                <h2>BRANCHES</h2>
                 <div class="form">
                     <label>Branch Color</label>
                     <input id="branchColor" type="color" value="#3b2d44">
@@ -930,24 +1014,6 @@
 
                     <label>Branch Length</label>
                     <input id="bLen" type="range" min="0.5" max="1.8" step="0.01" value="1" />
-                    <!-- Phase C.1: Height & Leaf Size Controls -->
-                    <div class="field">
-                        <label>Plant Height</label>
-                        <input id="heightScale" type="range" min="0.3" max="1.6" step="0.01" value="1.00">
-                        <span id="heightScale_val">1.00</span>
-                    </div>
-
-                    <div class="field">
-                        <label>Leaf Size</label>
-                        <input id="leafSize" type="range" min="0.4" max="2.0" step="0.01" value="1.00">
-                        <span id="leafSize_val">1.00</span>
-                    </div>
-
-                    <div class="field">
-                        <label>Leaf Size Variation (±%)</label>
-                        <input id="leafVar" type="range" min="0" max="0.9" step="0.01" value="0.25">
-                        <span id="leafVar_val">0.25</span>
-                    </div>
 
                     <!-- Phase C: Branch Attachment Controls -->
                     <div class="field">
@@ -961,13 +1027,25 @@
                         <input id="branchBias" type="range" min="0" max="1" step="0.01" value="0.45">
                         <span id="branchBias_val">0.45</span>
                     </div>
+                    <!-- Phase D: Branch Length Variance & Falloff -->
+                    <div class="field">
+                        <label>Branch Length Variation (±%)</label>
+                        <input id="bLenVar" type="range" min="0" max="0.9" step="0.01" value="0.25">
+                        <span id="bLenVar_val">0.25</span>
+                    </div>
+
+                    <div class="field">
+                        <label>Branch Falloff per Depth</label>
+                        <input id="bFall" type="range" min="0.60" max="0.98" step="0.005" value="0.85">
+                        <span id="bFall_val">0.85</span>
+                    </div>
 
                 </div>
 
             </div>
 
             <div class="section">
-                <h2>Vessel</h2>
+                <h2>VESSEL</h2>
                 <div class="form">
                     <label>Color</label>
                     <input id="vesselColor" type="color" value="#a5b2bd" />
@@ -986,7 +1064,7 @@
             </div>
 
             <div class="section">
-                <h2>Render & Appearance</h2>
+                <h2>RENDER + APPEARANCE</h2>
                 <div class="form">
                     <label>Auto rotate</label>
                     <select id="autoRotate">
@@ -1026,6 +1104,17 @@
                 <div>Tip: drag to orbit · wheel/pinch to zoom</div>
                 <div>Press <span class="kbd">Frame</span> to refit</div>
             </footer>
+        </div>
+        <!-- Floating canvas toolbar -->
+        <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
+            <button id="tbFrame" class="btn btn-icon" title="Frame (F)">⤢</button>
+            <button id="tbShot" class="btn btn-icon" title="Screenshot (X)">📸</button>
+            <button id="tbWire" class="btn btn-icon" title="Wireframe (W)">◧</button>
+            <span class="split"></span>
+            <button id="tbSpinL" class="btn btn-icon" title="Rotate Left ([)">⟲</button>
+            <button id="tbSpinR" class="btn btn-icon" title="Rotate Right (])">⟳</button>
+            <span class="split"></span>
+            <button id="tbHelp" class="btn btn-icon" title="Toggle Tip Bar (H)">?</button>
         </div>
 
     </div>
@@ -1107,6 +1196,15 @@
 
         const rotLeft = $('rotLeft');
         const rotRight = $('rotRight');
+
+        // Floating toolbar buttons
+        const panelToggle = document.getElementById('panelToggle');
+        const tbFrame = document.getElementById('tbFrame');
+        const tbShot = document.getElementById('tbShot');
+        const tbWire = document.getElementById('tbWire');
+        const tbSpinL = document.getElementById('tbSpinL');
+        const tbSpinR = document.getElementById('tbSpinR');
+        const tbHelp = document.getElementById('tbHelp');
 
         // --- Scene ---
         const scene = new THREE.Scene();
@@ -1402,7 +1500,6 @@
                 }
                 mesh.material = mat;
             };
-
 
             if (treeGroup) {
                 treeGroup.traverse(o => { if (o.isMesh) { const kind = o.userData.kind || 'branch'; setMat(o, kind); } });
@@ -2008,7 +2105,22 @@
                 const pitch = rr(r, -0.2, 0.2) * Math.PI * 0.3 * (1 - uni) - rr(r, 0, up) * 0.2;
                 let dir = dirBase.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
                 if (pref) { dir = dir.lerp(pref, uni).normalize(); } else dir.normalize();
-                const L = branchLenMul * (2.6 * 0.45) * Math.pow(lenFall, levelIdx) * rr(r, 0.8, 1.2);
+                // --- Phase D: branch length with mean + variation + per-depth falloff ---
+                const meanMul = Math.max(0.1, (parseFloat(bLen.value) || branchLenMul || 1.0)); // keep your slider as mean
+                const varPct = Math.max(0, Math.min(0.9, parseFloat($('bLenVar').value) || 0.25));
+                const fallMul = Math.max(0.60, Math.min(0.98, parseFloat($('bFall').value) || 0.85));
+
+                // per-branch random jitter in [-varPct, +varPct]
+                const jitter = (Math.random() * 2 - 1) * varPct;
+
+                // a tiny micro-jitter so things aren't too uniform
+                const micro = rr ? rr(r, 0.97, 1.03) : 1.0;
+
+                // Base unit you used before was (2.6 * 0.45). We’ll keep that.
+                // IMPORTANT: We replace Math.pow(lenFall, levelIdx) with Math.pow(fallMul, levelIdx)
+                // so the user slider controls per-depth taper for *branches*.
+                const baseUnit = (2.6 * 0.45);
+                const L = baseUnit * meanMul * Math.pow(fallMul, levelIdx) * (1 + jitter) * micro;
                 const end = origin.clone().addScaledVector(dir, L);
                 const t = Math.max(0.02, 0.07 * Math.pow(lenFall, levelIdx + 1));
                 const seg = new THREE.Mesh(new THREE.BoxGeometry(t, t, L)); seg.userData.kind = 'branch';
@@ -2129,12 +2241,10 @@
             holdSpin = holdWas;
         }
 
-
         function applyVesselOnly() {
             makeVessel(vesselType.value, parseFloat(vesselDia.value), parseFloat(vesselDepth.value));
             updateSpinPivotFromVessel();
         }
-
 
         function savePNG() {
             const a = document.createElement('a'); a.download = `bonsai_${Date.now()}.png`; a.href = renderer.domElement.toDataURL('image/png'); a.click();
@@ -2164,7 +2274,8 @@
         [treeType, levels, curvature, uniformity, spread, upBias, bDepth, bMin, bMax, bLen, density, leafSpread, leafType, plumage,
             $('maxLeaves'), $('lowerBias'), $('minPerTerminal'), $('maxPerTerminal'),
             $('branchStart'), $('branchBias'),
-            $('heightScale'), $('leafSize'), $('leafVar')
+            $('heightScale'), $('leafSize'), $('leafVar'),
+            $('bLenVar'), $('bFall')
         ].forEach(el => bindLive(el, debRegenerate));
 
         [wireToggle, renderMode].forEach(el => bindLive(el, applyRenderStyle));
@@ -2181,8 +2292,8 @@
         $('heightScale').addEventListener('input', e => $('heightScale_val').textContent = e.target.value);
         $('leafSize').addEventListener('input', e => $('leafSize_val').textContent = e.target.value);
         $('leafVar').addEventListener('input', e => $('leafVar_val').textContent = e.target.value);
-
-
+        $('bLenVar').addEventListener('input', e => $('bLenVar_val').textContent = e.target.value);
+        $('bFall').addEventListener('input', e => $('bFall_val').textContent = e.target.value);
 
         // Left/Right: smooth while held; also pause auto when you touch them
         function onHold(dir, isDown) {
@@ -2238,10 +2349,53 @@
             controls.update();
         });
 
-
         shotBtn.addEventListener('click', savePNG);
         newSeedBtn.addEventListener('click', () => { setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); });
         window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); } });
+
+        // Keyboard shortcuts
+        window.addEventListener('keydown', (e) => {
+            // ignore when typing in inputs
+            const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+            const isTyping = (tag === 'input' || tag === 'select' || tag === 'textarea' || e.target.isContentEditable);
+            if (isTyping) return;
+
+            if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                frameBtn.click();
+            }
+            else if (e.key === 'w' || e.key === 'W') {
+                e.preventDefault();
+                tbWire && tbWire.click();
+            }
+            else if (e.key === 'x' || e.key === 'X') {
+                e.preventDefault();
+                shotBtn.click();
+            }
+            else if (e.key === 'h' || e.key === 'H') {
+                e.preventDefault();
+                tbHelp && tbHelp.click();
+            }
+            else if (e.key === 'p' || e.key === 'P') {
+                e.preventDefault();
+                const now = !appRoot.classList.contains('panel-hidden');
+                setPanelHidden(now);
+            }
+            else if (e.key === '[') {
+                e.preventDefault();
+                onHold(+1, true); // rotate left while held
+            }
+            else if (e.key === ']') {
+                e.preventDefault();
+                onHold(-1, true); // rotate right while held
+            }
+        });
+
+        // stop rotate on keyup
+        window.addEventListener('keyup', (e) => {
+            if (e.key === '[') onHold(+1, false);
+            if (e.key === ']') onHold(-1, false);
+        });
 
         // === Theme switching ===
         (() => {
@@ -2324,6 +2478,66 @@
             setAccentAndMode(storedAccent, storedMode);
         })();
 
+        // Toolbar actions – forward to existing controls
+        if (tbFrame) tbFrame.addEventListener('click', () => frameBtn.click());
+        if (tbShot) tbShot.addEventListener('click', () => shotBtn.click());
+        if (tbWire) tbWire.addEventListener('click', () => {
+            // toggle wire select & apply
+            if (!wireToggle) return;
+            wireToggle.value = (wireToggle.value === 'on') ? 'off' : 'on';
+            applyRenderStyle();
+        });
+
+        // Rotate hold via same handlers you have for the side-panel buttons
+        if (tbSpinL) {
+            tbSpinL.addEventListener('mousedown', () => onHold(+1, true));
+            tbSpinL.addEventListener('mouseup', () => onHold(+1, false));
+            tbSpinL.addEventListener('touchstart', (e) => { e.preventDefault(); onHold(+1, true); }, { passive: false });
+            tbSpinL.addEventListener('touchend', () => onHold(+1, false), { passive: true });
+        }
+        if (tbSpinR) {
+            tbSpinR.addEventListener('mousedown', () => onHold(-1, true));
+            tbSpinR.addEventListener('mouseup', () => onHold(-1, false));
+            tbSpinR.addEventListener('touchstart', (e) => { e.preventDefault(); onHold(-1, true); }, { passive: false });
+            tbSpinR.addEventListener('touchend', () => onHold(-1, false), { passive: true });
+        }
+
+        // Toggle the bottom tip footer (help)
+        const tipFooter = document.querySelector('footer');
+        if (tbHelp && tipFooter) {
+            tbHelp.addEventListener('click', () => {
+                const on = tipFooter.style.display !== 'none';
+                tipFooter.style.display = on ? 'none' : 'flex';
+            });
+        }
+
+        const appRoot = document.getElementById('app');
+
+        function setPanelHidden(on) {
+            appRoot.classList.toggle('panel-hidden', !!on);
+            if (panelToggle) {
+                panelToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+            }
+            // persist preference
+            localStorage.setItem('bonsai.panelHidden', on ? '1' : '0');
+        }
+
+        // initial: prefer stored, else hide automatically on small screens
+        (function initPanelHidden() {
+            const stored = localStorage.getItem('bonsai.panelHidden');
+            if (stored === '1' || (stored === null && window.innerWidth <= 900)) {
+                setPanelHidden(true);
+            }
+        })();
+
+        if (panelToggle) {
+            panelToggle.addEventListener('click', () => {
+                const now = !appRoot.classList.contains('panel-hidden');
+                setPanelHidden(now);
+            });
+        }
+
+
         function initial() {
             applyBackground();
             setSeed((Math.random() * 0xFFFFFFFF) >>> 0);
@@ -2335,7 +2549,6 @@
             requestAnimationFrame(() => frameBtn.click());
             renderHUD();
         }
-
 
         initial();
 
