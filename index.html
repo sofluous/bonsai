@@ -662,11 +662,13 @@
         /* -----------------------------------------------------------------------------
    12) FOOTER / TIP BAR
    ----------------------------------------------------------------------------- */
-        footer {
+        /* Tips bar now below header, not floating */
+        /* Tips bar pinned at the top of the canvas (inside #stageWrap) */
+        #tipsBar {
             position: absolute;
-            bottom: 12px;
-            left: var(--s-5);
-            right: var(--s-5);
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -680,7 +682,14 @@
             border: 1px solid var(--outline);
             border-radius: var(--r-3);
             box-shadow: var(--glow-outer);
+            z-index: var(--z-hud);
+            /* above canvas, below panel */
+            max-width: calc(100% - 24px);
+            /* stay inside canvas on phones */
+            pointer-events: auto;
+            /* clickable */
         }
+
 
         .kbd {
             background: var(--surface-1);
@@ -778,11 +787,14 @@
         /* === Floating Canvas Toolbar === */
         #canvasToolbar {
             position: absolute;
+            bottom: 12px;
             /* bottom will be set dynamically so it sits above the footer (see JS) */
             left: 50%;
             transform: translateX(-50%);
             display: grid;
             grid-auto-flow: column;
+            min-width: 260px;
+            justify-content: center;
             align-items: center;
             gap: 6px;
             padding: 6px 8px;
@@ -847,10 +859,24 @@
             #stageWrap {
                 min-height: 56vh;
                 /* canvas still tall enough on phones */
+                position: relative;
+                z-index: 1;
+                /* lower than #panel */
+
+            }
+
+            /* Renderer canvas should never bleed over into the panel area */
+            #stage {
+                position: absolute;
+                inset: 0;
+                z-index: var(--z-stage);
+                /* already set, keep it within its row's stacking context */
             }
 
             /* Panel is visible by default, scrollable within its own area */
             #panel {
+                position: relative;
+                z-index: 5;
                 display: block;
                 max-height: 44vh;
                 /* you can tweak; lets both canvas+panel be visible */
@@ -899,6 +925,7 @@
                 margin: 6px 0 4px;
             }
 
+
         }
     </style>
 
@@ -912,9 +939,7 @@
     <div id="app" data-mode="light" data-accent="cyan">
         <header>
             <button id="panelToggle" class="btn btn-icon" aria-pressed="false" title="Toggle settings">☰</button>
-
-            <h1>POLYGON BONSAI / Ikebana Style</h1>
-
+            <h1>POLYGON BONSAI</h1>
             <div class="header-tools">
                 <!-- Accent theme dropdown -->
                 <label for="themeSelect" class="theme-label">THEME</label>
@@ -933,7 +958,6 @@
                 </div>
             </div>
         </header>
-
         <aside id="panel">
             <div class="section">
                 <h2>SCENE</h2> <!-- Debug HUD toggle -->
@@ -1154,10 +1178,10 @@
         <div id="stageWrap">
             <div id="bgOverlay"></div>
             <div id="stage"></div>
-            <footer>
+            <div id="tipsBar" role="note">
                 <div>Tip: drag to orbit · wheel/pinch to zoom</div>
                 <div>Press <span class="kbd">Frame</span> to refit</div>
-            </footer>
+            </div>
             <!-- Floating canvas toolbar -->
             <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
                 <button id="tbFrame" class="btn btn-icon" title="Frame (F)">⤢</button>
@@ -1207,7 +1231,6 @@
         const keyLightUI = $('keyLight');
         const hemiLightUI = $('hemiLight');
         const exposureUI = $('exposure');
-        const frameBtn = $('frame');
         const shotBtn = $('shot');
         const newSeedBtn = $('newSeed');
         const wireToggle = $('wireToggle');
@@ -1423,31 +1446,33 @@
             renderer.setSize(w, h, false);
             camera.aspect = w / h;
             camera.updateProjectionMatrix();
-            layoutCanvasToolbar();
         }
 
-        function layoutCanvasToolbar() {
-            if (!canvasToolbar) return;
-            // If footer is visible, sit a bit above it; else sit near bottom.
-            const footerVisible = tipFooter && tipFooter.style.display !== 'none';
-            const footerH = footerVisible ? tipFooter.offsetHeight : 0;
-            const padding = 14; // extra breathing room above the footer
-            const baseBottom = 12; // match your footer's 12px bottom gap
-            canvasToolbar.style.bottom = (baseBottom + footerH + padding) + 'px';
+        // Run frameView twice on next frames (lets CSS/layout settle)
+        function refitSoon() {
+            requestAnimationFrame(() => {
+                frameView();
+                requestAnimationFrame(frameView);
+            });
         }
 
         // Debounced resize that can refit after layout shifts (e.g., panel show/hide, orientation changes)
         const onResize = debounce(() => {
             onResizeCore();
-            if (AUTO_REFIT_ON_LAYOUT) {
-                // Give layout a tick to settle before framing
-                requestAnimationFrame(() => frameView());
-            }
+            if (AUTO_REFIT_ON_LAYOUT) refitSoon();
         }, 120);
 
         // Initial and listeners
         onResize();                         // run once after boot
         window.addEventListener('resize', onResize);
+
+        // Keep renderer exactly matched to #stage via ResizeObserver
+        const ro = new ResizeObserver(() => {
+            onResizeCore();              // recalc aspect + renderer size
+            if (AUTO_REFIT_ON_LAYOUT) refitSoon();
+        });
+        ro.observe(stage);
+
 
         // RNG
         function mulberry32(a) { return function () { let t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -2422,7 +2447,6 @@
             controls.update();
         }
 
-        if (frameBtn) frameBtn.addEventListener('click', frameView);
 
         if (shotBtn) shotBtn.addEventListener('click', savePNG);
         if (newSeedBtn) newSeedBtn.addEventListener('click', () => { setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); });
@@ -2446,15 +2470,16 @@
 
             if (e.key === 'f' || e.key === 'F') {
                 e.preventDefault();
-                (tbFrame || frameBtn)?.click();
+                tbFrame?.click();
             }
+
             else if (e.key === 'w' || e.key === 'W') {
                 e.preventDefault();
                 tbWire?.click();
             }
             else if (e.key === 'x' || e.key === 'X') {
                 e.preventDefault();
-                (tbShot || shotBtn)?.click();
+                tbShot?.click();
             }
             else if (e.key === 'h' || e.key === 'H') {
                 e.preventDefault();
@@ -2634,16 +2659,18 @@
         }
 
 
-        // Toggle the bottom tip footer (help)
-        const tipFooter = document.querySelector('footer');
-        if (tbHelp && tipFooter) {
+        const tipsBar = document.getElementById('tipsBar');
+        if (tbHelp && tipsBar) {
             tbHelp.addEventListener('click', () => {
-                const on = tipFooter.style.display !== 'none';
-                tipFooter.style.display = on ? 'none' : 'flex';
+                const on = tipsBar.style.display !== 'none';
+                tipsBar.style.display = on ? 'none' : 'flex';
             });
         }
 
+        // Refit when the panel is toggled (class changes)
         const appRoot = document.getElementById('app');
+        const obs = new MutationObserver(() => refitSoon());
+        obs.observe(appRoot, { attributes: true, attributeFilter: ['class'] });
 
         function setPanelHidden(on) {
             appRoot.classList.toggle('panel-hidden', !!on);
@@ -2652,6 +2679,7 @@
             }
             // persist preference
             localStorage.setItem('bonsai.panelHidden', on ? '1' : '0');
+            refitSoon();
         }
 
         // initial: prefer stored, else hide automatically on small screens
@@ -2659,9 +2687,12 @@
             const stored = localStorage.getItem('bonsai.panelHidden');
             if (stored === '1' || (stored === null && window.innerWidth <= 900)) {
                 setPanelHidden(true);
-                layoutCanvasToolbar();
             }
         })();
+
+        // Refit when the breakpoint crosses (layout rows/cols change)
+        const mq = window.matchMedia('(max-width: 900px)');
+        mq.addEventListener?.('change', () => refitSoon());
 
         if (panelToggle) {
             panelToggle.addEventListener('click', () => {
@@ -2678,9 +2709,10 @@
             setAutoRotate(true);
             tick();
             // Defer framing so the first paint happens before the bbox scan
-            requestAnimationFrame(() => tbFrame.click());
             renderHUD();
-            layoutCanvasToolbar();
+            // Let the first frame render, then refit robustly (twice)
+            refitSoon();
+
         }
 
         initial();
