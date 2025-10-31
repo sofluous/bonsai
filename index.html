@@ -888,43 +888,47 @@
 
             /* When the class is present, THEN hide the panel (hamburger toggles this) */
             #app.panel-hidden {
-                grid-template-rows: auto 1fr;
-                /* header / stage only */
+                grid-template-columns: 1fr !important;
                 grid-template-areas:
                     "header"
                     "stage";
             }
 
             #app.panel-hidden #panel {
-                display: none;
+                display: none !important;
             }
+        }
 
-            /* HUD becomes a normal block inside the panel (no absolute overlay) */
-            #hud {
-                position: static;
-                max-width: none;
-                max-height: none;
-                left: auto;
-                top: auto;
-                margin-top: 8px;
-            }
+        /* HUD becomes a normal block inside the panel (no absolute overlay) */
+        #hud {
+            position: static;
+            max-width: none;
+            max-height: none;
+            left: auto;
+            top: auto;
+            margin-top: 8px;
+        }
 
-            /* Toolbar: keep centered above footer with our JS bottom-offset */
-            #canvasToolbar {
-                left: 50%;
-                transform: translateX(-50%);
-                max-width: calc(100% - 24px);
-            }
+        /* Toolbar: keep centered above footer with our JS bottom-offset */
+        #canvasToolbar {
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: calc(100% - 24px);
+        }
 
-            #hud {
-                font-size: 11px;
-                padding: 8px 10px;
-            }
+        /* On phones, show HUD as a normal section (no absolute overlay) */
+        #hud {
+            position: static;
+            max-width: none;
+            max-height: none;
+            left: auto;
+            top: auto;
+            margin-top: 8px;
+        }
 
-            #hud .hdr {
-                margin: 6px 0 4px;
-            }
-
+        #hud .hdr {
+            margin: 6px 0 4px;
+        }
 
         }
     </style>
@@ -1311,7 +1315,7 @@
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.dampingFactor = 0.08;
-        controls.minDistance = 4; controls.maxDistance = 30;
+        controls.minDistance = 2; controls.maxDistance = 60;
         controls.maxPolarAngle = Math.PI * 0.95; controls.target.set(0, 0, 0);
         controls.autoRotate = false; // disable internal camera spin
 
@@ -1441,18 +1445,26 @@
 
         function onResizeCore() {
             const rect = stage.getBoundingClientRect();
-            const w = Math.max(1, rect.width);
-            const h = Math.max(1, rect.height);
-            renderer.setSize(w, h, false);
+            const w = Math.max(1, Math.round(rect.width));
+            const h = Math.max(1, Math.round(rect.height));
+
+            // Set renderer buffer *and* element CSS size
+            renderer.setSize(w, h, true); // true updates canvas.style.{width,height}
+            // Defensive: make sure it fills its parent absolutely
+            const c = renderer.domElement;
+            c.style.position = 'absolute';
+            c.style.inset = '0';
             camera.aspect = w / h;
             camera.updateProjectionMatrix();
         }
 
-        // Run frameView twice on next frames (lets CSS/layout settle)
+
         function refitSoon() {
             requestAnimationFrame(() => {
+                // Ensure renderer size & aspect are synced first
+                onResizeCore();
+                // One authoritative frame after layout is stable
                 frameView();
-                requestAnimationFrame(frameView);
             });
         }
 
@@ -1468,10 +1480,11 @@
 
         // Keep renderer exactly matched to #stage via ResizeObserver
         const ro = new ResizeObserver(() => {
-            onResizeCore();              // recalc aspect + renderer size
+            onResizeCore();
             if (AUTO_REFIT_ON_LAYOUT) refitSoon();
         });
-        ro.observe(stage);
+        ro.observe(document.getElementById('stageWrap'));
+
 
 
         // RNG
@@ -2342,6 +2355,9 @@
             ike.rotation.copy(ikeRot);
             ike.scale.copy(ikeScale);
 
+            // Update zoom bounds after rebuild (keeps mobile zoom sane)
+            try { updateZoomBoundsFromBox(getSceneBounds()); } catch (e) { }
+
             // Restore flags
             controls.enableDamping = dampingWas;
             controls.enabled = enabledWas;
@@ -2430,22 +2446,131 @@
         });
 
         function frameView() {
-            const box = new THREE.Box3().setFromObject(ike);
+            // Measure bonsai bounds once
+            const box = getSceneBounds();
             const size = box.getSize(new THREE.Vector3());
             const center = box.getCenter(new THREE.Vector3());
 
-            controls.target.copy(center);
+            // Stable pivot: vessel base if present, otherwise the bonsai center
+            const pivot = getOrbitPivot();         // uses vessel minY when available
+            controls.target.copy(pivot);
 
-            const maxDim = Math.max(size.x, size.y, size.z);
+            // Current canvas aspect
+            const { width, height } = renderer.domElement;
+            const aspect = Math.max(1, width) / Math.max(1, height);
+
+            // Choose a gentle oblique depending on aspect (taller phones need more Y)
+            const viewDir = (aspect < 1)
+                ? new THREE.Vector3(0.9, 0.95, 1).normalize()
+                : new THREE.Vector3(1.0, 0.6, 1.0).normalize();
+
+            // Fit distance by vertical FoV with a small margin
+            const radius = Math.max(size.x, size.y, size.z) * 0.5 || 1.0;
+            const dist = fitDistanceForSphere(radius, camera.fov, aspect, 1.18);
+
+            camera.position.copy(pivot).addScaledVector(viewDir, dist);
+            camera.near = Math.max(0.01, dist * 0.02);
+            camera.far = Math.max(camera.near + 1, dist * 10);
+            camera.lookAt(pivot);
+            camera.updateProjectionMatrix();
+
+            // Wider (and saner) zoom range on mobile
+            const phone = window.innerWidth <= 900;
+            controls.minDistance = Math.max(1.0, radius * (phone ? 0.8 : 0.7));
+            controls.maxDistance = Math.max(controls.minDistance + 1, radius * (phone ? 7.5 : 5.5));
+            controls.update();
+        }
+
+
+
+        // === Framing helpers (stable pivot + sphere) ===
+        function getBonsaiSphere() {
+            // Measure the bonsai content only
+            const box = new THREE.Box3().setFromObject(ike);
+            if (!isFinite(box.min.x) || !isFinite(box.max.x)) {
+                return { center: new THREE.Vector3(0, 0, 0), radius: 1 };
+            }
+            const sphere = new THREE.Sphere();
+            box.getBoundingSphere(sphere);
+            return { center: sphere.center, radius: Math.max(0.001, sphere.radius) };
+        }
+
+        // Choose a single, never-drifting orbit pivot.
+        // We’ll aim at vessel base if available, otherwise the bonsai sphere center.
+        function getOrbitPivot() {
+            if (vesselGroup) {
+                const vb = new THREE.Box3().setFromObject(vesselGroup);
+                const base = new THREE.Vector3(0, vb.min.y, 0);
+                // Transform from ike-local to world:
+                return base.applyMatrix4(ike.matrixWorld);
+            }
+            const { center } = getBonsaiSphere();
+            return center;
+        }
+
+        // Distance to fit a sphere in view with a small margin.
+        function fitDistanceForSphere(radius, fovDeg, aspect, margin = 1.15) {
+            // fit by vertical FoV; vertical is the tight axis on tall phones
+            const fov = THREE.MathUtils.degToRad(fovDeg);
+            const fit = radius / Math.sin(fov * 0.5);
+            return fit * margin;
+        }
+
+        // --- Mobile-friendly, bounds-driven framing/zoom ---
+
+        function getSceneBounds() {
+            // Measure the bonsai content only (avoid HUD/overlays)
+            const box = new THREE.Box3().setFromObject(ike);
+            if (!isFinite(box.min.x) || !isFinite(box.max.x)) {
+                // Fallback small box if scene is empty/transitioning
+                return new THREE.Box3(new THREE.Vector3(-1, -1, -1), new THREE.Vector3(1, 1, 1));
+            }
+            return box;
+        }
+
+        function updateZoomBoundsFromBox(box) {
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            const radius = Math.max(size.x, size.y, size.z) * 0.5 || 1.0;
+
+            // Base distances from radius
+            let minD = Math.max(1.2, radius * 0.8);
+            let maxD = Math.max(minD + 1.0, radius * 5.0);
+
+            // Phones: give more headroom
+            if (window.innerWidth <= 900) {
+                minD = Math.max(1.2, radius * 0.9);
+                maxD = Math.max(minD + 1.0, radius * 6.0);
+            }
+            controls.minDistance = minD;
+            controls.maxDistance = maxD;
+
+            // Keep orbit target on the true center
+            controls.target.copy(center);
+            controls.update();
+        }
+
+        // Wrap frameView to always respect true bounds and sync zoom limits
+        const __orig_frameView = frameView;
+        frameView = function () {
+            const box = getSceneBounds();
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+
+            const maxDim = Math.max(size.x, size.y, size.z) || 1.0;
             const dist = maxDim / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) + 2;
 
+            // Slightly oblique vantage; works well on tall canvases too
             const viewDir = new THREE.Vector3(1, 0.6, 1).normalize();
             camera.position.copy(center).addScaledVector(viewDir, dist);
             camera.near = Math.max(0.01, dist * 0.02);
-            camera.far = dist * 10;
+            camera.far = Math.max(camera.near + 1, dist * 10);
             camera.updateProjectionMatrix();
+
+            updateZoomBoundsFromBox(box);
+            camera.lookAt(center);
             controls.update();
-        }
+        };
 
 
         if (shotBtn) shotBtn.addEventListener('click', savePNG);
