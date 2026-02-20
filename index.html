@@ -22,9 +22,9 @@
             --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
             --panel-w: 380px;
-            --r-1: 6px;
-            --r-2: 8px;
-            --r-3: 10px;
+            --r-1: 2px;
+            --r-2: 3px;
+            --r-3: 4px;
             --s-1: .35rem;
             --s-2: .6rem;
             --s-3: .7rem;
@@ -342,40 +342,185 @@
             grid-area: panel;
             overflow: auto;
             background: var(--surface-1);
-            box-shadow: inset -1px 0 0 var(--outline);
-            padding: 16px;
+            box-shadow:
+                inset -1px 0 0 var(--outline),
+                10px 0 24px color-mix(in oklab, var(--accent-900) 16%, transparent);
+            border-right: 1px solid color-mix(in oklab, var(--outline) 75%, transparent);
+            padding: 10px 12px 12px;
             box-sizing: border-box;
+            position: relative;
+        }
+
+        #panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(-45deg,
+                    color-mix(in oklab, var(--accent-500) 8%, transparent) 0 1px,
+                    transparent 1px 12px);
+            opacity: .18;
         }
 
         /* Section */
         .section {
-            margin-bottom: 14px;
-            border: 1px solid var(--outline);
-            border-radius: var(--r-3);
-            background: var(--surface-1);
-            box-shadow: var(--glow-outer), var(--glow-inner);
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            padding: 8px 0 10px;
+        }
+
+        .section+.section {
+            border-top: 1px solid color-mix(in oklab, var(--outline) 80%, transparent);
+        }
+
+        .panel-tabs {
+            position: sticky;
+            top: 0;
+            z-index: 6;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            margin: -10px -12px 8px;
+            padding: 0;
+            border-bottom: 1px solid color-mix(in oklab, var(--accent-600) 35%, var(--outline));
+            background: linear-gradient(180deg,
+                    color-mix(in oklab, var(--surface-2) 92%, var(--accent-900) 8%),
+                    color-mix(in oklab, var(--surface-1) 94%, transparent));
+        }
+
+        .panel-tab {
+            border: none;
+            border-right: 1px solid color-mix(in oklab, var(--accent-600) 24%, var(--outline));
+            border-bottom: 2px solid transparent;
+            background: transparent;
+            color: color-mix(in oklab, var(--text-subtle) 88%, var(--accent-300));
+            font: 600 .72rem/1 var(--font-mono);
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            padding: .62rem .3rem .58rem;
+            cursor: pointer;
+            transition: border-color var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
+        }
+
+        .panel-tab:last-child {
+            border-right: none;
+        }
+
+        .panel-tab[aria-pressed="true"] {
+            border-bottom-color: var(--accent-500);
+            background: linear-gradient(180deg,
+                    color-mix(in oklab, var(--accent-600) 24%, var(--surface-2) 76%),
+                    color-mix(in oklab, var(--accent-600) 10%, var(--surface-1) 90%));
+            color: var(--text-strong);
+            box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--accent-400) 80%, transparent);
+        }
+
+        #panel[data-tab="scene"] .section[data-tab]:not([data-tab="scene"]),
+        #panel[data-tab="bonsai"] .section[data-tab]:not([data-tab="bonsai"]),
+        #panel[data-tab="app"] .section[data-tab]:not([data-tab="app"]) {
+            display: none;
         }
 
         .section>h2 {
             margin: 0;
-            font-size: .9rem;
-            padding: .55rem var(--s-3);
+            font-size: .74rem;
+            text-transform: uppercase;
+            padding: .3rem 0 .45rem;
             color: var(--hud-key);
-            border-bottom: 1px dashed var(--outline);
-            letter-spacing: .03em;
+            border-bottom: none;
+            letter-spacing: .08em;
+            opacity: .92;
         }
 
         /* Form grid */
         .form {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 10px;
+            grid-template-columns: 1fr;
+            gap: 6px;
             align-items: center;
-            padding: var(--s-2) var(--s-3);
+            padding: 0;
         }
+
+        /* simple padded container for non-grid section bodies */
+        .pad {
+            padding: 0;
+        }
+
 
         .full {
             grid-column: 1 / -1;
+        }
+
+        .form .field {
+            display: grid;
+            grid-template-columns: minmax(110px, auto) 1fr auto;
+            gap: 6px 8px;
+            align-items: center;
+        }
+
+        .form .field.field-inline {
+            grid-template-columns: minmax(110px, auto) 1fr auto auto;
+        }
+
+        .form .field label {
+            grid-column: 1;
+            margin: 0;
+        }
+
+        .form .field input,
+        .form .field select {
+            grid-column: 2;
+        }
+
+        .form .field span {
+            grid-column: 3;
+            justify-self: end;
+            min-width: 4ch;
+            color: var(--text-dim);
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .form .field.no-val input,
+        .form .field.no-val select,
+        .form .field.no-val .row {
+            grid-column: 2 / 4;
+        }
+
+        .form .field.no-val.has-val input,
+        .form .field.no-val.has-val select,
+        .form .field.no-val.has-val .row {
+            grid-column: 2;
+        }
+
+        .form .field.no-val input[type="color"] {
+            grid-column: 2;
+            justify-self: start;
+        }
+
+        .form .field.field-inline input[type="color"] {
+            grid-column: 3;
+        }
+
+        .form .field.field-inline .value-readout {
+            grid-column: 4;
+        }
+
+        .form .field.seed-row .kbd {
+            grid-column: 2;
+            justify-self: start;
+            text-align: left;
+        }
+
+        .form .field.seed-row .btn {
+            grid-column: 3;
+            width: auto;
+            justify-self: end;
+            white-space: nowrap;
         }
 
         .row {
@@ -383,6 +528,19 @@
             flex-wrap: wrap;
             gap: .4rem;
             align-items: center;
+        }
+
+        .form .field .row {
+            width: 100%;
+        }
+
+        .form .field .row .btn {
+            width: auto;
+            flex: 0 0 auto;
+        }
+
+        .form .field .row input[type="range"] {
+            flex: 1;
         }
 
         .form label,
@@ -407,12 +565,12 @@
             background: var(--surface-2);
             color: var(--text-on-surface-2);
             border: 1px solid var(--outline-strong);
-            border-radius: var(--r-2);
+            border-radius: var(--r-1);
             transition: background var(--t-med) var(--e-out),
                 border-color var(--t-med) var(--e-out),
                 box-shadow var(--t-med) var(--e-out),
                 transform var(--t-fast) var(--e-out);
-            box-shadow: 0 1px 0 rgba(255, 255, 255, .04), inset 0 1px 0 rgba(255, 255, 255, .03);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, .04), inset 0 0 0 1px color-mix(in oklab, var(--accent-700) 16%, transparent);
         }
 
         .control:hover,
@@ -460,7 +618,26 @@
 
         /* Color */
         input[type="color"] {
-            padding: .2rem;
+            width: 44px;
+            min-width: 44px;
+            height: 32px;
+            padding: 0;
+            border-radius: var(--r-2);
+            overflow: hidden;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 0;
+        }
+
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 0;
         }
 
         /* Buttons */
@@ -468,15 +645,18 @@
         .button {
             padding: .55rem var(--s-3);
             font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
             cursor: pointer;
             user-select: none;
         }
 
         /* Button variants */
         .btn-primary {
-            background: var(--accent-600);
-            border: 1px solid color-mix(in oklab, var(--accent-700) 60%, var(--accent-500));
+            background: linear-gradient(180deg, var(--accent-600), color-mix(in oklab, var(--accent-700) 82%, black 18%));
+            border: 1px solid color-mix(in oklab, var(--accent-700) 70%, var(--accent-500));
             color: var(--btn-primary-text);
+            box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent-200) 24%, transparent), 0 0 14px color-mix(in oklab, var(--accent-500) 18%, transparent);
         }
 
         .btn-primary:hover {
@@ -500,8 +680,8 @@
         }
 
         .btn-icon {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             display: grid;
             place-items: center;
@@ -817,8 +997,8 @@
         }
 
         #canvasToolbar .btn.btn-icon {
-            width: 34px;
-            height: 34px;
+            width: 36px;
+            height: 36px;
             font-weight: 700;
             padding: 0;
         }
@@ -897,39 +1077,65 @@
             #app.panel-hidden #panel {
                 display: none !important;
             }
-        }
 
-        /* HUD becomes a normal block inside the panel (no absolute overlay) */
-        #hud {
-            position: static;
-            max-width: none;
-            max-height: none;
-            left: auto;
-            top: auto;
-            margin-top: 8px;
-        }
 
-        /* Toolbar: keep centered above footer with our JS bottom-offset */
-        #canvasToolbar {
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: calc(100% - 24px);
-        }
+            /* Toolbar: keep centered above footer with our JS bottom-offset */
+            #canvasToolbar {
+                left: 50%;
+                transform: translateX(-50%);
+                width: min(100%, 420px);
+                max-width: calc(100% - 12px);
+                grid-auto-flow: row;
+                grid-template-columns: repeat(5, minmax(44px, 1fr));
+                justify-items: center;
+                gap: 8px;
+                padding: 8px;
+            }
 
-        /* On phones, show HUD as a normal section (no absolute overlay) */
-        #hud {
-            position: static;
-            max-width: none;
-            max-height: none;
-            left: auto;
-            top: auto;
-            margin-top: 8px;
-        }
+            #canvasToolbar .split {
+                display: none;
+            }
 
-        #hud .hdr {
-            margin: 6px 0 4px;
-        }
+            #canvasToolbar .btn.btn-icon {
+                width: 44px;
+                height: 44px;
+            }
 
+            /* On phones, show HUD as a normal section (no absolute overlay) */
+            #hud {
+                position: static;
+                max-width: none;
+                max-height: none;
+                left: auto;
+                top: auto;
+                margin-top: 8px;
+            }
+
+            #hud .hdr {
+                margin: 6px 0 4px;
+            }
+
+            .form .field {
+                grid-template-columns: minmax(96px, auto) 1fr auto;
+            }
+
+            .form .field.field-inline {
+                grid-template-columns: minmax(96px, auto) 1fr auto auto;
+            }
+
+            #panel {
+                padding: 10px;
+            }
+
+            .panel-tabs {
+                margin: -10px -10px 8px;
+                gap: 0;
+            }
+
+            .panel-tab {
+                padding: .56rem .15rem .52rem;
+                font-size: .68rem;
+            }
         }
     </style>
 
@@ -962,72 +1168,115 @@
                 </div>
             </div>
         </header>
-        <aside id="panel">
-            <div class="section">
+        <aside id="panel" data-tab="bonsai">
+            <div class="panel-tabs" role="tablist" aria-label="Settings groups">
+                <button class="panel-tab" data-tab="scene" role="tab" aria-pressed="false">Scene & FX</button>
+                <button class="panel-tab" data-tab="bonsai" role="tab" aria-pressed="true">Bonsai</button>
+                <button class="panel-tab" data-tab="app" role="tab" aria-pressed="false">App</button>
+            </div>
+            <div class="section" data-tab="scene">
                 <h2>SCENE</h2> <!-- Debug HUD toggle -->
                 <div class="form">
-                    <!-- Cyberpunk HUD overlay -->
-                    <label>Display Debug</label>
-                    <input id="debugToggle" type="checkbox">
-                    <div id="hud" aria-hidden="true"></div>
-                    <label>Background</label>
-                    <input id="bgColor" type="color" value="#0e1115" />
-                    <label>Texture</label>
-                    <select id="bgTex">
-                        <option value="solid">Solid</option>
-                        <option value="grain">Grain</option>
-                        <option value="gradient">Gradient</option>
-                        <option value="paper">Paper</option>
-                    </select>
-                    <label>Key</label>
-                    <input id="keyLight" type="range" min="0" max="5" step="0.01" value="0.55" />
-                    <label>Ambient</label>
-                    <input id="hemiLight" type="range" min="0" max="5" step="0.01" value="0.9" />
-                    <label>Exposure</label>
-                    <input id="exposure" type="range" min="0.5" max="2.5" step="0.01" value="1" />
-                    <div class="full row">
-                        <button id="newSeed" class="btn">New Seed</button>
-                        <span>Seed: <span id="seedLabel" class="kbd">—</span></span>
+                    <div class="field field-inline">
+                        <label>Background</label>
+                        <select id="bgTex">
+                            <option value="solid">Solid</option>
+                            <option value="grain">Grain</option>
+                            <option value="gradient">Gradient</option>
+                            <option value="paper">Paper</option>
+                        </select>
+                        <input id="bgColor" type="color" value="#0e1115" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Key Light</label>
+                        <input id="keyLight" type="range" min="0" max="5" step="0.01" value="0.55" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Ambient</label>
+                        <input id="hemiLight" type="range" min="0" max="5" step="0.01" value="0.9" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Exposure</label>
+                        <input id="exposure" type="range" min="0.5" max="2.5" step="0.01" value="1" />
+                    </div>
+                    <div class="field seed-row">
+                        <label>Seed</label>
+                        <span id="seedLabel" class="kbd">-</span>
+                        <button id="newSeed" class="btn">New</button>
                     </div>
                 </div>
             </div>
-
-            <div class="section">
+            <div class="section" data-tab="bonsai">
                 <h2>SPECIES</h2>
                 <div class="form">
-                    <label>Type</label>
-                    <select id="treeType">
-                        <option value="magnolia">Magnolia (petals, arching)</option>
-                        <option value="maple">Maple (broad, lobed)</option>
-                        <option value="pine">Pine (upright, whorled)</option>
-                        <option value="olive">Olive (compact, slabs)</option>
-                        <option value="juniper">Juniper (windswept)</option>
-                        <option value="ginkgo">Ginkgo (tiered fans)</option>
-                    </select>
+                    <div class="field no-val">
+                        <label>Type</label>
+                        <select id="treeType">
+                            <option value="magnolia">Magnolia (petals, arching)</option>
+                            <option value="maple">Maple (broad, lobed)</option>
+                            <option value="pine">Pine (upright, whorled)</option>
+                            <option value="olive">Olive (compact, slabs)</option>
+                            <option value="juniper">Juniper (windswept)</option>
+                            <option value="ginkgo">Ginkgo (tiered fans)</option>
+                        </select>
+                    </div>
                     <!-- Phase C.1: Height & Leaf Size Controls -->
-                    <label>Plant Height</label>
-
                     <div class="field">
+                        <label>Plant Height</label>
                         <input id="heightScale" type="range" min="0.3" max="1.6" step="0.01" value="1.00" />
                         <span id="heightScale_val">1.00</span>
                     </div>
-                    <label>Levels</label>
-                    <input id="levels" type="range" min="3" max="10" step="1" value="6" />
-                    <label>Curvature</label>
-                    <input id="curvature" type="range" min="0" max="1" step="0.01" value="0.55" />
-                    <label>Uniformity</label>
-                    <input id="uniformity" type="range" min="0" max="1" step="0.01" value="0.6" />
-                    <label>Spread</label>
-                    <input id="spread" type="range" min="0.3" max="1.2" step="0.01" value="0.75" />
-                    <label>Up-Bias</label>
-                    <input id="upBias" type="range" min="0" max="1" step="0.01" value="0.3" />
+                    <div class="field no-val">
+                        <label>Levels</label>
+                        <input id="levels" type="range" min="3" max="10" step="1" value="6" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Curvature</label>
+                        <input id="curvature" type="range" min="0" max="1" step="0.01" value="0.55" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Uniformity</label>
+                        <input id="uniformity" type="range" min="0" max="1" step="0.01" value="0.6" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Spread</label>
+                        <input id="spread" type="range" min="0.3" max="1.2" step="0.01" value="0.75" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Up Bias</label>
+                        <input id="upBias" type="range" min="0" max="1" step="0.01" value="0.3" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Style</label>
+                        <select id="bonsaiStyle">
+                            <option value="auto">Species Auto</option>
+                            <option value="formal">Formal Upright</option>
+                            <option value="slant">Slanting</option>
+                            <option value="cascade">Cascade</option>
+                            <option value="windswept">Windswept</option>
+                            <option value="literati">Literati</option>
+                        </select>
+                    </div>
+                    <div class="field no-val">
+                        <label>Drama</label>
+                        <input id="drama" type="range" min="0" max="1" step="0.01" value="0.55" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Asymmetry</label>
+                        <input id="asymmetry" type="range" min="0" max="1" step="0.01" value="0.45" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Twist</label>
+                        <input id="branchTwist" type="range" min="0" max="1" step="0.01" value="0.35" />
+                    </div>
                 </div>
             </div>
-            <div class="section">
+            <div class="section" data-tab="bonsai">
                 <h2>LEAVES</h2>
                 <div class="form">
-                    <label>Leaf Type</label>
-                    <select id="leafType">
+                    <div class="field field-inline">
+                        <label>Type</label>
+                        <select id="leafType">
                         <option value="diamond">Diamond</option>
                         <option value="needle">Needle</option>
                         <option value="slab">Slab</option>
@@ -1039,24 +1288,34 @@
                         <option value="crescent">Crescent</option>
                         <option value="petal">Petal (flower)</option>
                     </select>
-                    <label>Plumage</label>
-                    <select id="plumage">
-                        <option value="random">Random</option>
-                        <option value="upward">Upward</option>
-                        <option value="radial">Radial</option>
-                        <option value="wind-left">Wind →</option>
-                        <option value="wind-right">Wind ←</option>
-                    </select>
-                    <label>Leaf Color</label>
-                    <input id="leafColor" type="color" value="#2d6e52">
-                    <label>Per-level Min</label>
-                    <input id="bMin" type="range" min="1" max="6" step="1" value="2" />
-                    <label>Per-level Max</label>
-                    <input id="bMax" type="range" min="1" max="8" step="1" value="3" />
-                    <label>Terminal Density</label>
-                    <input id="density" type="range" min="0.3" max="3" step="0.01" value="1" />
-                    <label>Spread</label>
-                    <input id="leafSpread" type="range" min="0.3" max="2.5" step="0.01" value="1" />
+                        <input id="leafColor" type="color" value="#2d6e52">
+                    </div>
+                    <div class="field no-val">
+                        <label>Plumage</label>
+                        <select id="plumage">
+                            <option value="random">Random</option>
+                            <option value="upward">Upward</option>
+                            <option value="radial">Radial</option>
+                            <option value="wind-left">Wind →</option>
+                            <option value="wind-right">Wind ←</option>
+                        </select>
+                    </div>
+                    <div class="field no-val">
+                        <label>Level Min</label>
+                        <input id="bMin" type="range" min="1" max="6" step="1" value="2" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Level Max</label>
+                        <input id="bMax" type="range" min="1" max="8" step="1" value="3" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Density</label>
+                        <input id="density" type="range" min="0.3" max="3" step="0.01" value="1" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Spread</label>
+                        <input id="leafSpread" type="range" min="0.3" max="2.5" step="0.01" value="1" />
+                    </div>
                     <div class="field">
                         <label>Size</label>
                         <input id="leafSize" type="range" min="0.4" max="2.0" step="0.01" value="1.00">
@@ -1076,55 +1335,61 @@
                         <span id="maxLeaves_val">500</span>
                     </div>
                     <div class="field">
-                        <label>Lower-Canopy Bias</label>
+                        <label>Lower Bias</label>
                         <input id="lowerBias" type="range" min="0" max="1" step="0.01" value="0.35">
                         <span id="lowerBias_val">0.35</span>
                     </div>
-                    <div class="field">
-                        <label>Per-Terminal Min</label>
+                    <div class="field no-val">
+                        <label>Min / Terminal</label>
                         <input id="minPerTerminal" type="number" min="0" max="99" step="1" value="2">
                     </div>
-                    <div class="field">
-                        <label>Per-Terminal Max</label>
+                    <div class="field no-val">
+                        <label>Max / Terminal</label>
                         <input id="maxPerTerminal" type="number" min="1" max="999" step="1" value="60">
                     </div>
 
                 </div>
             </div>
 
-            <div class="section">
+            <div class="section" data-tab="bonsai">
                 <h2>BRANCHES</h2>
                 <div class="form">
-                    <label>Branch Color</label>
-                    <input id="branchColor" type="color" value="#3b2d44">
+                    <div class="field no-val">
+                        <label>Color</label>
+                        <input id="branchColor" type="color" value="#3b2d44">
+                    </div>
 
-                    <label>Depth</label>
-                    <input id="bDepth" type="range" min="1" max="4" step="1" value="3" />
+                    <div class="field no-val">
+                        <label>Depth</label>
+                        <input id="bDepth" type="range" min="1" max="4" step="1" value="3" />
+                    </div>
 
-                    <label>Branch Length</label>
-                    <input id="bLen" type="range" min="0.5" max="1.8" step="0.01" value="1" />
+                    <div class="field no-val">
+                        <label>Length</label>
+                        <input id="bLen" type="range" min="0.5" max="1.8" step="0.01" value="1" />
+                    </div>
 
                     <!-- Phase C: Branch Attachment Controls -->
                     <div class="field">
-                        <label>Branch Start Height</label>
+                        <label>Start Height</label>
                         <input id="branchStart" type="range" min="0" max="1" step="0.01" value="0.15">
                         <span id="branchStart_val">0.15</span>
                     </div>
 
                     <div class="field">
-                        <label>Lower-Branch Bias (attachments)</label>
+                        <label>Lower Bias</label>
                         <input id="branchBias" type="range" min="0" max="1" step="0.01" value="0.45">
                         <span id="branchBias_val">0.45</span>
                     </div>
                     <!-- Phase D: Branch Length Variance & Falloff -->
                     <div class="field">
-                        <label>Branch Length Variation (±%)</label>
+                        <label>Length Variation (±%)</label>
                         <input id="bLenVar" type="range" min="0" max="0.9" step="0.01" value="0.25">
                         <span id="bLenVar_val">0.25</span>
                     </div>
 
                     <div class="field">
-                        <label>Branch Falloff per Depth</label>
+                        <label>Falloff per Depth</label>
                         <input id="bFall" type="range" min="0.60" max="0.98" step="0.005" value="0.85">
                         <span id="bFall_val">0.85</span>
                     </div>
@@ -1133,52 +1398,90 @@
 
             </div>
 
-            <div class="section">
+            <div class="section" data-tab="bonsai">
                 <h2>VESSEL</h2>
                 <div class="form">
-                    <label>Color</label>
-                    <input id="vesselColor" type="color" value="#a5b2bd" />
-                    <label>Type</label>
-                    <select id="vesselType">
+                    <div class="field field-inline">
+                        <label>Type</label>
+                        <select id="vesselType">
                         <option value="glass-cylinder">Glass Cylinder</option>
                         <option value="shallow-bowl">Shallow Bowl</option>
                         <option value="faceted">Faceted Prism</option>
                         <option value="stone-disc">Stone Disc</option>
                     </select>
-                    <label>Diameter</label>
-                    <input id="vesselDia" type="range" min="0.8" max="2.4" step="0.01" value="1.2" />
-                    <label>Depth</label>
-                    <input id="vesselDepth" type="range" min="0.2" max="2.5" step="0.01" value="1.6" />
+                        <input id="vesselColor" type="color" value="#a5b2bd" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Diameter</label>
+                        <input id="vesselDia" type="range" min="0.8" max="2.4" step="0.01" value="1.2" />
+                    </div>
+                    <div class="field no-val">
+                        <label>Depth</label>
+                        <input id="vesselDepth" type="range" min="0.2" max="2.5" step="0.01" value="1.6" />
+                    </div>
                 </div>
             </div>
 
-            <div class="section">
-                <h2>RENDER + APPEARANCE</h2>
+            <div class="section" data-tab="scene">
+                <h2>RENDER</h2>
                 <div class="form">
-                    <button id="autoBtn" class="btn">⏸ Pause</button>
-                    <input id="autoSpeed" type="range" min="-4" max="4" step="0.01" value="0.8" />
-                    <label>Wireframe</label>
-                    <select id="wireToggle">
+                    <div class="field no-val">
+                        <label>Spin</label>
+                        <div class="row">
+                            <button id="autoBtn" class="btn">⏸ Pause</button>
+                            <input id="autoSpeed" type="range" min="-4" max="4" step="0.01" value="0.8" />
+                        </div>
+                    </div>
+                    <div class="field no-val">
+                        <label>Wireframe</label>
+                        <select id="wireToggle">
                         <option value="off">Off</option>
                         <option value="on">On</option>
                     </select>
-                    <label>Render Mode</label>
-                    <select id="renderMode">
+                    </div>
+                    <div class="field field-inline">
+                        <label>Mode</label>
+                        <select id="renderMode">
                         <option value="toon">Toon</option>
                         <option value="sketchy">Sketchy</option>
                         <option value="metallic">Metallic</option>
                         <option value="holographic">Holographic</option>
                         <option value="emissive">Emissive</option>
                     </select>
-                    <label>Emissive Color</label>
-                    <input id="emissiveColor" type="color" value="#94e3ff">
-                    <label>Emissive Strength</label>
-                    <input id="emissiveStrength" type="range" min="0" max="1" step="0.01" value="0.5" />
+                        <input id="emissiveColor" type="color" value="#94e3ff">
+                    </div>
+                    <div class="field no-val">
+                        <label>Emissive</label>
+                        <input id="emissiveStrength" type="range" min="0" max="1" step="0.01" value="0.5" />
+                    </div>
                 </div>
-
+            </div>
+            <div class="section" data-tab="app">
+                <h2>PERFORMANCE</h2>
+                <div class="form">
+                    <div class="field no-val">
+                        <label>Quality</label>
+                        <select id="qualityMode">
+                            <option value="auto">Auto</option>
+                            <option value="high">High</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="mobile">Mobile</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- DEBUG section -->
+            <div class="section" id="debugSection" data-tab="app">
+                <h2>DEBUG <input id="debugToggle" type="checkbox">
+                </h2>
+                <div class="pad">
+                    <div id="hud" aria-hidden="true"></div>
+                    <div style="margin-bottom:8px; color:var(--text-subtle);">
+                        Toggle checkbox or press <span class="kbd">`</span>
+                    </div>
+                </div>
             </div>
         </aside>
-
         <div id="stageWrap">
             <div id="bgOverlay"></div>
             <div id="stage"></div>
@@ -1186,7 +1489,6 @@
                 <div>Tip: drag to orbit · wheel/pinch to zoom</div>
                 <div>Press <span class="kbd">Frame</span> to refit</div>
             </div>
-            <!-- Floating canvas toolbar -->
             <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
                 <button id="tbFrame" class="btn btn-icon" title="Frame (F)">⤢</button>
                 <button id="tbWire" class="btn btn-icon" title="Wireframe (W)">◧</button>
@@ -1206,7 +1508,6 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-
         // --- UI refs ---
         const $ = (id) => document.getElementById(id);
         const stage = $('stage');
@@ -1235,7 +1536,6 @@
         const keyLightUI = $('keyLight');
         const hemiLightUI = $('hemiLight');
         const exposureUI = $('exposure');
-        const shotBtn = $('shot');
         const newSeedBtn = $('newSeed');
         const wireToggle = $('wireToggle');
         const renderMode = $('renderMode');
@@ -1243,19 +1543,27 @@
         const autoBtn = document.getElementById('autoBtn');
         const autoRotate = $('autoRotate');
         const autoSpeedUI = $('autoSpeed');
+        const bonsaiStyleUI = $('bonsaiStyle');
+        const dramaUI = $('drama');
+        const asymmetryUI = $('asymmetry');
+        const branchTwistUI = $('branchTwist');
+        const qualityModeUI = $('qualityMode');
+        const minPerTerminalUI = $('minPerTerminal');
+        const maxPerTerminalUI = $('maxPerTerminal');
         const branchColorUI = $('branchColor');
         const leafColorUI = $('leafColor');
         const emissiveColorUI = $('emissiveColor');
         [branchColorUI, leafColorUI, emissiveColorUI].forEach(el => el && el.addEventListener('input', applyRenderStyle));
 
         const MAX_GLOBAL_LEAVES = 1000;   // safety cap
-        // ---- SAFETY CAPS (bonsai scale; guaranteed not to freeze)
-        const SAFE_INST_LIMIT = 500;  // ≤500 instances total
-        const SAFE_TERM_LIMIT = 180;  // ≤180 terminals used
-        const PER_TERM_HARD_MAX = 16;   // ≤16 leaves per terminal
-        const CHILDREN_HARD_MAX = 3;    // ≤3 children per joint
-        const SEGMENTS_HARD_MAX = 800;  // ≤800 branch segments
-        const ATTACH_MAX = 48; // hard cap on number of trunk attachment joints we’ll use
+        // ---- SAFETY CAPS (bonsai scale; adjusted by quality profile)
+        let SAFE_INST_LIMIT = 500;  // ≤500 instances total
+        let SAFE_TERM_LIMIT = 180;  // ≤180 terminals used
+        let PER_TERM_HARD_MAX = 16;   // ≤16 leaves per terminal
+        let CHILDREN_HARD_MAX = 3;    // ≤3 children per joint
+        let SEGMENTS_HARD_MAX = 800;  // ≤800 branch segments
+        let ATTACH_MAX = 48; // hard cap on number of trunk attachment joints we’ll use
+        let regenMsEMA = 0;
 
         let globalLeafCount = 0;
 
@@ -1292,7 +1600,6 @@
         const scene = new THREE.Scene();
         // If true, we auto refit after major layout changes (resize/panel toggle).
         const AUTO_REFIT_ON_LAYOUT = true;
-
 
         // Debug target gizmo (shows camera focus)
         const gizmo = new THREE.Group();
@@ -1381,6 +1688,7 @@
             const lines = [];
             lines.push(`<div class="hdr">runtime</div>`);
             lines.push(`<div><span class="k">frame</span> <span class="v">${frameNo}</span>  <span class="k">fps~</span> <span class="v">${fpsEMA.toFixed(1)}</span></div>`);
+            lines.push(`<div><span class="k">regen~ms</span> <span class="v">${regenMsEMA.toFixed(1)}</span>  <span class="k">quality</span> <span class="v">${qualityModeUI ? qualityModeUI.value : 'auto'}</span></div>`);
             lines.push(`<div><span class="k">auto</span> <span class="v">${autoOn ? 'on' : 'off'}</span>  <span class="k">speed</span> <span class="v">${autoSpeedUI ? autoSpeedUI.value : '—'}</span></div>`);
             lines.push(`<div class="hdr">camera</div>`);
             lines.push(`<div><span class="k">pos</span> <span class="v">${v3(cam.position)}</span></div>`);
@@ -1408,6 +1716,7 @@
                 lines.push(`<div><span class="k">petals(inst)</span> <span class="v">${petalInstanceCount}</span></div>`);
             }
             lines.push(`<div><span class="k">targets</span> <span class="v">${terminals.length} terms → ${leafInstanceCount} leaves</span></div>`);
+            lines.push(`<div><span class="k">caps</span> <span class="v">inst ${SAFE_INST_LIMIT}, term ${SAFE_TERM_LIMIT}, seg ${SEGMENTS_HARD_MAX}</span></div>`);
             lines.push(`<div class="hdr">gpu</div>`);
             lines.push(`<div><span class="k">calls</span> <span class="v">${ri.render.calls}</span>  <span class="k">tri</span> <span class="v">${ri.render.triangles}</span>  <span class="k">points</span> <span class="v">${ri.render.points}</span></div>`);
 
@@ -1421,6 +1730,46 @@
                 clearTimeout(t);
                 t = setTimeout(() => fn(...args), ms);
             };
+        }
+
+        function applyQualityProfile(mode = 'auto') {
+            const mobileAuto = window.innerWidth <= 900 || (window.devicePixelRatio || 1) > 2.2;
+            const q = (mode === 'auto') ? (mobileAuto ? 'mobile' : 'balanced') : mode;
+            if (q === 'high') {
+                SAFE_INST_LIMIT = 900;
+                SAFE_TERM_LIMIT = 320;
+                PER_TERM_HARD_MAX = 24;
+                CHILDREN_HARD_MAX = 4;
+                SEGMENTS_HARD_MAX = 1400;
+                ATTACH_MAX = 72;
+            } else if (q === 'mobile') {
+                SAFE_INST_LIMIT = 320;
+                SAFE_TERM_LIMIT = 120;
+                PER_TERM_HARD_MAX = 10;
+                CHILDREN_HARD_MAX = 2;
+                SEGMENTS_HARD_MAX = 520;
+                ATTACH_MAX = 30;
+            } else {
+                SAFE_INST_LIMIT = 560;
+                SAFE_TERM_LIMIT = 200;
+                PER_TERM_HARD_MAX = 16;
+                CHILDREN_HARD_MAX = 3;
+                SEGMENTS_HARD_MAX = 900;
+                ATTACH_MAX = 50;
+            }
+            renderer.setPixelRatio(Math.min((q === 'mobile' ? 1.5 : 2), window.devicePixelRatio || 1));
+            onResizeCore();
+        }
+
+        function setPanelTab(tab) {
+            const panel = document.getElementById('panel');
+            if (!panel) return;
+            panel.setAttribute('data-tab', tab);
+            document.querySelectorAll('.panel-tab').forEach(btn => {
+                const on = btn.dataset.tab === tab;
+                btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            localStorage.setItem('bonsai.panelTab', tab);
         }
 
         function spinBy(radPerSec, dt) {
@@ -1470,6 +1819,7 @@
 
         // Debounced resize that can refit after layout shifts (e.g., panel show/hide, orientation changes)
         const onResize = debounce(() => {
+            if (qualityModeUI && qualityModeUI.value === 'auto') applyQualityProfile('auto');
             onResizeCore();
             if (AUTO_REFIT_ON_LAYOUT) refitSoon();
         }, 120);
@@ -1479,11 +1829,22 @@
         window.addEventListener('resize', onResize);
 
         // Keep renderer exactly matched to #stage via ResizeObserver
-        const ro = new ResizeObserver(() => {
-            onResizeCore();
-            if (AUTO_REFIT_ON_LAYOUT) refitSoon();
+        let lastW = 0, lastH = 0;
+        const ro = new ResizeObserver(entries => {
+            for (const e of entries) {
+                const cr = e.contentRect;
+                const w = Math.round(cr.width);
+                const h = Math.round(cr.height);
+                // Only react to real size changes (≥1px)
+                if (w !== lastW || h !== lastH) {
+                    lastW = w; lastH = h;
+                    onResizeCore();            // update canvas size + camera.aspect
+                    // do NOT refit here; refitting belongs to window resize or panel toggle
+                }
+            }
         });
         ro.observe(document.getElementById('stageWrap'));
+
 
 
 
@@ -1503,15 +1864,27 @@
             water: new THREE.MeshPhysicalMaterial({ color: 0x5b7a86, metalness: 0, roughness: 0.4, transmission: 0.9, ior: 1.33, thickness: 0.2, transparent: true, opacity: 0.6, side: DS }),
             stone: new THREE.MeshStandardMaterial({ color: 0x545a5f, roughness: 0.9, metalness: 0.0, side: DS })
         };
+        const SHARED_MATERIALS = new Set(Object.values(mats));
+
+        function disposeOwnedMaterial(material) {
+            if (!material) return;
+            if (Array.isArray(material)) {
+                material.forEach(disposeOwnedMaterial);
+                return;
+            }
+            if (!SHARED_MATERIALS.has(material) && typeof material.dispose === 'function') {
+                material.dispose();
+            }
+        }
 
         // Species presets
         const PRESETS = {
-            magnolia: { spread: 0.6, upBias: 0.2, lenFalloff: 0.72, leaves: 'petal', trunk: 'arch', colors: { branch: 0x3b2d44, leaf: 0xf3e7da } },
-            maple: { spread: 0.9, upBias: 0.15, lenFalloff: 0.70, leaves: 'diamond', trunk: 'splay', colors: { branch: 0x3b2d44, leaf: 0xd44a2f } },
-            pine: { spread: 0.5, upBias: 0.6, lenFalloff: 0.76, leaves: 'needle', trunk: 'upright', branchPattern: 'whorl', colors: { branch: 0x2a3a2c, leaf: 0x1d4228 } },
-            olive: { spread: 0.65, upBias: 0.4, lenFalloff: 0.74, leaves: 'slab', trunk: 'compact', colors: { branch: 0x403e3a, leaf: 0x6e7b64 } },
-            juniper: { spread: 0.55, upBias: 0.45, lenFalloff: 0.75, leaves: 'teardrop', trunk: 'windswept', colors: { branch: 0x2e3a3f, leaf: 0x547b7c } },
-            ginkgo: { spread: 0.8, upBias: 0.25, lenFalloff: 0.71, leaves: 'half', trunk: 'tiered', branchPattern: 'tiers', colors: { branch: 0x3b2d44, leaf: 0xe8b736 } }
+            magnolia: { spread: 0.6, upBias: 0.2, lenFalloff: 0.72, leaves: 'petal', trunk: 'slant', drama: 0.48, asym: 0.32, twist: 0.22, colors: { branch: 0x3b2d44, leaf: 0xf3e7da } },
+            maple: { spread: 0.9, upBias: 0.15, lenFalloff: 0.70, leaves: 'diamond', trunk: 'slant', drama: 0.62, asym: 0.38, twist: 0.30, colors: { branch: 0x3b2d44, leaf: 0xd44a2f } },
+            pine: { spread: 0.5, upBias: 0.6, lenFalloff: 0.76, leaves: 'needle', trunk: 'formal', drama: 0.26, asym: 0.18, twist: 0.18, branchPattern: 'whorl', colors: { branch: 0x2a3a2c, leaf: 0x1d4228 } },
+            olive: { spread: 0.65, upBias: 0.4, lenFalloff: 0.74, leaves: 'slab', trunk: 'formal', drama: 0.36, asym: 0.24, twist: 0.25, colors: { branch: 0x403e3a, leaf: 0x6e7b64 } },
+            juniper: { spread: 0.55, upBias: 0.45, lenFalloff: 0.75, leaves: 'teardrop', trunk: 'windswept', drama: 0.78, asym: 0.72, twist: 0.56, colors: { branch: 0x2e3a3f, leaf: 0x547b7c } },
+            ginkgo: { spread: 0.8, upBias: 0.25, lenFalloff: 0.71, leaves: 'half', trunk: 'literati', drama: 0.67, asym: 0.42, twist: 0.41, branchPattern: 'tiers', colors: { branch: 0x3b2d44, leaf: 0xe8b736 } }
         };
 
         let currentSeed = (Math.random() * 0xFFFFFFFF) >>> 0;
@@ -1618,6 +1991,7 @@
                         : (kind === 'branch' ? mats.branch.clone() : mats.leaf.clone());
                     mat.wireframe = wire; mat.side = DS;
                 }
+                disposeOwnedMaterial(mesh.material);
                 mesh.material = mat;
             };
 
@@ -1625,7 +1999,14 @@
                 treeGroup.traverse(o => { if (o.isMesh) { const kind = o.userData.kind || 'branch'; setMat(o, kind); } });
             }
 
-            if (sketchOverlay) { ike.remove(sketchOverlay); sketchOverlay.traverse(o => { if (o.geometry) o.geometry.dispose(); }); sketchOverlay = null; }
+            if (sketchOverlay) {
+                ike.remove(sketchOverlay);
+                sketchOverlay.traverse(o => {
+                    if (o.geometry) o.geometry.dispose();
+                    if (o.material) disposeOwnedMaterial(o.material);
+                });
+                sketchOverlay = null;
+            }
             if (mode === 'sketchy') {
                 sketchOverlay = new THREE.Group();
                 treeGroup.traverse(o => {
@@ -1792,6 +2173,7 @@
 
 
         function regenerate() {
+            const regenT0 = performance.now();
             // Snapshot camera + object transforms (to restore exactly)
             const camPos = camera.position.clone();
             const camTarget = controls.target.clone();
@@ -1804,7 +2186,10 @@
             // Clear children instead of replacing `ike`
             if (treeGroup) {
                 ike.remove(treeGroup);
-                treeGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+                treeGroup.traverse(o => {
+                    if (o.geometry) o.geometry.dispose();
+                    if (o.material) disposeOwnedMaterial(o.material);
+                });
                 treeGroup = null;
             }
             if (vesselGroup) {
@@ -1858,6 +2243,11 @@
             const branchLenMul = parseFloat(bLen.value);
             const densityMul = parseFloat(density.value);
             const leafSpreadMul = parseFloat(leafSpread.value);
+            const styleMode = (bonsaiStyleUI && bonsaiStyleUI.value) ? bonsaiStyleUI.value : 'auto';
+            const trunkType = styleMode === 'auto' ? (preset.trunk || 'formal') : styleMode;
+            const drama = Math.max(0, Math.min(1, (parseFloat(dramaUI ? dramaUI.value : '') || preset.drama || 0.5)));
+            const asymmetry = Math.max(0, Math.min(1, (parseFloat(asymmetryUI ? asymmetryUI.value : '') || preset.asym || 0.35)));
+            const branchTwist = Math.max(0, Math.min(1, (parseFloat(branchTwistUI ? branchTwistUI.value : '') || preset.twist || 0.3)));
 
             globalLeafCount = 0; // <-- reset once per generation HERE
 
@@ -1880,15 +2270,25 @@
             let dir0 = new THREE.Vector3(rr(r, -0.1, 0.1), 1, rr(r, -0.1, 0.1)).normalize();
             let len = 2.6;
             const heightMul = Math.max(0.3, Math.min(1.6, parseFloat($('heightScale').value) || 1.0));
-            const bendDir = (preset.trunk === 'windswept') ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(rr(r, -1, 1), 0, rr(r, -1, 1));
-            bendDir.normalize().multiplyScalar(0.6 * curv);
+            const asymSign = rr(r, -1, 1) >= 0 ? 1 : -1;
+            const bendDir = new THREE.Vector3(rr(r, -1, 1), 0, rr(r, -1, 1));
+            if (trunkType === 'windswept') bendDir.set(asymSign, 0, rr(r, -0.3, 0.3));
+            if (trunkType === 'cascade') bendDir.set(asymSign * rr(r, 0.75, 1.2), -0.25, rr(r, -0.25, 0.25));
+            if (trunkType === 'formal') bendDir.set(rr(r, -0.25, 0.25), 0, rr(r, -0.25, 0.25));
+            if (trunkType === 'literati') bendDir.set(asymSign * rr(r, 0.2, 0.7), 0, rr(r, -0.8, 0.8));
+            bendDir.normalize().multiplyScalar((0.35 + drama * 0.95) * curv);
 
             for (let i = 0; i < depth; i++) {
-                let yawBias = bendDir.x * 0.35 + (1 - uni) * rr(r, -0.3, 0.3);
-                let pitchBias = (preset.trunk === 'upright' ? 0.08 : 0.15) * curv + (1 - uni) * rr(r, -0.2, 0.2) + up * 0.05;
-                if (preset.trunk === 'tiered' && i % 2 === 0) { yawBias *= 0.35; pitchBias *= 0.2; }
-                if (preset.trunk === 'compact') { yawBias *= 0.5; pitchBias *= 0.5; }
-                if (preset.trunk === 'splay') { yawBias += rr(r, -0.15, 0.15); }
+                const tNorm = depth > 1 ? (i / (depth - 1)) : 0;
+                const dramaCurve = (0.35 + 0.9 * drama) * (0.8 + 0.35 * (1 - tNorm));
+                let yawBias = bendDir.x * (0.22 + dramaCurve * 0.55) + asymSign * asymmetry * 0.08 + (1 - uni) * rr(r, -0.3, 0.3);
+                let pitchBias = 0.08 * curv + (1 - uni) * rr(r, -0.2, 0.2) + up * 0.05;
+                if (trunkType === 'formal') { yawBias *= 0.45; pitchBias *= 0.55; }
+                if (trunkType === 'slant') { yawBias += asymSign * (0.12 + drama * 0.22); pitchBias *= 0.8; }
+                if (trunkType === 'windswept') { yawBias += asymSign * (0.35 + drama * 0.35); pitchBias -= 0.03 + drama * 0.08; }
+                if (trunkType === 'cascade') { pitchBias -= 0.11 + drama * 0.18 + tNorm * 0.1; yawBias += asymSign * (0.2 + drama * 0.28); }
+                if (trunkType === 'literati') { yawBias += rr(r, -0.08, 0.08) + asymSign * (0.08 + drama * 0.12); pitchBias *= 0.35; }
+                yawBias += branchTwist * rr(r, -0.11, 0.11);
                 dir0 = dir0.clone().applyAxisAngle(upVec, yawBias).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitchBias).normalize();
                 const np = p.clone().addScaledVector(dir0, len * heightMul);
                 np.add(new THREE.Vector3(rr(r, -0.10, 0.10), rr(r, -0.05, 0.05), rr(r, -0.10, 0.10)).multiplyScalar(curv * 0.35));
@@ -1943,8 +2343,9 @@
                 const uiMinPT = parseInt($('minPerTerminal').value, 10) || 0;
                 const uiMaxPT = parseInt($('maxPerTerminal').value, 10) || 12;
                 // Clamp per-terminal bounds to our hard envelope
-                const minPT = Math.max(0, Math.min(uiMinPT, PER_TERM_HARD_MAX));
-                const maxPT = Math.max(1, Math.min(uiMaxPT, PER_TERM_HARD_MAX));
+                let minPT = Math.max(0, Math.min(uiMinPT, PER_TERM_HARD_MAX));
+                let maxPT = Math.max(1, Math.min(uiMaxPT, PER_TERM_HARD_MAX));
+                if (minPT > maxPT) [minPT, maxPT] = [maxPT, minPT];
                 // Soft per-terminal density suggestion (does not affect branching anymore)
                 const densityMul = Math.max(0.3, Math.min(3.0, parseFloat($('density').value) || 1));
                 // We'll use it as a gentle multiplier when computing weights -> quotas per terminal
@@ -2137,22 +2538,22 @@
                     base.updateMatrix();
 
                     for (let i = 0; i < count; i++) {
-                        const az = (i / count) * Math.PI * 2 + (1 - uni) * (Math.random() - 0.5) * 0.6;
-                        const rad = spreadR * (0.15 + 0.85 * Math.random());
+                        const az = (i / count) * Math.PI * 2 + (1 - uni) * (r() - 0.5) * 0.6;
+                        const rad = spreadR * (0.15 + 0.85 * r());
                         const lx = Math.cos(az) * rad;
-                        const ly = (Math.random() - 0.3) * 0.2;
+                        const ly = (r() - 0.3) * 0.2;
                         const lz = Math.sin(az) * rad;
 
                         tmp.position.set(lx, ly, lz);
-                        const yaw = (Math.random() - 0.5) * (1 - uni) * 1.2;
-                        const pitch = (Math.random() - 0.5) * (1 - uni) * 0.6 - upBiasVal * 0.15;
+                        const yaw = (r() - 0.5) * (1 - uni) * 1.2;
+                        const pitch = (r() - 0.5) * (1 - uni) * 0.6 - upBiasVal * 0.15;
                         tmp.rotation.set(pitch, yaw, 0);
                         // Leaf size & variation
                         const sizeBase = Math.max(0.05, parseFloat($('leafSize').value) || 1.0); // base scale
                         const sizeVar = Math.max(0, Math.min(0.9, parseFloat($('leafVar').value) || 0.25)); // 0..0.9
 
                         // random factor in [-sizeVar, +sizeVar]
-                        const jitter = (Math.random() * 2 - 1) * sizeVar;
+                        const jitter = (r() * 2 - 1) * sizeVar;
                         // final per-leaf scale
                         const s = sizeBase * (1 + jitter);
                         tmp.scale.set(s, s, s);
@@ -2221,8 +2622,8 @@
                     return;
                 }
                 const pref = preferredDir(dirBase);
-                const yaw = rr(r, -sp, sp) * Math.PI * 0.6 * (1 - uni);
-                const pitch = rr(r, -0.2, 0.2) * Math.PI * 0.3 * (1 - uni) - rr(r, 0, up) * 0.2;
+                const yaw = rr(r, -sp, sp) * Math.PI * (0.45 + drama * 0.45) * (1 - uni) + asymSign * asymmetry * 0.12 + rr(r, -1, 1) * branchTwist * 0.15;
+                const pitch = rr(r, -0.2, 0.2) * Math.PI * (0.24 + drama * 0.25) * (1 - uni) - rr(r, 0, up) * 0.2;
                 let dir = dirBase.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw).applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
                 if (pref) { dir = dir.lerp(pref, uni).normalize(); } else dir.normalize();
                 // --- Phase D: branch length with mean + variation + per-depth falloff ---
@@ -2231,7 +2632,7 @@
                 const fallMul = Math.max(0.60, Math.min(0.98, parseFloat($('bFall').value) || 0.85));
 
                 // per-branch random jitter in [-varPct, +varPct]
-                const jitter = (Math.random() * 2 - 1) * varPct;
+                const jitter = (r() * 2 - 1) * varPct;
 
                 // a tiny micro-jitter so things aren't too uniform
                 const micro = rr ? rr(r, 0.97, 1.03) : 1.0;
@@ -2266,7 +2667,7 @@
                 for (let k = 0; k < n; k++) {
                     let dirChild = dir.clone();
                     if (PRESETS[treeType.value].branchPattern === 'whorl') {
-                        const yawW = (k / n) * Math.PI * 2;
+                        const yawW = (k / n) * Math.PI * 2 + branchTwist * 0.35;
                         dirChild.applyAxisAngle(new THREE.Vector3(0, 1, 0), yawW);
                     }
                     grow(end, dirChild, levelIdx + 1, depthLeft - 1);
@@ -2293,7 +2694,7 @@
                 for (let m = 0; m < n0; m++) {
                     let d0 = dir.clone();
                     if (PRESETS[treeType.value].branchPattern === 'whorl') {
-                        const yaw0 = (m / n0) * Math.PI * 2;
+                        const yaw0 = (m / n0) * Math.PI * 2 + branchTwist * 0.35;
                         d0.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw0);
                     }
                     // Use i as levelIdx anchor (consistent with your existing scheme)
@@ -2363,6 +2764,8 @@
             controls.enabled = enabledWas;
             if (typeof controls.autoRotate === 'boolean') controls.autoRotate = autoWas;
             holdSpin = holdWas;
+            const regenMs = performance.now() - regenT0;
+            regenMsEMA = regenMsEMA === 0 ? regenMs : regenMsEMA * 0.82 + regenMs * 0.18;
         }
 
         function applyVesselOnly() {
@@ -2397,12 +2800,106 @@
         // Bindings
         const bindLive = (el, fn) => { el.addEventListener('input', fn); el.addEventListener('change', fn); };
         const debRegenerate = debounce(regenerate, 120);
+        function formatFieldValue(el) {
+            if (!el) return '';
+            if (el.tagName === 'SELECT') {
+                const idx = el.selectedIndex;
+                return (idx >= 0 && el.options[idx]) ? el.options[idx].textContent.trim() : String(el.value || '');
+            }
+            if (el.type === 'range' || el.type === 'number') {
+                const n = Number(el.value);
+                if (Number.isFinite(n)) return Number.isInteger(n) ? String(n) : String(n.toFixed(2)).replace(/\.?0+$/, '');
+            }
+            if (el.type === 'color') return String(el.value || '').toUpperCase();
+            if (el.type === 'checkbox') return el.checked ? 'On' : 'Off';
+            return String(el.value || '').trim();
+        }
+
+        function updateFieldReadout(field) {
+            if (!field || field.classList.contains('seed-row')) return;
+
+            const outExisting = field.querySelector(':scope > span:not(.kbd)');
+            const inline = field.classList.contains('field-inline');
+            const primary = field.querySelector(':scope > input:not([type="color"]), :scope > select, :scope > input[type="color"], :scope > .row input, :scope > .row select');
+            const isSelectLike = !!(primary && primary.tagName === 'SELECT');
+            const isColorLike = !!(primary && primary.type === 'color');
+            const skipReadout = inline || isSelectLike || isColorLike;
+
+            if (skipReadout) {
+                if (outExisting) outExisting.remove();
+                field.classList.remove('has-val');
+                return;
+            }
+
+            let out = outExisting;
+            if (!out) {
+                out = document.createElement('span');
+                out.className = 'value-readout';
+                field.appendChild(out);
+            }
+            if (!out.classList.contains('value-readout')) out.classList.add('value-readout');
+
+            const text = formatFieldValue(primary);
+
+            out.textContent = text || '-';
+            if (field.classList.contains('no-val')) field.classList.add('has-val');
+        }
+
+        function initFieldReadouts() {
+            document.querySelectorAll('#panel .form .field').forEach(field => {
+                if (field.classList.contains('seed-row')) return;
+                updateFieldReadout(field);
+                field.querySelectorAll('input, select').forEach(el => {
+                    el.addEventListener('input', () => updateFieldReadout(field));
+                    el.addEventListener('change', () => updateFieldReadout(field));
+                });
+            });
+        }
+
+        function sanitizeTerminalBounds(changedId = '') {
+            if (!minPerTerminalUI || !maxPerTerminalUI) return;
+            const minAttr = parseInt(minPerTerminalUI.min || '0', 10);
+            const lo = Number.isFinite(minAttr) ? minAttr : 0;
+            const hi = PER_TERM_HARD_MAX;
+
+            let minV = parseInt(minPerTerminalUI.value, 10);
+            let maxV = parseInt(maxPerTerminalUI.value, 10);
+            minV = Number.isFinite(minV) ? minV : lo;
+            maxV = Number.isFinite(maxV) ? maxV : Math.max(1, lo);
+            minV = Math.max(lo, Math.min(hi, minV));
+            maxV = Math.max(1, Math.min(hi, maxV));
+
+            if (minV > maxV) {
+                if (changedId === 'minPerTerminal') {
+                    maxV = minV;
+                } else if (changedId === 'maxPerTerminal') {
+                    minV = maxV;
+                } else {
+                    minV = maxV;
+                }
+            }
+
+            minPerTerminalUI.value = String(minV);
+            maxPerTerminalUI.value = String(maxV);
+        }
+
+        function syncFormDefaultsFromSpecies() {
+            if (!treeType) return;
+            const p = PRESETS[treeType.value];
+            if (!p) return;
+            if (bonsaiStyleUI && bonsaiStyleUI.value === 'auto') {
+                if (dramaUI) dramaUI.value = String(p.drama ?? dramaUI.value ?? 0.55);
+                if (asymmetryUI) asymmetryUI.value = String(p.asym ?? asymmetryUI.value ?? 0.45);
+                if (branchTwistUI) branchTwistUI.value = String(p.twist ?? branchTwistUI.value ?? 0.35);
+            }
+        }
 
         [treeType, levels, curvature, uniformity, spread, upBias, bDepth, bMin, bMax, bLen, density, leafSpread, leafType, plumage,
             $('maxLeaves'), $('lowerBias'), $('minPerTerminal'), $('maxPerTerminal'),
             $('branchStart'), $('branchBias'),
             $('heightScale'), $('leafSize'), $('leafVar'),
-            $('bLenVar'), $('bFall')
+            $('bLenVar'), $('bFall'),
+            bonsaiStyleUI, dramaUI, asymmetryUI, branchTwistUI
         ].forEach(el => bindLive(el, debRegenerate));
 
         [wireToggle, renderMode].forEach(el => bindLive(el, applyRenderStyle));
@@ -2421,6 +2918,30 @@
         $('leafVar').addEventListener('input', e => $('leafVar_val').textContent = e.target.value);
         $('bLenVar').addEventListener('input', e => $('bLenVar_val').textContent = e.target.value);
         $('bFall').addEventListener('input', e => $('bFall_val').textContent = e.target.value);
+        if (minPerTerminalUI && maxPerTerminalUI) {
+            minPerTerminalUI.addEventListener('input', () => sanitizeTerminalBounds('minPerTerminal'));
+            minPerTerminalUI.addEventListener('change', () => sanitizeTerminalBounds('minPerTerminal'));
+            maxPerTerminalUI.addEventListener('input', () => sanitizeTerminalBounds('maxPerTerminal'));
+            maxPerTerminalUI.addEventListener('change', () => sanitizeTerminalBounds('maxPerTerminal'));
+            sanitizeTerminalBounds();
+        }
+        if (qualityModeUI) {
+            qualityModeUI.addEventListener('input', () => {
+                localStorage.setItem('bonsai.qualityMode', qualityModeUI.value);
+                applyQualityProfile(qualityModeUI.value);
+                sanitizeTerminalBounds();
+                regenerate();
+            });
+        }
+        if (treeType) {
+            treeType.addEventListener('change', () => {
+                syncFormDefaultsFromSpecies();
+            });
+        }
+        document.querySelectorAll('.panel-tab').forEach(btn => {
+            btn.addEventListener('click', () => setPanelTab(btn.dataset.tab || 'bonsai'));
+        });
+        initFieldReadouts();
 
         // Left/Right: smooth while held; also pause auto when you touch them
         function onHold(dir, isDown) {
@@ -2446,38 +2967,34 @@
         });
 
         function frameView() {
-            // Measure bonsai bounds once
-            const box = getSceneBounds();
-            const size = box.getSize(new THREE.Vector3());
-            const center = box.getCenter(new THREE.Vector3());
+            const { center, radius } = getBonsaiSphere();
 
-            // Stable pivot: vessel base if present, otherwise the bonsai center
-            const pivot = getOrbitPivot();         // uses vessel minY when available
-            controls.target.copy(pivot);
+            // Aim at the center
+            controls.target.copy(center);
 
-            // Current canvas aspect
+            // Canvas aspect
             const { width, height } = renderer.domElement;
             const aspect = Math.max(1, width) / Math.max(1, height);
 
-            // Choose a gentle oblique depending on aspect (taller phones need more Y)
+            // Slightly higher tilt on tall screens
             const viewDir = (aspect < 1)
                 ? new THREE.Vector3(0.9, 0.95, 1).normalize()
                 : new THREE.Vector3(1.0, 0.6, 1.0).normalize();
 
-            // Fit distance by vertical FoV with a small margin
-            const radius = Math.max(size.x, size.y, size.z) * 0.5 || 1.0;
+            // Distance that guarantees the sphere is in view (margin >1 gives a little breathing room)
             const dist = fitDistanceForSphere(radius, camera.fov, aspect, 1.18);
 
-            camera.position.copy(pivot).addScaledVector(viewDir, dist);
+            camera.position.copy(center).addScaledVector(viewDir, dist);
             camera.near = Math.max(0.01, dist * 0.02);
             camera.far = Math.max(camera.near + 1, dist * 10);
-            camera.lookAt(pivot);
+            camera.lookAt(center);
             camera.updateProjectionMatrix();
 
-            // Wider (and saner) zoom range on mobile
+            // Mobile gets a wider zoom band
             const phone = window.innerWidth <= 900;
             controls.minDistance = Math.max(1.0, radius * (phone ? 0.8 : 0.7));
             controls.maxDistance = Math.max(controls.minDistance + 1, radius * (phone ? 7.5 : 5.5));
+
             controls.update();
         }
 
@@ -2498,15 +3015,10 @@
         // Choose a single, never-drifting orbit pivot.
         // We’ll aim at vessel base if available, otherwise the bonsai sphere center.
         function getOrbitPivot() {
-            if (vesselGroup) {
-                const vb = new THREE.Box3().setFromObject(vesselGroup);
-                const base = new THREE.Vector3(0, vb.min.y, 0);
-                // Transform from ike-local to world:
-                return base.applyMatrix4(ike.matrixWorld);
-            }
-            const { center } = getBonsaiSphere();
+            const { center } = getBonsaiSphere(); // sphere of `ike`
             return center;
         }
+
 
         // Distance to fit a sphere in view with a small margin.
         function fitDistanceForSphere(radius, fovDeg, aspect, margin = 1.15) {
@@ -2530,50 +3042,17 @@
 
         function updateZoomBoundsFromBox(box) {
             const size = box.getSize(new THREE.Vector3());
-            const center = box.getCenter(new THREE.Vector3());
             const radius = Math.max(size.x, size.y, size.z) * 0.5 || 1.0;
 
-            // Base distances from radius
-            let minD = Math.max(1.2, radius * 0.8);
-            let maxD = Math.max(minD + 1.0, radius * 5.0);
-
-            // Phones: give more headroom
-            if (window.innerWidth <= 900) {
-                minD = Math.max(1.2, radius * 0.9);
-                maxD = Math.max(minD + 1.0, radius * 6.0);
-            }
+            let minD = Math.max(1.2, radius * (window.innerWidth <= 900 ? 0.9 : 0.8));
+            let maxD = Math.max(minD + 1.0, radius * (window.innerWidth <= 900 ? 6.0 : 5.0));
             controls.minDistance = minD;
             controls.maxDistance = maxD;
 
-            // Keep orbit target on the true center
-            controls.target.copy(center);
+            // REMOVE: controls.target.copy(center);
             controls.update();
         }
 
-        // Wrap frameView to always respect true bounds and sync zoom limits
-        const __orig_frameView = frameView;
-        frameView = function () {
-            const box = getSceneBounds();
-            const size = box.getSize(new THREE.Vector3());
-            const center = box.getCenter(new THREE.Vector3());
-
-            const maxDim = Math.max(size.x, size.y, size.z) || 1.0;
-            const dist = maxDim / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) + 2;
-
-            // Slightly oblique vantage; works well on tall canvases too
-            const viewDir = new THREE.Vector3(1, 0.6, 1).normalize();
-            camera.position.copy(center).addScaledVector(viewDir, dist);
-            camera.near = Math.max(0.01, dist * 0.02);
-            camera.far = Math.max(camera.near + 1, dist * 10);
-            camera.updateProjectionMatrix();
-
-            updateZoomBoundsFromBox(box);
-            camera.lookAt(center);
-            controls.update();
-        };
-
-
-        if (shotBtn) shotBtn.addEventListener('click', savePNG);
         if (newSeedBtn) newSeedBtn.addEventListener('click', () => { setSeed((Math.random() * 0xFFFFFFFF) >>> 0); regenerate(); });
 
         // Keyboard shortcuts
@@ -2828,6 +3307,17 @@
 
         function initial() {
             applyBackground();
+            if (qualityModeUI) {
+                const storedQ = localStorage.getItem('bonsai.qualityMode');
+                if (storedQ) qualityModeUI.value = storedQ;
+                applyQualityProfile(qualityModeUI.value || 'auto');
+            } else {
+                applyQualityProfile('auto');
+            }
+            sanitizeTerminalBounds();
+            const storedTab = localStorage.getItem('bonsai.panelTab') || 'bonsai';
+            setPanelTab(storedTab);
+            syncFormDefaultsFromSpecies();
             setSeed((Math.random() * 0xFFFFFFFF) >>> 0);
             regenerate();
             if (autoSpeedUI) { controls.autoRotateSpeed = parseFloat(autoSpeedUI.value); }
@@ -2846,3 +3336,7 @@
 </body>
 
 </html>
+
+
+
+
