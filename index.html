@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>POLYGON BONSAI / Ikebana Style</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/iconoir@7.10.1/css/iconoir.css" />
     <style>
         /* =======================================================================
    GEOMETRIC BONSAI — Unified Design System (Techno Minimal)
@@ -22,6 +23,8 @@
             --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 
             --panel-w: 380px;
+            --rail-w: 58px;
+            --mobile-rail-h: 52px;
             --r-1: 2px;
             --r-2: 3px;
             --r-3: 4px;
@@ -295,44 +298,52 @@
             position: fixed;
             inset: 0;
             display: grid;
-            grid-template-columns: var(--panel-w) 1fr;
-            grid-template-rows: auto 1fr;
+            grid-template-columns: var(--rail-w) var(--panel-w) 1fr;
+            grid-template-rows: 1fr;
             grid-template-areas:
-                "header header"
-                "panel stage";
+                "rail panel stage";
             background: var(--surface-0);
             color: var(--text-on-surface-0);
         }
 
-        /* -----------------------------------------------------------------------------
-   5) HEADER
-   ----------------------------------------------------------------------------- */
-        header {
-            grid-area: header;
+        #sidebar {
+            grid-area: rail;
             display: flex;
-            align-items: center;
-            gap: var(--s-4);
-            padding: .65rem var(--s-5);
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
+            padding: 8px 6px;
             background: linear-gradient(180deg,
-                    color-mix(in oklab, var(--surface-1) 96%, transparent),
-                    transparent);
-            border-bottom: 1px solid var(--outline);
+                    color-mix(in oklab, var(--surface-1) 96%, var(--accent-900) 4%),
+                    color-mix(in oklab, var(--surface-1) 92%, var(--accent-900) 8%));
+            border-right: 1px solid color-mix(in oklab, var(--accent-600) 30%, var(--outline));
+            box-shadow: inset -1px 0 0 color-mix(in oklab, var(--accent-500) 12%, transparent);
         }
 
-        header h1 {
-            font-size: 1rem;
-            letter-spacing: .06em;
-            margin: 0;
-            color: var(--hud-key);
-            font-weight: 600;
+        .side-fill {
+            flex: 1;
         }
 
-        /* Right-side header tools (theme selectors, etc.) */
-        header .header-tools {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: .5rem;
+        .side-btn {
+            width: 100%;
+            min-height: 42px;
+            border: 1px solid color-mix(in oklab, var(--accent-600) 28%, var(--outline));
+            background: color-mix(in oklab, var(--surface-2) 88%, var(--accent-900) 12%);
+            color: var(--text-subtle);
+            font: 700 .62rem/1 var(--font-mono);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background var(--t-fast) var(--e-out), border-color var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out);
+        }
+
+        .side-btn[aria-pressed="true"] {
+            color: var(--text-strong);
+            border-color: color-mix(in oklab, var(--accent-600) 58%, var(--outline-strong));
+            background: linear-gradient(180deg,
+                    color-mix(in oklab, var(--accent-600) 30%, var(--surface-2) 70%),
+                    color-mix(in oklab, var(--accent-700) 24%, var(--surface-1) 76%));
+            box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--accent-400) 70%, transparent);
         }
 
         /* -----------------------------------------------------------------------------
@@ -340,13 +351,15 @@
    ----------------------------------------------------------------------------- */
         #panel {
             grid-area: panel;
-            overflow: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             background: var(--surface-1);
             box-shadow:
                 inset -1px 0 0 var(--outline),
                 10px 0 24px color-mix(in oklab, var(--accent-900) 16%, transparent);
             border-right: 1px solid color-mix(in oklab, var(--outline) 75%, transparent);
-            padding: 10px 12px 12px;
+            padding: 0;
             box-sizing: border-box;
             position: relative;
         }
@@ -377,51 +390,85 @@
             border-top: 1px solid color-mix(in oklab, var(--outline) 80%, transparent);
         }
 
-        .panel-tabs {
+        .panel-head {
             position: sticky;
             top: 0;
             z-index: 6;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0;
-            margin: -10px -12px 8px;
-            padding: 0;
+            display: flex;
+            align-items: center;
+            margin: 0;
+            padding: .56rem .7rem;
             border-bottom: 1px solid color-mix(in oklab, var(--accent-600) 35%, var(--outline));
             background: linear-gradient(180deg,
                     color-mix(in oklab, var(--surface-2) 92%, var(--accent-900) 8%),
-                    color-mix(in oklab, var(--surface-1) 94%, transparent));
+                    color-mix(in oklab, var(--surface-1) 98%, var(--accent-900) 2%));
         }
 
-        .panel-tab {
+        .panel-title {
+            margin: 0;
+            color: var(--text-strong);
+            font: 700 .74rem/1 var(--font-mono);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }
+
+        .bonsai-tabs {
+            position: sticky;
+            top: 34px;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            margin: 0;
+            background: color-mix(in oklab, var(--surface-1) 96%, var(--accent-900) 4%);
+            border-bottom: 1px solid color-mix(in oklab, var(--accent-600) 26%, var(--outline));
+        }
+
+        .panel-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
+            padding: 8px 12px 12px;
+            box-sizing: border-box;
+        }
+
+        .bonsai-tab {
             border: none;
-            border-right: 1px solid color-mix(in oklab, var(--accent-600) 24%, var(--outline));
+            border-right: 1px solid color-mix(in oklab, var(--accent-600) 20%, var(--outline));
             border-bottom: 2px solid transparent;
             background: transparent;
-            color: color-mix(in oklab, var(--text-subtle) 88%, var(--accent-300));
-            font: 600 .72rem/1 var(--font-mono);
-            letter-spacing: .07em;
+            color: var(--text-dim);
+            font: 600 .66rem/1 var(--font-mono);
+            letter-spacing: .08em;
             text-transform: uppercase;
-            padding: .62rem .3rem .58rem;
+            padding: .5rem .2rem;
             cursor: pointer;
-            transition: border-color var(--t-fast) var(--e-out), background var(--t-fast) var(--e-out), color var(--t-fast) var(--e-out), box-shadow var(--t-fast) var(--e-out);
         }
 
-        .panel-tab:last-child {
+        .bonsai-tab:last-child {
             border-right: none;
         }
 
-        .panel-tab[aria-pressed="true"] {
-            border-bottom-color: var(--accent-500);
-            background: linear-gradient(180deg,
-                    color-mix(in oklab, var(--accent-600) 24%, var(--surface-2) 76%),
-                    color-mix(in oklab, var(--accent-600) 10%, var(--surface-1) 90%));
+        .bonsai-tab[aria-pressed="true"] {
             color: var(--text-strong);
-            box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--accent-400) 80%, transparent);
+            border-bottom-color: var(--accent-500);
+            background: color-mix(in oklab, var(--accent-700) 12%, var(--surface-2));
         }
 
-        #panel[data-tab="scene"] .section[data-tab]:not([data-tab="scene"]),
-        #panel[data-tab="bonsai"] .section[data-tab]:not([data-tab="bonsai"]),
-        #panel[data-tab="app"] .section[data-tab]:not([data-tab="app"]) {
+        #panel[data-tab="bonsai"] .section[data-tab="app"],
+        #panel[data-tab="app"] .section[data-tab="bonsai"] {
+            display: none;
+        }
+
+        #panel[data-tab="app"] .bonsai-tabs {
+            display: none;
+        }
+
+        #panel[data-tab="bonsai"][data-bonsai-tab="plant"] .section[data-bonsai]:not([data-bonsai="plant"]),
+        #panel[data-tab="bonsai"][data-bonsai-tab="vessel"] .section[data-bonsai]:not([data-bonsai="vessel"]),
+        #panel[data-tab="bonsai"][data-bonsai-tab="scene"] .section[data-bonsai]:not([data-bonsai="scene"]) {
             display: none;
         }
 
@@ -487,13 +534,15 @@
 
         .form .field.no-val input,
         .form .field.no-val select,
-        .form .field.no-val .row {
+        .form .field.no-val .row,
+        .form .field.no-val .segmented {
             grid-column: 2 / 4;
         }
 
         .form .field.no-val.has-val input,
         .form .field.no-val.has-val select,
-        .form .field.no-val.has-val .row {
+        .form .field.no-val.has-val .row,
+        .form .field.no-val.has-val .segmented {
             grid-column: 2;
         }
 
@@ -687,6 +736,25 @@
             place-items: center;
         }
 
+        .iconoir {
+            font-size: 18px;
+            line-height: 1;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         /* -----------------------------------------------------------------------------
    8) RANGE SLIDER
    ----------------------------------------------------------------------------- */
@@ -819,6 +887,75 @@
             color: var(--text-on-accent);
         }
 
+        .segmented.theme-mode {
+            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(72px, 1fr) minmax(72px, 1fr);
+            gap: 0;
+            padding: 0;
+            border-radius: var(--r-1);
+            overflow: hidden;
+        }
+
+        .segmented.theme-mode .seg {
+            border-radius: 0;
+            border: none;
+            border-right: 1px solid color-mix(in oklab, var(--accent-600) 35%, var(--outline));
+            min-height: 34px;
+            margin: 0;
+        }
+
+        .segmented.theme-mode .seg:last-child {
+            border-right: none;
+        }
+
+        .segmented.theme-mode .theme-select-seg {
+            order: 1;
+        }
+
+        .segmented.theme-mode .seg[data-mode="light"] {
+            order: 2;
+        }
+
+        .segmented.theme-mode .seg[data-mode="dark"] {
+            order: 3;
+        }
+
+        .segmented.theme-mode .seg[aria-pressed="true"],
+        .segmented.theme-mode .seg.is-active {
+            border: none;
+            border-right: 1px solid color-mix(in oklab, var(--accent-600) 35%, var(--outline));
+            background: color-mix(in oklab, var(--accent-600) 40%, var(--surface-1) 60%);
+        }
+
+        .segmented.theme-mode .seg[aria-pressed="true"]:last-child,
+        .segmented.theme-mode .seg.is-active:last-child {
+            border-right: none;
+        }
+
+        .theme-select-seg {
+            width: 100%;
+            min-height: 34px;
+            border: none;
+            border-right: 1px solid color-mix(in oklab, var(--accent-600) 35%, var(--outline));
+            border-radius: 0;
+            background: transparent;
+            color: var(--text-on-control);
+            font: 600 .72rem/1 var(--font-mono);
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            padding: .35rem .5rem;
+            outline: none;
+        }
+
+        .theme-select-seg:hover {
+            background: color-mix(in oklab, var(--surface-2) 84%, var(--accent-700) 16%);
+        }
+
+        .theme-select-seg:focus-visible {
+            box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent-500) 45%, transparent);
+        }
+
         /* -----------------------------------------------------------------------------
    11) STAGE
    ----------------------------------------------------------------------------- */
@@ -883,50 +1020,93 @@
         /* -----------------------------------------------------------------------------
    13) HUD (adaptive position — aligns to panel width)
    ----------------------------------------------------------------------------- */
-        #hud {
+        .hud-overlay {
             position: absolute;
-            top: 82px;
-            left: calc(var(--panel-w) + 16px);
-            max-width: 360px;
-            max-height: 60vh;
-            overflow: auto;
-            padding: 10px 12px;
+            inset: 0;
+            pointer-events: none;
+            z-index: var(--z-hud);
+            display: none;
+        }
+
+        .hud-overlay[data-on="true"] {
+            display: block;
+        }
+
+        .hud-card {
+            position: absolute;
+            min-width: 220px;
+            max-width: min(32vw, 360px);
+            padding: 9px 10px;
             border: var(--hud-border);
             background: var(--hud-bg);
             box-shadow: var(--glow-outer), var(--glow-inner);
-            border-radius: var(--r-2);
             font: 12px/1.35 var(--font-mono);
             color: var(--hud-text);
             letter-spacing: .2px;
             backdrop-filter: blur(var(--blur));
-            display: none;
-            /* toggle via JS */
-            z-index: var(--z-hud);
         }
 
-        #hud .hdr {
+        .hud-card .hdr {
             color: var(--hud-key);
             text-transform: uppercase;
             font-weight: 700;
-            margin: 8px 0 4px;
+            margin: 0 0 4px;
             border-bottom: 1px dashed color-mix(in oklab, var(--accent-500) 35%, transparent);
             padding-bottom: 2px;
         }
 
-        #hud .k {
+        .hud-card .k {
             color: var(--hud-key);
         }
 
-        #hud .v {
+        .hud-card .v {
             color: color-mix(in oklab, var(--text-on-surface-1) 92%, var(--accent-200) 8%);
         }
 
-        #hud .warn {
-            color: #ffde69;
+        #hudRuntime {
+            top: 12px;
+            left: 12px;
         }
 
-        #hud .err {
-            color: #ff8a8a;
+        #hudCamera {
+            top: 12px;
+            right: 12px;
+        }
+
+        #hudTree {
+            top: 34%;
+            left: 12px;
+        }
+
+        #hudRender {
+            top: 34%;
+            right: 12px;
+        }
+
+        #hudCounts {
+            bottom: 74px;
+            right: 12px;
+        }
+
+        .hud-marker {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            border: 1px dashed color-mix(in oklab, var(--accent-500) 64%, transparent);
+            border-radius: 999px;
+            box-shadow: inset 0 0 22px color-mix(in oklab, var(--accent-500) 18%, transparent);
+            opacity: .8;
+            transform: translate(-50%, -50%);
+        }
+
+        .hud-marker::before {
+            content: "";
+            position: absolute;
+            width: 26px;
+            height: 1px;
+            background: color-mix(in oklab, var(--accent-400) 80%, transparent);
+            top: 50%;
+            right: -22px;
         }
 
         /* -----------------------------------------------------------------------------
@@ -1007,16 +1187,11 @@
         /* === Collapsible Panel (desktop & mobile) === */
         /* When collapsed, hide the left column (settings panel) and expand the stage */
         #app.panel-hidden {
-            grid-template-columns: 0 1fr;
+            grid-template-columns: var(--rail-w) 0 1fr;
         }
 
         #app.panel-hidden #panel {
             display: none;
-        }
-
-        /* When panel is hidden, shift HUD closer to the left edge */
-        #app.panel-hidden #hud {
-            left: 16px;
         }
 
         @media (max-width: 900px) {
@@ -1027,12 +1202,9 @@
      - Panel (settings) at the bottom (scrollable) */
             #app {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr auto;
-                /* header / stage / panel */
+                grid-template-rows: 1fr;
                 grid-template-areas:
-                    "header"
-                    "stage"
-                    "panel";
+                    "stage";
             }
 
             /* Stage fills available height */
@@ -1055,23 +1227,56 @@
 
             /* Panel is visible by default, scrollable within its own area */
             #panel {
-                position: relative;
-                z-index: 5;
-                display: block;
-                max-height: 44vh;
-                /* you can tweak; lets both canvas+panel be visible */
-                overflow: auto;
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: var(--mobile-rail-h);
+                z-index: 6;
+                display: flex;
+                flex-direction: column;
+                max-height: min(52vh, calc(100vh - var(--mobile-rail-h) - 8px));
+                overflow: hidden;
                 border-top: 1px solid var(--outline);
                 box-shadow: none;
-                /* avoid heavy shadows on small screens */
+                border-right: none;
             }
 
             /* When the class is present, THEN hide the panel (hamburger toggles this) */
             #app.panel-hidden {
                 grid-template-columns: 1fr !important;
-                grid-template-areas:
-                    "header"
-                    "stage";
+                grid-template-rows: 1fr;
+                grid-template-areas: "stage";
+            }
+
+            #sidebar {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 7;
+                height: var(--mobile-rail-h);
+                flex-direction: row;
+                align-items: center;
+                gap: 6px;
+                padding: 6px;
+                border-right: none;
+                border-top: 1px solid color-mix(in oklab, var(--accent-600) 30%, var(--outline));
+                box-shadow: inset 0 1px 0 color-mix(in oklab, var(--accent-500) 12%, transparent);
+            }
+
+            .side-fill {
+                display: none;
+            }
+
+            .side-btn {
+                min-height: 36px;
+                font-size: .58rem;
+                letter-spacing: .06em;
+                flex: 1 1 0;
+            }
+
+            #panelToggle {
+                flex: 0 0 48px;
             }
 
             #app.panel-hidden #panel {
@@ -1083,13 +1288,22 @@
             #canvasToolbar {
                 left: 50%;
                 transform: translateX(-50%);
-                width: min(100%, 420px);
+                width: calc(100% - 12px);
                 max-width: calc(100% - 12px);
-                grid-auto-flow: row;
-                grid-template-columns: repeat(5, minmax(44px, 1fr));
-                justify-items: center;
-                gap: 8px;
+                display: flex;
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                overflow-x: auto;
+                overflow-y: hidden;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x proximity;
+                gap: 6px;
                 padding: 8px;
+            }
+
+            #canvasToolbar::-webkit-scrollbar {
+                display: none;
             }
 
             #canvasToolbar .split {
@@ -1097,22 +1311,44 @@
             }
 
             #canvasToolbar .btn.btn-icon {
-                width: 44px;
-                height: 44px;
+                width: 40px;
+                height: 40px;
+                flex: 0 0 auto;
+                scroll-snap-align: start;
             }
 
-            /* On phones, show HUD as a normal section (no absolute overlay) */
-            #hud {
-                position: static;
-                max-width: none;
-                max-height: none;
-                left: auto;
-                top: auto;
-                margin-top: 8px;
+            .hud-card {
+                max-width: min(56vw, 320px);
+                font-size: 11px;
             }
 
-            #hud .hdr {
-                margin: 6px 0 4px;
+            #hudRuntime,
+            #hudTree {
+                left: 8px;
+            }
+
+            #hudCamera,
+            #hudRender,
+            #hudCounts {
+                right: 8px;
+            }
+
+            #hudRuntime,
+            #hudCamera {
+                top: 8px;
+            }
+
+            #hudTree,
+            #hudRender {
+                top: 38%;
+            }
+
+            #hudCounts {
+                bottom: 72px;
+            }
+
+            .hud-marker {
+                display: none;
             }
 
             .form .field {
@@ -1124,18 +1360,23 @@
             }
 
             #panel {
-                padding: 10px;
+                padding: 0;
             }
 
-            .panel-tabs {
-                margin: -10px -10px 8px;
-                gap: 0;
+            .panel-head {
+                display: none;
             }
 
-            .panel-tab {
-                padding: .56rem .15rem .52rem;
-                font-size: .68rem;
+            .bonsai-tabs {
+                margin: 0;
+                top: 0;
             }
+
+            .panel-scroll {
+                padding: 8px 10px 10px;
+                min-height: 0;
+            }
+
         }
     </style>
 
@@ -1147,34 +1388,26 @@
 
 <body>
     <div id="app" data-mode="light" data-accent="cyan">
-        <header>
-            <button id="panelToggle" class="btn btn-icon" aria-pressed="false" title="Toggle settings">☰</button>
-            <h1>POLYGON BONSAI</h1>
-            <div class="header-tools">
-                <!-- Accent theme dropdown -->
-                <label for="themeSelect" class="theme-label">THEME</label>
-                <select id="themeSelect" class="theme-dropdown" aria-label="Accent theme">
-                    <option value="cyan">Cyan</option>
-                    <option value="magenta">Magenta</option>
-                    <option value="amber">Amber</option>
-                    <option value="lime">Lime</option>
-                    <option value="black">Black</option>
-                    <option value="white">White</option>
-                </select>
-                <!-- Mode segmented control -->
-                <div id="modeControl" class="segmented" role="group" aria-label="Color scheme">
-                    <button type="button" class="seg" data-mode="dark" aria-pressed="false">Dark</button>
-                    <button type="button" class="seg" data-mode="light" aria-pressed="true">Light</button>
-                </div>
+        <nav id="sidebar" aria-label="Primary">
+            <button id="panelToggle" class="side-btn" aria-pressed="false" title="Toggle panel">
+                <span class="iconoir iconoir-sidebar-collapse" aria-hidden="true"></span>
+                <span class="sr-only">Toggle panel</span>
+            </button>
+            <button class="side-btn rail-tab" data-tab="bonsai" aria-pressed="true">Bonsai</button>
+            <div class="side-fill"></div>
+            <button class="side-btn rail-tab" data-tab="app" aria-pressed="false">Settings</button>
+        </nav>
+        <aside id="panel" data-tab="bonsai" data-bonsai-tab="plant">
+            <div class="panel-head">
+                <h2 id="panelTitle" class="panel-title">Bonsai</h2>
             </div>
-        </header>
-        <aside id="panel" data-tab="bonsai">
-            <div class="panel-tabs" role="tablist" aria-label="Settings groups">
-                <button class="panel-tab" data-tab="scene" role="tab" aria-pressed="false">Scene & FX</button>
-                <button class="panel-tab" data-tab="bonsai" role="tab" aria-pressed="true">Bonsai</button>
-                <button class="panel-tab" data-tab="app" role="tab" aria-pressed="false">App</button>
+            <div class="bonsai-tabs" role="tablist" aria-label="Bonsai groups">
+                <button class="bonsai-tab" data-bonsai-tab="plant" aria-pressed="true">Plant</button>
+                <button class="bonsai-tab" data-bonsai-tab="vessel" aria-pressed="false">Vessel</button>
+                <button class="bonsai-tab" data-bonsai-tab="scene" aria-pressed="false">Scene</button>
             </div>
-            <div class="section" data-tab="scene">
+            <div class="panel-scroll">
+            <div class="section" data-tab="bonsai" data-bonsai="scene">
                 <h2>SCENE</h2> <!-- Debug HUD toggle -->
                 <div class="form">
                     <div class="field field-inline">
@@ -1206,7 +1439,7 @@
                     </div>
                 </div>
             </div>
-            <div class="section" data-tab="bonsai">
+            <div class="section" data-tab="bonsai" data-bonsai="plant">
                 <h2>SPECIES</h2>
                 <div class="form">
                     <div class="field no-val">
@@ -1271,7 +1504,7 @@
                     </div>
                 </div>
             </div>
-            <div class="section" data-tab="bonsai">
+            <div class="section" data-tab="bonsai" data-bonsai="plant">
                 <h2>LEAVES</h2>
                 <div class="form">
                     <div class="field field-inline">
@@ -1351,7 +1584,7 @@
                 </div>
             </div>
 
-            <div class="section" data-tab="bonsai">
+            <div class="section" data-tab="bonsai" data-bonsai="plant">
                 <h2>BRANCHES</h2>
                 <div class="form">
                     <div class="field no-val">
@@ -1398,7 +1631,7 @@
 
             </div>
 
-            <div class="section" data-tab="bonsai">
+            <div class="section" data-tab="bonsai" data-bonsai="vessel">
                 <h2>VESSEL</h2>
                 <div class="form">
                     <div class="field field-inline">
@@ -1422,7 +1655,7 @@
                 </div>
             </div>
 
-            <div class="section" data-tab="scene">
+            <div class="section" data-tab="bonsai" data-bonsai="scene">
                 <h2>RENDER</h2>
                 <div class="form">
                     <div class="field no-val">
@@ -1457,6 +1690,26 @@
                 </div>
             </div>
             <div class="section" data-tab="app">
+                <h2>APPEARANCE</h2>
+                <div class="form">
+                    <div class="field no-val">
+                        <label>Theme + Mode</label>
+                        <div id="modeControl" class="segmented theme-mode" role="group" aria-label="Theme and color scheme">
+                            <select id="themeSelect" class="theme-select-seg" aria-label="Accent theme">
+                                <option value="cyan">Cyan</option>
+                                <option value="magenta">Magenta</option>
+                                <option value="amber">Amber</option>
+                                <option value="lime">Lime</option>
+                                <option value="black">Black</option>
+                                <option value="white">White</option>
+                            </select>
+                            <button type="button" class="seg" data-mode="light" aria-pressed="true">Light</button>
+                            <button type="button" class="seg" data-mode="dark" aria-pressed="false">Dark</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section" data-tab="app">
                 <h2>PERFORMANCE</h2>
                 <div class="form">
                     <div class="field no-val">
@@ -1470,37 +1723,46 @@
                     </div>
                 </div>
             </div>
-            <!-- DEBUG section -->
             <div class="section" id="debugSection" data-tab="app">
-                <h2>DEBUG <input id="debugToggle" type="checkbox">
-                </h2>
-                <div class="pad">
-                    <div id="hud" aria-hidden="true"></div>
-                    <div style="margin-bottom:8px; color:var(--text-subtle);">
-                        Toggle checkbox or press <span class="kbd">`</span>
+                <h2>DEBUG</h2>
+                <div class="form">
+                    <div class="field no-val">
+                        <label>Overlay HUD</label>
+                        <input id="debugToggle" type="checkbox">
                     </div>
                 </div>
+            </div>
             </div>
         </aside>
         <div id="stageWrap">
             <div id="bgOverlay"></div>
             <div id="stage"></div>
+            <div id="hudOverlay" class="hud-overlay" data-on="false" aria-hidden="true">
+                <div id="hudRuntime" class="hud-card"></div>
+                <div id="hudCamera" class="hud-card"></div>
+                <div id="hudTree" class="hud-card"></div>
+                <div id="hudRender" class="hud-card"></div>
+                <div id="hudCounts" class="hud-card"></div>
+                <div id="markerCanopy" class="hud-marker" aria-hidden="true"></div>
+                <div id="markerTrunk" class="hud-marker" aria-hidden="true"></div>
+                <div id="markerVessel" class="hud-marker" aria-hidden="true"></div>
+            </div>
             <div id="tipsBar" role="note">
                 <div>Tip: drag to orbit · wheel/pinch to zoom</div>
                 <div>Press <span class="kbd">Frame</span> to refit</div>
             </div>
             <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
-                <button id="tbFrame" class="btn btn-icon" title="Frame (F)">⤢</button>
-                <button id="tbWire" class="btn btn-icon" title="Wireframe (W)">◧</button>
+                <button id="tbFrame" class="btn btn-icon" title="Frame (F)"><span class="iconoir iconoir-scale-frame-enlarge" aria-hidden="true"></span></button>
+                <button id="tbWire" class="btn btn-icon" title="Wireframe (W)"><span class="iconoir iconoir-select-window" aria-hidden="true"></span></button>
                 <span class="split"></span>
-                <button id="tbSpinL" class="btn btn-icon" title="Rotate Left ([)">⟲</button>
-                <button id="tbSlower" class="btn btn-icon" title="Slower">−</button>
-                <button id="tbAuto" class="btn btn-icon" title="Play/Pause (Space)">⏸</button>
-                <button id="tbFaster" class="btn btn-icon" title="Faster">＋</button>
-                <button id="tbSpinR" class="btn btn-icon" title="Rotate Right (])">⟳</button>
+                <button id="tbSpinL" class="btn btn-icon" title="Rotate Left ([)"><span class="iconoir iconoir-nav-arrow-left" aria-hidden="true"></span></button>
+                <button id="tbSlower" class="btn btn-icon" title="Slower"><span class="iconoir iconoir-ruler-minus" aria-hidden="true"></span></button>
+                <button id="tbAuto" class="btn btn-icon" title="Play/Pause (Space)"><span class="iconoir iconoir-refresh-double" aria-hidden="true"></span></button>
+                <button id="tbFaster" class="btn btn-icon" title="Faster"><span class="iconoir iconoir-ruler-plus" aria-hidden="true"></span></button>
+                <button id="tbSpinR" class="btn btn-icon" title="Rotate Right (])"><span class="iconoir iconoir-nav-arrow-right" aria-hidden="true"></span></button>
                 <span class="split"></span>
-                <button id="tbShot" class="btn btn-icon" title="Screenshot (X)">📸</button>
-                <button id="tbHelp" class="btn btn-icon" title="Toggle Tip Bar (H)">?</button>
+                <button id="tbShot" class="btn btn-icon" title="Screenshot (X)"><span class="iconoir iconoir-screenshot" aria-hidden="true"></span></button>
+                <button id="tbHelp" class="btn btn-icon" title="Toggle Tip Bar (H)"><span class="iconoir iconoir-question-mark" aria-hidden="true"></span></button>
             </div>
         </div>
     </div>
@@ -1642,7 +1904,15 @@
         const AUTO_BASE = 0.8;          // base radians/sec scale for speed slider
 
         const debugToggle = $('debugToggle');
-        const hud = $('hud');
+        const hudOverlay = $('hudOverlay');
+        const hudRuntime = $('hudRuntime');
+        const hudCamera = $('hudCamera');
+        const hudTree = $('hudTree');
+        const hudRender = $('hudRender');
+        const hudCounts = $('hudCounts');
+        const markerCanopy = $('markerCanopy');
+        const markerTrunk = $('markerTrunk');
+        const markerVessel = $('markerVessel');
 
         // handy formatters
         const d = (n) => Number.isFinite(n) ? n.toFixed(3) : 'NaN';
@@ -1651,77 +1921,105 @@
         const eulerDeg = (e) => `${deg(e.x)}, ${deg(e.y)}, ${deg(e.z)}`;
 
         function renderHUD() {
-            if (!debugToggle || !hud) return;
+            if (!debugToggle || !hudOverlay) return;
             const on = !!debugToggle.checked;
-            hud.style.display = on ? 'block' : 'none';
-            if (!on) return;
+            hudOverlay.dataset.on = on ? 'true' : 'false';
+            if (!on) {
+                [markerCanopy, markerTrunk, markerVessel].forEach(el => { if (el) el.style.display = 'none'; });
+                return;
+            }
 
-            // gather data
             const cam = camera;
             const tgt = controls.target;
-            const ikeRot = ike.rotation;
-            const ikePos = ike.position;
-            const ikeScale = ike.scale;
-
             const ems = emissiveStrengthUI ? parseFloat(emissiveStrengthUI.value) : 0;
             const w = wireToggle ? (wireToggle.value === 'on') : false;
-
             const ri = renderer.info;
-
-            // counts come from your generators:
-            // lastBranchSegments, lastTerminalPieces, globalLeafCount
-            // seed from currentSeed
-
-            // vessel values
             const vType = vesselType ? vesselType.value : '';
             const vDia = vesselDia ? parseFloat(vesselDia.value) : 0;
             const vDep = vesselDepth ? parseFloat(vesselDepth.value) : 0;
-
-            // tree settings
             const tSet = {
                 type: treeType.value, levels: levels.value,
                 bDepth: bDepth.value, bMin: bMin.value, bMax: bMax.value, bLen: bLen.value,
                 curvature: curvature.value, uniformity: uniformity.value, upBias: upBias.value, spread: spread.value,
                 density: density.value, leafSpread: leafSpread.value, leafType: leafType.value, plumage: plumage.value
             };
+            const petalLine = petalInstanceCount > 0 ? `<div><span class="k">petals(inst)</span> <span class="v">${petalInstanceCount}</span></div>` : '';
 
-            const lines = [];
-            lines.push(`<div class="hdr">runtime</div>`);
-            lines.push(`<div><span class="k">frame</span> <span class="v">${frameNo}</span>  <span class="k">fps~</span> <span class="v">${fpsEMA.toFixed(1)}</span></div>`);
-            lines.push(`<div><span class="k">regen~ms</span> <span class="v">${regenMsEMA.toFixed(1)}</span>  <span class="k">quality</span> <span class="v">${qualityModeUI ? qualityModeUI.value : 'auto'}</span></div>`);
-            lines.push(`<div><span class="k">auto</span> <span class="v">${autoOn ? 'on' : 'off'}</span>  <span class="k">speed</span> <span class="v">${autoSpeedUI ? autoSpeedUI.value : '—'}</span></div>`);
-            lines.push(`<div class="hdr">camera</div>`);
-            lines.push(`<div><span class="k">pos</span> <span class="v">${v3(cam.position)}</span></div>`);
-            lines.push(`<div><span class="k">rot(deg)</span> <span class="v">${eulerDeg(cam.rotation)}</span></div>`);
-            lines.push(`<div><span class="k">target</span> <span class="v">${v3(tgt)}</span></div>`);
-            lines.push(`<div class="hdr">object (ike)</div>`);
-            lines.push(`<div><span class="k">pos</span> <span class="v">${v3(ikePos)}</span></div>`);
-            lines.push(`<div><span class="k">rot(deg)</span> <span class="v">${eulerDeg(ikeRot)}</span></div>`);
-            lines.push(`<div><span class="k">scale</span> <span class="v">${v3(ikeScale)}</span></div>`);
-            lines.push(`<div><span class="k">seed</span> <span class="v">${currentSeed}</span></div>`);
-            lines.push(`<div class="hdr">vessel</div>`);
-            lines.push(`<div><span class="k">type</span> <span class="v">${vType}</span></div>`);
-            lines.push(`<div><span class="k">dia</span> <span class="v">${d(vDia)}</span>  <span class="k">depth</span> <span class="v">${d(vDep)}</span></div>`);
-            lines.push(`<div class="hdr">tree</div>`);
-            lines.push(`<div><span class="k">type</span> <span class="v">${tSet.type}</span>  <span class="k">levels</span> <span class="v">${tSet.levels}</span></div>`);
-            lines.push(`<div><span class="k">branch</span> <span class="v">depth ${tSet.bDepth}, min ${tSet.bMin}, max ${tSet.bMax}, len ${tSet.bLen}</span></div>`);
-            lines.push(`<div><span class="k">shape</span> <span class="v">curv ${tSet.curvature}, uni ${tSet.uniformity}, upBias ${tSet.upBias}, spread ${tSet.spread}</span></div>`);
-            lines.push(`<div><span class="k">leaves</span> <span class="v">${tSet.leafType}, spread ${tSet.leafSpread}, density ${tSet.density}, plumage ${tSet.plumage}</span></div>`);
-            lines.push(`<div class="hdr">render</div>`);
-            lines.push(`<div><span class="k">mode</span> <span class="v">${renderMode.value}</span>  <span class="k">wire</span> <span class="v">${w ? 'on' : 'off'}</span>  <span class="k">emiss</span> <span class="v">${ems}</span></div>`);
-            lines.push(`<div class="hdr">counts</div>`);
-            lines.push(`<div><span class="k">segments</span> <span class="v">${lastBranchSegments}</span>  <span class="k">terminals</span> <span class="v">${lastTerminalPieces}</span>  <span class="k">globalLeaves</span> <span class="v">${globalLeafCount}</span></div>`);
-            lines.push(`<div><span class="k">leaves(inst)</span> <span class="v">${leafInstanceCount}</span></div>`);
-            if (petalInstanceCount > 0) {
-                lines.push(`<div><span class="k">petals(inst)</span> <span class="v">${petalInstanceCount}</span></div>`);
+            if (hudRuntime) hudRuntime.innerHTML = `
+                <div class="hdr">runtime</div>
+                <div><span class="k">frame</span> <span class="v">${frameNo}</span>  <span class="k">fps~</span> <span class="v">${fpsEMA.toFixed(1)}</span></div>
+                <div><span class="k">regen~ms</span> <span class="v">${regenMsEMA.toFixed(1)}</span>  <span class="k">quality</span> <span class="v">${qualityModeUI ? qualityModeUI.value : 'auto'}</span></div>
+                <div><span class="k">auto</span> <span class="v">${autoOn ? 'on' : 'off'}</span>  <span class="k">speed</span> <span class="v">${autoSpeedUI ? autoSpeedUI.value : '-'}</span></div>`;
+            if (hudCamera) hudCamera.innerHTML = `
+                <div class="hdr">camera</div>
+                <div><span class="k">pos</span> <span class="v">${v3(cam.position)}</span></div>
+                <div><span class="k">rot(deg)</span> <span class="v">${eulerDeg(cam.rotation)}</span></div>
+                <div><span class="k">target</span> <span class="v">${v3(tgt)}</span></div>`;
+            if (hudTree) hudTree.innerHTML = `
+                <div class="hdr">tree</div>
+                <div><span class="k">seed</span> <span class="v">${currentSeed}</span></div>
+                <div><span class="k">type</span> <span class="v">${tSet.type}</span>  <span class="k">levels</span> <span class="v">${tSet.levels}</span></div>
+                <div><span class="k">branch</span> <span class="v">depth ${tSet.bDepth}, min ${tSet.bMin}, max ${tSet.bMax}, len ${tSet.bLen}</span></div>
+                <div><span class="k">shape</span> <span class="v">curv ${tSet.curvature}, uni ${tSet.uniformity}, upBias ${tSet.upBias}, spread ${tSet.spread}</span></div>
+                <div><span class="k">leaves</span> <span class="v">${tSet.leafType}, spread ${tSet.leafSpread}, density ${tSet.density}, plumage ${tSet.plumage}</span></div>
+                <div><span class="k">vessel</span> <span class="v">${vType}, dia ${d(vDia)}, depth ${d(vDep)}</span></div>`;
+            if (hudRender) hudRender.innerHTML = `
+                <div class="hdr">render</div>
+                <div><span class="k">mode</span> <span class="v">${renderMode.value}</span>  <span class="k">wire</span> <span class="v">${w ? 'on' : 'off'}</span></div>
+                <div><span class="k">emissive</span> <span class="v">${ems}</span></div>
+                <div><span class="k">calls</span> <span class="v">${ri.render.calls}</span>  <span class="k">tri</span> <span class="v">${ri.render.triangles}</span></div>
+                <div><span class="k">points</span> <span class="v">${ri.render.points}</span></div>`;
+            if (hudCounts) hudCounts.innerHTML = `
+                <div class="hdr">counts</div>
+                <div><span class="k">segments</span> <span class="v">${lastBranchSegments}</span>  <span class="k">terminals</span> <span class="v">${lastTerminalPieces}</span></div>
+                <div><span class="k">globalLeaves</span> <span class="v">${globalLeafCount}</span>  <span class="k">leaves(inst)</span> <span class="v">${leafInstanceCount}</span></div>
+                ${petalLine}
+                <div><span class="k">targets</span> <span class="v">${terminals.length} terms -> ${leafInstanceCount} leaves</span></div>
+                <div><span class="k">caps</span> <span class="v">inst ${SAFE_INST_LIMIT}, term ${SAFE_TERM_LIMIT}, seg ${SEGMENTS_HARD_MAX}</span></div>`;
+
+            const stageRect = stage.getBoundingClientRect();
+            const projectMarker = (el, worldPos, sizePx = 110) => {
+                if (!el || !worldPos) return;
+                const ndc = worldPos.clone().project(camera);
+                const out = ndc.z < -1 || ndc.z > 1;
+                const x = (ndc.x * 0.5 + 0.5) * stageRect.width;
+                const y = (-ndc.y * 0.5 + 0.5) * stageRect.height;
+                const pad = 120;
+                const offscreen = x < -pad || y < -pad || x > stageRect.width + pad || y > stageRect.height + pad;
+                if (out || offscreen) {
+                    el.style.display = 'none';
+                    return;
+                }
+                el.style.display = 'block';
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+                el.style.width = `${sizePx}px`;
+                el.style.height = `${sizePx}px`;
+            };
+
+            if (treeGroup) {
+                const b = new THREE.Box3().setFromObject(treeGroup);
+                if (isFinite(b.min.x) && isFinite(b.max.x)) {
+                    const midX = (b.min.x + b.max.x) * 0.5;
+                    const midZ = (b.min.z + b.max.z) * 0.5;
+                    const h = Math.max(0.001, b.max.y - b.min.y);
+                    projectMarker(markerCanopy, new THREE.Vector3(midX, b.min.y + h * 0.8, midZ), 112);
+                    projectMarker(markerTrunk, new THREE.Vector3(midX, b.min.y + h * 0.42, midZ), 90);
+                }
+            } else {
+                if (markerCanopy) markerCanopy.style.display = 'none';
+                if (markerTrunk) markerTrunk.style.display = 'none';
             }
-            lines.push(`<div><span class="k">targets</span> <span class="v">${terminals.length} terms → ${leafInstanceCount} leaves</span></div>`);
-            lines.push(`<div><span class="k">caps</span> <span class="v">inst ${SAFE_INST_LIMIT}, term ${SAFE_TERM_LIMIT}, seg ${SEGMENTS_HARD_MAX}</span></div>`);
-            lines.push(`<div class="hdr">gpu</div>`);
-            lines.push(`<div><span class="k">calls</span> <span class="v">${ri.render.calls}</span>  <span class="k">tri</span> <span class="v">${ri.render.triangles}</span>  <span class="k">points</span> <span class="v">${ri.render.points}</span></div>`);
 
-
-            hud.innerHTML = lines.join('');
+            if (vesselGroup) {
+                const vb = new THREE.Box3().setFromObject(vesselGroup);
+                if (isFinite(vb.min.x) && isFinite(vb.max.x)) {
+                    const vc = vb.getCenter(new THREE.Vector3());
+                    projectMarker(markerVessel, vc, 128);
+                }
+            } else if (markerVessel) {
+                markerVessel.style.display = 'none';
+            }
         }
 
         function debounce(fn, ms = 120) {
@@ -1765,11 +2063,26 @@
             const panel = document.getElementById('panel');
             if (!panel) return;
             panel.setAttribute('data-tab', tab);
-            document.querySelectorAll('.panel-tab').forEach(btn => {
+            document.querySelectorAll('.rail-tab').forEach(btn => {
                 const on = btn.dataset.tab === tab;
                 btn.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
+            const title = document.getElementById('panelTitle');
+            if (title) title.textContent = (tab === 'app') ? 'Settings' : 'Bonsai';
             localStorage.setItem('bonsai.panelTab', tab);
+            requestAnimationFrame(updateCanvasToolbarOffset);
+        }
+
+        function setBonsaiTab(tab) {
+            const panel = document.getElementById('panel');
+            if (!panel) return;
+            panel.setAttribute('data-bonsai-tab', tab);
+            document.querySelectorAll('.bonsai-tab').forEach(btn => {
+                const on = btn.dataset.bonsaiTab === tab;
+                btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            localStorage.setItem('bonsai.bonsaiTab', tab);
+            requestAnimationFrame(updateCanvasToolbarOffset);
         }
 
         function spinBy(radPerSec, dt) {
@@ -1821,6 +2134,7 @@
         const onResize = debounce(() => {
             if (qualityModeUI && qualityModeUI.value === 'auto') applyQualityProfile('auto');
             onResizeCore();
+            updateCanvasToolbarOffset();
             if (AUTO_REFIT_ON_LAYOUT) refitSoon();
         }, 120);
 
@@ -2823,7 +3137,7 @@
             const primary = field.querySelector(':scope > input:not([type="color"]), :scope > select, :scope > input[type="color"], :scope > .row input, :scope > .row select');
             const isSelectLike = !!(primary && primary.tagName === 'SELECT');
             const isColorLike = !!(primary && primary.type === 'color');
-            const skipReadout = inline || isSelectLike || isColorLike;
+            const skipReadout = inline || isSelectLike || isColorLike || !primary || field.classList.contains('no-readout');
 
             if (skipReadout) {
                 if (outExisting) outExisting.remove();
@@ -2938,8 +3252,11 @@
                 syncFormDefaultsFromSpecies();
             });
         }
-        document.querySelectorAll('.panel-tab').forEach(btn => {
+        document.querySelectorAll('.rail-tab').forEach(btn => {
             btn.addEventListener('click', () => setPanelTab(btn.dataset.tab || 'bonsai'));
+        });
+        document.querySelectorAll('.bonsai-tab').forEach(btn => {
+            btn.addEventListener('click', () => setBonsaiTab(btn.dataset.bonsaiTab || 'plant'));
         });
         initFieldReadouts();
 
@@ -3115,7 +3432,7 @@
             const app = document.getElementById('app');
             const themeSelect = document.getElementById('themeSelect');
             const modeCtrl = document.getElementById('modeControl');
-            const segBtns = [...modeCtrl.querySelectorAll('.seg')];
+            const segBtns = [...modeCtrl.querySelectorAll('button.seg')];
 
             // --- helpers ---
             const setPressed = (val) => {
@@ -3217,6 +3534,22 @@
 
         const canvasToolbar = document.getElementById('canvasToolbar');
 
+        function updateCanvasToolbarOffset() {
+            if (!canvasToolbar) return;
+            const mobile = window.matchMedia('(max-width: 900px)').matches;
+            if (!mobile) {
+                canvasToolbar.style.bottom = '12px';
+                return;
+            }
+            const root = document.getElementById('app');
+            const rail = document.getElementById('sidebar');
+            const panel = document.getElementById('panel');
+            const railH = rail ? rail.getBoundingClientRect().height : 52;
+            const panelOpen = root && !root.classList.contains('panel-hidden') && panel && getComputedStyle(panel).display !== 'none';
+            const panelH = panelOpen ? panel.getBoundingClientRect().height : 0;
+            canvasToolbar.style.bottom = `${Math.max(8, railH + panelH + 8)}px`;
+        }
+
         function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
         function setAutoSpeed(val) {
@@ -3228,8 +3561,8 @@
 
         function refreshTbAutoIcon() {
             if (!tbAuto) return;
-            tbAuto.textContent = autoOn ? '⏸' : '▶'; // pause/play glyph
             tbAuto.title = autoOn ? 'Pause (Space)' : 'Play (Space)';
+            tbAuto.innerHTML = '<span class="iconoir iconoir-refresh-double" aria-hidden="true"></span>';
         }
 
         if (tbAuto) {
@@ -3280,10 +3613,29 @@
             appRoot.classList.toggle('panel-hidden', !!on);
             if (panelToggle) {
                 panelToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+                updatePanelToggleIcon();
             }
             // persist preference
             localStorage.setItem('bonsai.panelHidden', on ? '1' : '0');
+            requestAnimationFrame(updateCanvasToolbarOffset);
             refitSoon();
+        }
+
+        function updatePanelToggleIcon() {
+            if (!panelToggle) return;
+            const hidden = appRoot.classList.contains('panel-hidden');
+            const mobile = window.matchMedia('(max-width: 900px)').matches;
+            let icon = 'iconoir-nav-arrow-left';
+            let title = 'Collapse panel';
+            if (mobile) {
+                icon = hidden ? 'iconoir-nav-arrow-up' : 'iconoir-nav-arrow-down';
+                title = hidden ? 'Open panel (up)' : 'Collapse panel (down)';
+            } else {
+                icon = hidden ? 'iconoir-nav-arrow-right' : 'iconoir-nav-arrow-left';
+                title = hidden ? 'Open panel (right)' : 'Collapse panel (left)';
+            }
+            panelToggle.title = title;
+            panelToggle.innerHTML = `<span class="iconoir ${icon}" aria-hidden="true"></span><span class="sr-only">Toggle panel</span>`;
         }
 
         // initial: prefer stored, else hide automatically on small screens
@@ -3291,12 +3643,18 @@
             const stored = localStorage.getItem('bonsai.panelHidden');
             if (stored === '1' || (stored === null && window.innerWidth <= 900)) {
                 setPanelHidden(true);
+            } else {
+                updatePanelToggleIcon();
             }
         })();
 
         // Refit when the breakpoint crosses (layout rows/cols change)
         const mq = window.matchMedia('(max-width: 900px)');
-        mq.addEventListener?.('change', () => refitSoon());
+        mq.addEventListener?.('change', () => {
+            updatePanelToggleIcon();
+            updateCanvasToolbarOffset();
+            refitSoon();
+        });
 
         if (panelToggle) {
             panelToggle.addEventListener('click', () => {
@@ -3315,8 +3673,11 @@
                 applyQualityProfile('auto');
             }
             sanitizeTerminalBounds();
-            const storedTab = localStorage.getItem('bonsai.panelTab') || 'bonsai';
-            setPanelTab(storedTab);
+            const storedTopTab = localStorage.getItem('bonsai.panelTab') || 'bonsai';
+            const normalizedTop = (storedTopTab === 'scene') ? 'bonsai' : storedTopTab;
+            setPanelTab(normalizedTop);
+            const storedBonsaiTab = localStorage.getItem('bonsai.bonsaiTab') || 'plant';
+            setBonsaiTab(storedBonsaiTab);
             syncFormDefaultsFromSpecies();
             setSeed((Math.random() * 0xFFFFFFFF) >>> 0);
             regenerate();
@@ -3327,6 +3688,7 @@
             renderHUD();
             // Let the first frame render, then refit robustly (twice)
             refitSoon();
+            updateCanvasToolbarOffset();
 
         }
 
@@ -3336,6 +3698,7 @@
 </body>
 
 </html>
+
 
 
 
