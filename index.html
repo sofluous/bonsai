@@ -4,14 +4,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>POLYGON BONSAI / Ikebana Style</title>
+    <title>BONSAI /</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/iconoir@7.10.1/css/iconoir.css" />
     <style>
         /* =======================================================================
-   GEOMETRIC BONSAI — Unified Design System (Techno Minimal)
-   - Hue-driven accent themes
-   - Light/Dark mode aware
-   - Role-based component styling
+   GEOMETRIC BONSAI — v0.6.4
    ======================================================================= */
 
         /* -----------------------------------------------------------------------------
@@ -417,7 +414,7 @@
             top: 34px;
             z-index: 5;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 0;
             margin: 0;
             background: color-mix(in oklab, var(--surface-1) 96%, var(--accent-900) 4%);
@@ -457,18 +454,19 @@
             background: color-mix(in oklab, var(--accent-700) 12%, var(--surface-2));
         }
 
-        #panel[data-tab="bonsai"] .section[data-tab="app"],
-        #panel[data-tab="app"] .section[data-tab="bonsai"] {
+        #panel[data-tab="bonsai"] .section[data-tab]:not([data-tab="bonsai"]),
+        #panel[data-tab="scene"] .section[data-tab]:not([data-tab="scene"]),
+        #panel[data-tab="app"] .section[data-tab]:not([data-tab="app"]) {
             display: none;
         }
 
-        #panel[data-tab="app"] .bonsai-tabs {
+        #panel[data-tab="app"] .bonsai-tabs,
+        #panel[data-tab="scene"] .bonsai-tabs {
             display: none;
         }
 
         #panel[data-tab="bonsai"][data-bonsai-tab="plant"] .section[data-bonsai]:not([data-bonsai="plant"]),
-        #panel[data-tab="bonsai"][data-bonsai-tab="vessel"] .section[data-bonsai]:not([data-bonsai="vessel"]),
-        #panel[data-tab="bonsai"][data-bonsai-tab="scene"] .section[data-bonsai]:not([data-bonsai="scene"]) {
+        #panel[data-tab="bonsai"][data-bonsai-tab="vessel"] .section[data-bonsai]:not([data-bonsai="vessel"]) {
             display: none;
         }
 
@@ -1007,6 +1005,20 @@
             /* clickable */
         }
 
+        #tipsBar .tip-close {
+            margin-left: .35rem;
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            padding: 0;
+            display: grid;
+            place-items: center;
+            border: 1px solid color-mix(in oklab, var(--accent-600) 40%, var(--outline));
+            background: color-mix(in oklab, var(--surface-2) 80%, transparent);
+            color: var(--text-subtle);
+            cursor: pointer;
+        }
+
 
         .kbd {
             background: var(--surface-1);
@@ -1234,7 +1246,7 @@
                 z-index: 6;
                 display: flex;
                 flex-direction: column;
-                max-height: min(52vh, calc(100vh - var(--mobile-rail-h) - 8px));
+                max-height: min(50vh, calc(100vh - var(--mobile-rail-h) - 24px));
                 overflow: hidden;
                 border-top: 1px solid var(--outline);
                 box-shadow: none;
@@ -1378,6 +1390,12 @@
             }
 
         }
+
+        @media (max-width: 900px) and (orientation: portrait) {
+            #panel {
+                max-height: min(38vh, calc(100vh - var(--mobile-rail-h) - 56px));
+            }
+        }
     </style>
 
     <!-- Import map for bare specifier "three" -->
@@ -1394,6 +1412,7 @@
                 <span class="sr-only">Toggle panel</span>
             </button>
             <button class="side-btn rail-tab" data-tab="bonsai" aria-pressed="true">Bonsai</button>
+            <button class="side-btn rail-tab" data-tab="scene" aria-pressed="false">Scene</button>
             <div class="side-fill"></div>
             <button class="side-btn rail-tab" data-tab="app" aria-pressed="false">Settings</button>
         </nav>
@@ -1404,10 +1423,9 @@
             <div class="bonsai-tabs" role="tablist" aria-label="Bonsai groups">
                 <button class="bonsai-tab" data-bonsai-tab="plant" aria-pressed="true">Plant</button>
                 <button class="bonsai-tab" data-bonsai-tab="vessel" aria-pressed="false">Vessel</button>
-                <button class="bonsai-tab" data-bonsai-tab="scene" aria-pressed="false">Scene</button>
             </div>
             <div class="panel-scroll">
-            <div class="section" data-tab="bonsai" data-bonsai="scene">
+            <div class="section" data-tab="scene">
                 <h2>SCENE</h2> <!-- Debug HUD toggle -->
                 <div class="form">
                     <div class="field field-inline">
@@ -1655,13 +1673,13 @@
                 </div>
             </div>
 
-            <div class="section" data-tab="bonsai" data-bonsai="scene">
+            <div class="section" data-tab="scene">
                 <h2>RENDER</h2>
                 <div class="form">
                     <div class="field no-val">
                         <label>Spin</label>
                         <div class="row">
-                            <button id="autoBtn" class="btn">⏸ Pause</button>
+                            <button id="autoBtn" class="btn"><span class="iconoir iconoir-pause" aria-hidden="true"></span> Pause</button>
                             <input id="autoSpeed" type="range" min="-4" max="4" step="0.01" value="0.8" />
                         </div>
                     </div>
@@ -1707,6 +1725,13 @@
                             <button type="button" class="seg" data-mode="dark" aria-pressed="false">Dark</button>
                         </div>
                     </div>
+                    <div class="field no-val">
+                        <label>Tips Overlay</label>
+                        <select id="tipsToggle">
+                            <option value="on">On</option>
+                            <option value="off">Off</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="section" data-tab="app">
@@ -1748,8 +1773,9 @@
                 <div id="markerVessel" class="hud-marker" aria-hidden="true"></div>
             </div>
             <div id="tipsBar" role="note">
-                <div>Tip: drag to orbit · wheel/pinch to zoom</div>
+                <div>Tip: drag to orbit, wheel/pinch to zoom</div>
                 <div>Press <span class="kbd">Frame</span> to refit</div>
+                <button id="tipsClose" class="tip-close" aria-label="Close tips"><span class="iconoir iconoir-xmark" aria-hidden="true"></span></button>
             </div>
             <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
                 <button id="tbFrame" class="btn btn-icon" title="Frame (F)"><span class="iconoir iconoir-scale-frame-enlarge" aria-hidden="true"></span></button>
@@ -1757,12 +1783,11 @@
                 <span class="split"></span>
                 <button id="tbSpinL" class="btn btn-icon" title="Rotate Left ([)"><span class="iconoir iconoir-nav-arrow-left" aria-hidden="true"></span></button>
                 <button id="tbSlower" class="btn btn-icon" title="Slower"><span class="iconoir iconoir-ruler-minus" aria-hidden="true"></span></button>
-                <button id="tbAuto" class="btn btn-icon" title="Play/Pause (Space)"><span class="iconoir iconoir-refresh-double" aria-hidden="true"></span></button>
+                <button id="tbAuto" class="btn btn-icon" title="Play/Pause (Space)"><span class="iconoir iconoir-play" aria-hidden="true"></span></button>
                 <button id="tbFaster" class="btn btn-icon" title="Faster"><span class="iconoir iconoir-ruler-plus" aria-hidden="true"></span></button>
                 <button id="tbSpinR" class="btn btn-icon" title="Rotate Right (])"><span class="iconoir iconoir-nav-arrow-right" aria-hidden="true"></span></button>
                 <span class="split"></span>
                 <button id="tbShot" class="btn btn-icon" title="Screenshot (X)"><span class="iconoir iconoir-screenshot" aria-hidden="true"></span></button>
-                <button id="tbHelp" class="btn btn-icon" title="Toggle Tip Bar (H)"><span class="iconoir iconoir-question-mark" aria-hidden="true"></span></button>
             </div>
         </div>
     </div>
@@ -1856,7 +1881,8 @@
         const tbAuto = document.getElementById('tbAuto');
         const tbFaster = document.getElementById('tbFaster');
         const tbSpinR = document.getElementById('tbSpinR');
-        const tbHelp = document.getElementById('tbHelp');
+        const tipsToggle = $('tipsToggle');
+        const tipsClose = $('tipsClose');
 
         // --- Scene ---
         const scene = new THREE.Scene();
@@ -2068,7 +2094,7 @@
                 btn.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
             const title = document.getElementById('panelTitle');
-            if (title) title.textContent = (tab === 'app') ? 'Settings' : 'Bonsai';
+            if (title) title.textContent = (tab === 'app') ? 'Settings' : ((tab === 'scene') ? 'Scene' : 'Bonsai');
             localStorage.setItem('bonsai.panelTab', tab);
             requestAnimationFrame(updateCanvasToolbarOffset);
         }
@@ -2102,7 +2128,13 @@
         function setAutoRotate(on) {
             autoOn = !!on;                            // our smooth rot flag
             if (autoRotate) autoRotate.value = autoOn ? 'on' : 'off';
-            if (autoBtn) autoBtn.textContent = autoOn ? '⏸ Pause' : '▶ Play';
+            if (autoBtn) {
+                const icon = autoOn ? 'iconoir-pause' : 'iconoir-play';
+                autoBtn.innerHTML = `<span class="iconoir ${icon}" aria-hidden="true"></span> ${autoOn ? 'Pause' : 'Play'}`;
+                autoBtn.classList.toggle('btn-primary', autoOn);
+                autoBtn.classList.toggle('btn-ghost', !autoOn);
+            }
+            refreshTbAutoIcon();
         }
 
         function onResizeCore() {
@@ -3402,10 +3434,6 @@
                 e.preventDefault();
                 tbShot?.click();
             }
-            else if (e.key === 'h' || e.key === 'H') {
-                e.preventDefault();
-                tbHelp && tbHelp.click();
-            }
             else if (e.key === 'p' || e.key === 'P') {
                 e.preventDefault();
                 const now = !appRoot.classList.contains('panel-hidden');
@@ -3539,6 +3567,12 @@
             const mobile = window.matchMedia('(max-width: 900px)').matches;
             if (!mobile) {
                 canvasToolbar.style.bottom = '12px';
+                const hidden = appRoot.classList.contains('panel-hidden');
+                const railW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rail-w')) || 58;
+                const panelW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--panel-w')) || 380;
+                const left = hidden ? (railW + 4) : (railW + panelW + 4);
+                canvasToolbar.style.left = `${left}px`;
+                canvasToolbar.style.transform = 'none';
                 return;
             }
             const root = document.getElementById('app');
@@ -3548,6 +3582,8 @@
             const panelOpen = root && !root.classList.contains('panel-hidden') && panel && getComputedStyle(panel).display !== 'none';
             const panelH = panelOpen ? panel.getBoundingClientRect().height : 0;
             canvasToolbar.style.bottom = `${Math.max(8, railH + panelH + 8)}px`;
+            canvasToolbar.style.left = '50%';
+            canvasToolbar.style.transform = 'translateX(-50%)';
         }
 
         function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
@@ -3562,13 +3598,15 @@
         function refreshTbAutoIcon() {
             if (!tbAuto) return;
             tbAuto.title = autoOn ? 'Pause (Space)' : 'Play (Space)';
-            tbAuto.innerHTML = '<span class="iconoir iconoir-refresh-double" aria-hidden="true"></span>';
+            const icon = autoOn ? 'iconoir-pause' : 'iconoir-play';
+            tbAuto.innerHTML = `<span class="iconoir ${icon}" aria-hidden="true"></span><span class="sr-only">${autoOn ? 'Pause' : 'Play'}</span>`;
+            tbAuto.classList.toggle('btn-primary', autoOn);
+            tbAuto.classList.toggle('btn-ghost', !autoOn);
         }
 
         if (tbAuto) {
             tbAuto.addEventListener('click', () => {
                 setAutoRotate(!autoOn);
-                refreshTbAutoIcon();
             });
             // also keep icon synced if someone uses the side panel control
             if (autoRotate) {
@@ -3597,11 +3635,18 @@
 
 
         const tipsBar = document.getElementById('tipsBar');
-        if (tbHelp && tipsBar) {
-            tbHelp.addEventListener('click', () => {
-                const on = tipsBar.style.display !== 'none';
-                tipsBar.style.display = on ? 'none' : 'flex';
-            });
+        function setTipsVisible(on) {
+            if (!tipsBar) return;
+            const visible = !!on;
+            tipsBar.style.display = visible ? 'flex' : 'none';
+            if (tipsToggle) tipsToggle.value = visible ? 'on' : 'off';
+            localStorage.setItem('bonsai.tipsVisible', visible ? '1' : '0');
+        }
+        if (tipsToggle) {
+            tipsToggle.addEventListener('change', () => setTipsVisible(tipsToggle.value === 'on'));
+        }
+        if (tipsClose) {
+            tipsClose.addEventListener('click', () => setTipsVisible(false));
         }
 
         // Refit when the panel is toggled (class changes)
@@ -3665,6 +3710,8 @@
 
         function initial() {
             applyBackground();
+            const storedTips = localStorage.getItem('bonsai.tipsVisible');
+            setTipsVisible(storedTips === null ? true : storedTips === '1');
             if (qualityModeUI) {
                 const storedQ = localStorage.getItem('bonsai.qualityMode');
                 if (storedQ) qualityModeUI.value = storedQ;
@@ -3674,8 +3721,7 @@
             }
             sanitizeTerminalBounds();
             const storedTopTab = localStorage.getItem('bonsai.panelTab') || 'bonsai';
-            const normalizedTop = (storedTopTab === 'scene') ? 'bonsai' : storedTopTab;
-            setPanelTab(normalizedTop);
+            setPanelTab(storedTopTab);
             const storedBonsaiTab = localStorage.getItem('bonsai.bonsaiTab') || 'plant';
             setBonsaiTab(storedBonsaiTab);
             syncFormDefaultsFromSpecies();
@@ -3698,6 +3744,8 @@
 </body>
 
 </html>
+
+
 
 
 
