@@ -42,7 +42,6 @@
   --ds-control-h: 38px;
   --ds-control-h-sm: 32px;
   --ds-control-hit-min: 32px;
-<<<<<<< HEAD
   --ds-motion-slow: 260ms;
   --ds-ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
   --ds-layout-rail-w: 58px;
@@ -64,8 +63,6 @@
   --ds-hud-marker-size: 110px;
   --ds-fs-micro: 11px;
   --ds-tracking-ui-sm: 0.08em;
-=======
->>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   --ds-layout-gap: var(--ds-space-4);
   --ds-card-pad: var(--ds-space-4);
   --ds-label-transform: uppercase;
@@ -78,7 +75,6 @@
   --ds-bg-overlay: rgba(5, 9, 15, 0.72);
   --ds-body-bg-image: none;
   --ds-card-bg-image: none;
-<<<<<<< HEAD
   --ds-body-texture-image: none;
   --ds-card-texture-image: none;
   --ds-control-texture-image: none;
@@ -87,8 +83,6 @@
   --ds-body-backdrop-blur: 0px;
   --ds-card-backdrop-blur: 0px;
   --ds-control-backdrop-blur: 0px;
-=======
->>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 
   --ds-text: #e4ebf8;
   --ds-text-muted: #9da8bc;
@@ -135,12 +129,9 @@
   --ds-btn-primary-border: var(--ds-accent-strong);
   --ds-btn-primary-text: var(--ds-text-inverse);
   --ds-btn-primary-bg-hover: color-mix(in oklab, var(--ds-btn-primary-bg), white 10%);
-<<<<<<< HEAD
   --ds-btn-text-quiet: var(--ds-text-muted);
   --ds-btn-text-quiet-hover: var(--ds-text);
   --ds-btn-text-quiet-active: var(--ds-accent);
-=======
->>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 
   --ds-card-bg: var(--ds-bg-elevated);
   --ds-card-border: var(--ds-border);
@@ -152,11 +143,8 @@
   --ds-input-text: var(--ds-text);
   --ds-input-placeholder: var(--ds-text-muted);
   --ds-input-shadow: none;
-<<<<<<< HEAD
   --ds-input-icon-color: var(--ds-input-placeholder);
   --ds-input-icon-color-focus: var(--ds-accent);
-=======
->>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   --ds-color-input-radius: var(--ds-btn-radius);
   --ds-color-input-bg: var(--ds-btn-bg);
   --ds-color-input-shadow: var(--ds-input-shadow);
@@ -194,8 +182,4 @@
   --color-text-primary: var(--ds-text);
   --color-text-secondary: var(--ds-text-muted);
   --color-primary: var(--ds-accent);
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
