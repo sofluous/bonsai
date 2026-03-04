@@ -10,8 +10,12 @@ body {
 
 body {
   background: var(--ds-bg);
+<<<<<<< HEAD
   background-image: var(--ds-body-texture-image), var(--ds-body-bg-image);
   background-blend-mode: var(--ds-texture-blend), normal;
+=======
+  background-image: var(--ds-body-bg-image);
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   color: var(--ds-text);
   font-family: var(--ds-font-sans);
   font-size: var(--ds-fs-2);
@@ -93,7 +97,11 @@ p {
   z-index: var(--ds-z-sticky);
   background: color-mix(in oklab, var(--ds-bg) 82%, transparent);
   border-bottom: var(--ds-border-w) var(--ds-border-style) var(--ds-border);
+<<<<<<< HEAD
   backdrop-filter: blur(calc(10px + var(--ds-body-backdrop-blur)));
+=======
+  backdrop-filter: blur(10px);
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 }
 
 .ds-topbar-inner {
@@ -108,6 +116,7 @@ p {
 
 .ds-card {
   background: var(--ds-card-bg);
+<<<<<<< HEAD
   background-image: var(--ds-card-texture-image), var(--ds-card-bg-image);
   background-blend-mode: var(--ds-texture-blend), normal;
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-card-border);
@@ -115,6 +124,12 @@ p {
   box-shadow: var(--ds-card-shadow);
   backdrop-filter: blur(var(--ds-card-backdrop-blur))
     saturate(calc(1 + var(--ds-texture-strength)));
+=======
+  background-image: var(--ds-card-bg-image);
+  border: var(--ds-border-w) var(--ds-border-style) var(--ds-card-border);
+  border-radius: var(--ds-card-radius);
+  box-shadow: var(--ds-card-shadow);
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   padding: var(--ds-card-pad);
 }
 
@@ -138,11 +153,15 @@ p {
   border-radius: var(--ds-btn-radius);
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-btn-border);
   background: var(--ds-btn-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
   box-shadow: var(--ds-btn-shadow);
   backdrop-filter: blur(var(--ds-control-backdrop-blur))
     saturate(calc(1 + var(--ds-texture-strength)));
+=======
+  box-shadow: var(--ds-btn-shadow);
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   color: var(--ds-btn-text);
   padding: 0 var(--ds-btn-pad-x);
   font: inherit;
@@ -172,7 +191,10 @@ p {
 
 .ds-btn-primary {
   background: var(--ds-btn-primary-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   border-color: var(--ds-btn-primary-border);
   color: var(--ds-btn-primary-text);
 }
@@ -181,6 +203,7 @@ p {
   background: var(--ds-btn-primary-bg-hover);
 }
 
+<<<<<<< HEAD
 .ds-btn-text {
   min-height: unset;
   border: none;
@@ -202,6 +225,8 @@ p {
   color: var(--ds-btn-text-quiet-active);
 }
 
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 .ds-btn-danger {
   background: color-mix(in oklab, var(--ds-danger) 20%, var(--ds-bg-raised));
   border-color: color-mix(in oklab, var(--ds-danger) 65%, var(--ds-border));
@@ -236,6 +261,7 @@ p {
   line-height: 1;
 }
 
+<<<<<<< HEAD
 .ds-btn i,
 .ds-btn svg {
   color: currentColor;
@@ -243,6 +269,8 @@ p {
   stroke: currentColor;
 }
 
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 .ds-btn-icon.ds-btn-sm {
   width: var(--ds-btn-icon-size-sm);
   min-width: var(--ds-btn-icon-size-sm);
@@ -281,11 +309,15 @@ p {
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-input-border);
   border-radius: var(--ds-radius-2);
   background: var(--ds-input-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
   box-shadow: var(--ds-input-shadow);
   backdrop-filter: blur(var(--ds-control-backdrop-blur))
     saturate(calc(1 + var(--ds-texture-strength)));
+=======
+  box-shadow: var(--ds-input-shadow);
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   color: var(--ds-input-text);
   padding: var(--ds-space-2) var(--ds-space-3);
   font: inherit;
@@ -301,6 +333,7 @@ p {
   color: var(--ds-input-placeholder);
 }
 
+<<<<<<< HEAD
 .ds-input-icon-wrap {
   position: relative;
 }
@@ -324,6 +357,8 @@ p {
   color: var(--ds-input-icon-color-focus);
 }
 
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 /* Normalize native controls so they follow themed surfaces and geometry. */
 input[type="color"],
 .builder-color {
@@ -334,8 +369,11 @@ input[type="color"],
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-input-border);
   border-radius: var(--ds-color-input-radius);
   background: var(--ds-color-input-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   box-shadow: var(--ds-color-input-shadow);
   padding: var(--ds-color-input-pad);
   cursor: pointer;
@@ -368,8 +406,11 @@ input[type="radio"] {
   height: var(--ds-check-size);
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-check-border);
   background: var(--ds-check-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   box-shadow: var(--ds-input-shadow);
   display: inline-grid;
   place-content: center;
@@ -436,8 +477,11 @@ input[type="range"]::-webkit-slider-runnable-track {
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-range-track-border);
   border-radius: var(--ds-radius-pill);
   background: var(--ds-range-track-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -448,8 +492,11 @@ input[type="range"]::-webkit-slider-thumb {
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-range-thumb-border);
   border-radius: var(--ds-radius-pill);
   background: var(--ds-range-thumb-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   box-shadow: var(--ds-range-thumb-shadow);
   margin-top: calc((var(--ds-range-track-h) - var(--ds-range-thumb-size)) / 2);
 }
@@ -459,8 +506,11 @@ input[type="range"]::-moz-range-track {
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-range-track-border);
   border-radius: var(--ds-radius-pill);
   background: var(--ds-range-track-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -469,8 +519,11 @@ input[type="range"]::-moz-range-thumb {
   border: var(--ds-border-w) var(--ds-border-style) var(--ds-range-thumb-border);
   border-radius: var(--ds-radius-pill);
   background: var(--ds-range-thumb-bg);
+<<<<<<< HEAD
   background-image: var(--ds-control-texture-image);
   background-blend-mode: var(--ds-texture-blend);
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   box-shadow: var(--ds-range-thumb-shadow);
 }
 
@@ -579,6 +632,7 @@ input[type="range"]::-moz-range-thumb {
   background: var(--ds-accent);
 }
 
+<<<<<<< HEAD
 .ds-switch-inline {
   display: flex;
   align-items: center;
@@ -679,6 +733,8 @@ input[type="range"]::-moz-range-thumb {
   text-transform: uppercase;
 }
 
+=======
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 .ds-chip {
   display: inline-flex;
   align-items: center;
@@ -955,6 +1011,7 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: var(--ds-shadow-md);
   padding: var(--ds-space-3);
   color: var(--ds-text-muted);
+<<<<<<< HEAD
   display: block;
   opacity: 0;
   visibility: hidden;
@@ -963,6 +1020,9 @@ input[type="range"]::-moz-range-thumb {
   transition: opacity var(--ds-dur-fast) var(--ds-ease-standard),
     transform var(--ds-dur-fast) var(--ds-ease-standard),
     visibility 0s linear var(--ds-dur-fast);
+=======
+  display: none;
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
   z-index: var(--ds-z-dropdown);
 }
 
@@ -973,11 +1033,15 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .ds-popover-wrap.is-open .ds-popover {
+<<<<<<< HEAD
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
   transition-delay: 0s;
+=======
+  display: block;
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
 }
 
 .ds-modal-panel .ds-toolbar,
@@ -1109,4 +1173,8 @@ textarea::-webkit-scrollbar-track {
   .ds-topbar-inner {
     padding: var(--ds-space-3);
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac

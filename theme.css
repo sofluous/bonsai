@@ -1,4 +1,8 @@
 /* Design system entrypoint for all projects */
 @import url("./css/tokens.css");
 @import url("./css/themes.css");
+<<<<<<< HEAD
 @import url("./css/components.css");
+=======
+@import url("./css/components.css");
+>>>>>>> c37069237eb5c2e90e5721c8f3353eba17d7edac
