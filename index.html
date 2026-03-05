@@ -361,6 +361,10 @@
         display: none;
       }
 
+      #panel:not([data-tab="export"]) .export-tabs {
+        display: none;
+      }
+
       #panel[data-tab="bonsai"][data-bonsai-tab="plant"]
         .section[data-bonsai]:not([data-bonsai="plant"]),
       #panel[data-tab="bonsai"][data-bonsai-tab="vessel"]
@@ -684,6 +688,7 @@
       }
 
       .gallery-tile {
+        position: relative;
         display: grid;
         grid-template-columns: 1fr;
         gap: 6px;
@@ -756,13 +761,22 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 6px;
+        position: absolute;
+        left: 6px;
+        right: 6px;
+        bottom: 6px;
+        z-index: 2;
+        padding: 6px;
+        border: 1px solid
+          color-mix(in oklab, var(--ds-accent-strong) 24%, var(--ds-border));
+        background: color-mix(in oklab, var(--ds-bg-elevated) 90%, transparent);
+        backdrop-filter: blur(2px);
         opacity: 0;
-        max-height: 0;
-        overflow: hidden;
+        transform: translateY(3px);
         pointer-events: none;
         transition:
           opacity var(--ds-dur-fast) var(--ds-ease-standard),
-          max-height var(--ds-dur-fast) var(--ds-ease-standard);
+          transform var(--ds-dur-fast) var(--ds-ease-standard);
       }
 
       .gallery-actions .btn {
@@ -775,8 +789,98 @@
       .gallery-tile:focus-within .gallery-actions,
       .gallery-tile.is-selected .gallery-actions {
         opacity: 1;
-        max-height: calc(var(--ds-control-h-sm) + 10px);
+        transform: translateY(0);
         pointer-events: auto;
+      }
+
+      .export-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        margin: 0;
+        background: color-mix(
+          in oklab,
+          var(--ds-bg-elevated) 96%,
+          color-mix(in oklab, var(--ds-accent-strong) 48%, black) 4%
+        );
+        border-bottom: 1px solid
+          color-mix(in oklab, var(--ds-accent-strong) 26%, var(--ds-border));
+      }
+
+      .export-tab {
+        border: none;
+        border-right: 1px solid
+          color-mix(in oklab, var(--ds-accent-strong) 20%, var(--ds-border));
+        border-bottom: 2px solid transparent;
+        background: transparent;
+        color: var(--ds-text-muted);
+        font: 600 0.66rem/1 var(--ds-font-mono);
+        letter-spacing: 0.08em;
+        text-transform: var(--ds-label-transform);
+        padding: 0.5rem 0.2rem;
+        min-height: var(--bo-tab-h);
+        cursor: pointer;
+        border-radius: 0;
+        box-shadow: none;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .export-tab:last-child {
+        border-right: none;
+      }
+
+      .export-tab[aria-pressed="true"] {
+        color: var(--ds-text);
+        border-bottom-color: var(--ds-accent);
+        background: color-mix(
+          in oklab,
+          color-mix(in oklab, var(--ds-accent-strong) 82%, black) 12%,
+          var(--ds-bg-raised)
+        );
+      }
+
+      .export-panel {
+        display: grid;
+        gap: var(--bo-control-gap-lg);
+      }
+
+      .export-panel[hidden] {
+        display: none;
+      }
+
+      .export-note {
+        margin: 0;
+        color: var(--ds-text-muted);
+        font-size: 0.66rem;
+      }
+
+      .perf-stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .perf-stat {
+        display: grid;
+        gap: 3px;
+        padding: 6px;
+        border: 1px solid var(--ds-border-subtle);
+        background: var(--ds-bg-subtle);
+      }
+
+      .perf-stat .k {
+        color: var(--ds-text-muted);
+        font: 600 0.64rem/1 var(--ds-font-mono);
+        text-transform: var(--ds-label-transform);
+        letter-spacing: 0.06em;
+      }
+
+      .perf-stat .v {
+        color: var(--ds-text);
+        font: 600 0.78rem/1.2 var(--ds-font-mono);
       }
 
       .control-row {
@@ -817,17 +921,6 @@
       .export-settings {
         display: grid;
         gap: var(--bo-control-gap-lg);
-      }
-
-      .export-row {
-        display: flex;
-        gap: var(--bo-control-gap);
-        justify-content: flex-end;
-        flex-wrap: wrap;
-      }
-
-      .export-row .btn {
-        width: auto;
       }
 
       .toast-stack {
@@ -1575,6 +1668,29 @@
               Vessel
             </button>
           </div>
+          <div class="export-tabs" role="tablist" aria-label="Export type">
+            <button
+              class="btn ds-btn export-tab"
+              data-export-tab="image"
+              aria-pressed="true"
+            >
+              Image
+            </button>
+            <button
+              class="btn ds-btn export-tab"
+              data-export-tab="model"
+              aria-pressed="false"
+            >
+              Model
+            </button>
+            <button
+              class="btn ds-btn export-tab"
+              data-export-tab="gif"
+              aria-pressed="false"
+            >
+              GIF
+            </button>
+          </div>
           <div class="panel-scroll ds-scroll">
             <div class="section" data-tab="scene">
               <h2>SCENE</h2>
@@ -1761,6 +1877,7 @@
                   <select class="ds-select" id="bonsaiStyle">
                     <option value="auto">Species Auto</option>
                     <option value="formal">Formal Upright</option>
+                    <option value="informal">Informal Upright</option>
                     <option value="slant">Slanting</option>
                     <option value="cascade">Cascade</option>
                     <option value="windswept">Windswept</option>
@@ -1889,7 +2006,7 @@
                 </div>
 
                 <div class="field">
-                  <label>Variation (±%)</label>
+                  <label>Variation (+/-)</label>
                   <input
                     id="leafVar"
                     type="range"
@@ -1907,12 +2024,12 @@
                   <input
                     id="maxLeaves"
                     type="range"
-                    min="100"
-                    max="1000"
-                    step="100"
-                    value="500"
+                    min="50"
+                    max="800"
+                    step="50"
+                    value="350"
                   />
-                  <span id="maxLeaves_val">500</span>
+                  <span id="maxLeaves_val">350</span>
                 </div>
                 <div class="field">
                   <label>Lower Bias</label>
@@ -1933,7 +2050,7 @@
                     id="minPerTerminal"
                     type="number"
                     min="0"
-                    max="99"
+                    max="40"
                     step="1"
                     value="2"
                   />
@@ -1945,9 +2062,9 @@
                     id="maxPerTerminal"
                     type="number"
                     min="1"
-                    max="999"
+                    max="120"
                     step="1"
-                    value="60"
+                    value="24"
                   />
                 </div>
               </div>
@@ -2010,6 +2127,30 @@
                     value="0.45"
                   />
                   <span id="branchBias_val">0.45</span>
+                </div>
+                <div class="field">
+                  <label>Training Drop</label>
+                  <input
+                    id="branchDrop"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.35"
+                  />
+                  <span id="branchDrop_val">0.35</span>
+                </div>
+                <div class="field">
+                  <label>Training Dir</label>
+                  <input
+                    id="branchPull"
+                    type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0"
+                  />
+                  <span id="branchPull_val">0.00</span>
                 </div>
                 <!-- Phase D: Branch Length Variance & Falloff -->
                 <div class="field">
@@ -2142,16 +2283,7 @@
                     class="ds-select"
                     aria-label="Design theme"
                   >
-                    <option value="steel-night">Steel Night</option>
-                    <option value="neon-grid">Neon Grid</option>
-                    <option value="tech-grid">Tech Grid</option>
-                    <option value="industrial-terminal">
-                      Industrial Terminal
-                    </option>
-                    <option value="paper-mint">Paper Mint</option>
-                    <option value="skeuo-panel">Skeuo Panel</option>
-                    <option value="saturn-alloy">Saturn Alloy</option>
-                    <option value="eva-unit-01">EVA Unit-01</option>
+                    <option value="">Loading themes...</option>
                   </select>
                 </div>
                 <div class="field no-val">
@@ -2174,6 +2306,34 @@
                     <option value="balanced">Balanced</option>
                     <option value="mobile">Mobile</option>
                   </select>
+                </div>
+                <div class="field no-label no-val no-readout">
+                  <div class="perf-stats" aria-label="Generation stats">
+                    <div class="perf-stat">
+                      <span class="k">fps~</span>
+                      <span id="statFps" class="v">0.0</span>
+                    </div>
+                    <div class="perf-stat">
+                      <span class="k">regen~ms</span>
+                      <span id="statRegenMs" class="v">0.0</span>
+                    </div>
+                    <div class="perf-stat">
+                      <span class="k">segments</span>
+                      <span id="statSegments" class="v">0</span>
+                    </div>
+                    <div class="perf-stat">
+                      <span class="k">terminals</span>
+                      <span id="statTerminals" class="v">0</span>
+                    </div>
+                    <div class="perf-stat">
+                      <span class="k">instances</span>
+                      <span id="statInstances" class="v">0</span>
+                    </div>
+                    <div class="perf-stat">
+                      <span class="k">quality</span>
+                      <span id="statQuality" class="v">auto</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2230,105 +2390,115 @@
               />
             </div>
             <div class="section" data-tab="export">
-              <h2>EXPORT SETTINGS</h2>
               <div id="exportSettings" class="export-settings">
-                <div class="control-row">
-                  <div class="control-label">File Type</div>
-                  <div class="control-input">
-                    <select class="ds-select" id="exportKind">
-                      <option value="png">Image PNG</option>
-                      <option value="jpeg">Image JPEG</option>
-                      <option value="webp">Image WEBP</option>
-                      <option value="glb">Model GLB</option>
-                      <option value="scene-json">Model JSON</option>
-                    </select>
+                <div id="exportPanelImage" class="export-panel">
+                  <div class="control-row">
+                    <div class="control-label">Format</div>
+                    <div class="control-input">
+                      <select class="ds-select" id="exportImageKind">
+                        <option value="png">PNG</option>
+                        <option value="jpeg">JPEG</option>
+                        <option value="webp">WEBP</option>
+                      </select>
+                    </div>
+                    <div class="control-icons"></div>
                   </div>
-                  <div class="control-icons"></div>
-                </div>
-                <div id="exportQualityRow" class="control-row">
-                  <div class="control-label">Quality</div>
-                  <div class="control-input">
-                    <input
-                      id="exportQuality"
-                      type="range"
-                      min="0.4"
-                      max="1"
-                      step="0.01"
-                      value="0.92"
-                    />
-                  </div>
-                  <div class="control-icons"></div>
-                </div>
-                <div id="exportCropRow" class="control-row">
-                  <div class="control-label">Crop</div>
-                  <div class="control-input">
-                    <select id="exportCropMode" class="ds-select">
-                      <option value="full">Full Canvas</option>
-                      <option value="square">Square</option>
-                      <option value="portrait">Portrait (4:5)</option>
-                      <option value="landscape">Landscape (16:9)</option>
-                    </select>
-                  </div>
-                  <div class="control-icons"></div>
-                </div>
-                <div id="exportSizeRow" class="control-row">
-                  <div class="control-label">Size Preset</div>
-                  <div class="control-input">
-                    <select id="exportSizePreset" class="ds-select">
-                      <option value="current">Current</option>
-                      <option value="1080-square">1080 Square</option>
-                      <option value="1920x1080">1920x1080</option>
-                      <option value="2160-square">2160 Square</option>
-                      <option value="custom">Custom</option>
-                    </select>
-                  </div>
-                  <div class="control-icons"></div>
-                </div>
-                <div id="exportDimsRow" class="control-row">
-                  <div class="control-label">Output Size</div>
-                  <div class="control-input">
-                    <div class="res-inputs">
+                  <div id="exportQualityRow" class="control-row">
+                    <div class="control-label">Quality</div>
+                    <div class="control-input">
                       <input
-                        class="ds-input"
-                        type="number"
-                        id="exportWidth"
-                        min="1"
-                        value="1920"
-                      />
-                      <span>x</span>
-                      <input
-                        class="ds-input"
-                        type="number"
-                        id="exportHeight"
-                        min="1"
-                        value="1080"
+                        id="exportQuality"
+                        type="range"
+                        min="0.4"
+                        max="1"
+                        step="0.01"
+                        value="0.92"
                       />
                     </div>
+                    <div class="control-icons"></div>
                   </div>
-                  <div class="control-icons"></div>
-                </div>
-                <div id="exportAlphaRow" class="control-row">
-                  <div class="control-label">Transparent BG</div>
-                  <div class="control-input">
-                    <label
-                      class="ds-switch"
-                      aria-label="Transparent background for PNG export"
-                    >
-                      <input id="exportTransparent" type="checkbox" checked />
-                      <span class="ds-switch-track"></span>
-                    </label>
+                  <div id="exportCropRow" class="control-row">
+                    <div class="control-label">Crop</div>
+                    <div class="control-input">
+                      <select id="exportCropMode" class="ds-select">
+                        <option value="full">Full Canvas</option>
+                        <option value="square">Square</option>
+                        <option value="portrait">Portrait (4:5)</option>
+                        <option value="landscape">Landscape (16:9)</option>
+                      </select>
+                    </div>
+                    <div class="control-icons"></div>
                   </div>
-                  <div class="control-icons"></div>
+                  <div id="exportSizeRow" class="control-row">
+                    <div class="control-label">Size Preset</div>
+                    <div class="control-input">
+                      <select id="exportSizePreset" class="ds-select">
+                        <option value="current">Current</option>
+                        <option value="1080-square">1080 Square</option>
+                        <option value="1920x1080">1920x1080</option>
+                        <option value="2160-square">2160 Square</option>
+                        <option value="custom">Custom</option>
+                      </select>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
+                  <div id="exportDimsRow" class="control-row">
+                    <div class="control-label">Output Size</div>
+                    <div class="control-input">
+                      <div class="res-inputs">
+                        <input
+                          class="ds-input"
+                          type="number"
+                          id="exportWidth"
+                          min="1"
+                          value="1920"
+                        />
+                        <span>x</span>
+                        <input
+                          class="ds-input"
+                          type="number"
+                          id="exportHeight"
+                          min="1"
+                          value="1080"
+                        />
+                      </div>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
+                  <div id="exportAlphaRow" class="control-row">
+                    <div class="control-label">Transparent BG</div>
+                    <div class="control-input">
+                      <label
+                        class="ds-switch"
+                        aria-label="Transparent background for PNG export"
+                      >
+                        <input id="exportTransparent" type="checkbox" checked />
+                        <span class="ds-switch-track"></span>
+                      </label>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
                 </div>
-              </div>
-              <h2>EXPORT ACTION</h2>
-              <div class="export-row">
-                <button
-                  id="exportCurrentBtn"
-                  class="btn ds-btn btn-primary ds-btn-primary"
-                >
-                  Export
-                </button>
+
+                <div id="exportPanelModel" class="export-panel" hidden>
+                  <div class="control-row">
+                    <div class="control-label">Format</div>
+                    <div class="control-input">
+                      <select class="ds-select" id="exportModelKind">
+                        <option value="glb">GLB</option>
+                        <option value="scene-json">Scene JSON</option>
+                      </select>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
+                </div>
+
+                <div id="exportPanelGif" class="export-panel" hidden>
+                  <p class="export-note">
+                    Fixed rules: square frame, auto-fit bonsai, and one full
+                    360-degree rotation for seamless looping.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -2576,8 +2746,16 @@
       const asymmetryUI = $("asymmetry");
       const branchTwistUI = $("branchTwist");
       const qualityModeUI = $("qualityMode");
+      const statFpsUI = $("statFps");
+      const statRegenMsUI = $("statRegenMs");
+      const statSegmentsUI = $("statSegments");
+      const statTerminalsUI = $("statTerminals");
+      const statInstancesUI = $("statInstances");
+      const statQualityUI = $("statQuality");
       const minPerTerminalUI = $("minPerTerminal");
       const maxPerTerminalUI = $("maxPerTerminal");
+      const branchDropUI = $("branchDrop");
+      const branchPullUI = $("branchPull");
       const branchColorUI = $("branchColor");
       const leafColorUI = $("leafColor");
       const emissiveColorUI = $("emissiveColor");
@@ -2632,8 +2810,14 @@
       const galleryMenu = $("galleryMenu");
       const galleryExportAllBtn = $("galleryExportAllBtn");
       const galleryImportAllBtn = $("galleryImportAllBtn");
-      const exportKindUI = $("exportKind");
-      const exportCurrentBtn = $("exportCurrentBtn");
+      const exportTabButtons = Array.from(
+        document.querySelectorAll("[data-export-tab]"),
+      );
+      const exportPanelImage = $("exportPanelImage");
+      const exportPanelModel = $("exportPanelModel");
+      const exportPanelGif = $("exportPanelGif");
+      const exportImageKindUI = $("exportImageKind");
+      const exportModelKindUI = $("exportModelKind");
       const exportSettingsUI = $("exportSettings");
       const exportQualityUI = $("exportQuality");
       const exportCropModeUI = $("exportCropMode");
@@ -2663,6 +2847,18 @@
       const confirmDeleteBtn = $("confirmDeleteBtn");
       const confirmCancelBtn = $("confirmCancelBtn");
       const confirmSkip = $("confirmSkip");
+      const panelRoot = $("panel");
+      const railTabs = Array.from(document.querySelectorAll(".rail-tab"));
+      const bonsaiTabs = Array.from(document.querySelectorAll(".bonsai-tab"));
+      let activeExportTab = "image";
+      const GIF_EXPORT_RULES = {
+        size: 512,
+        frames: 36,
+        fps: 24,
+        fitMargin: 1.18,
+      };
+      let gifLibPromise = null;
+      let gifWorkerUrl = "";
 
       // --- Scene ---
       const scene = new THREE.Scene();
@@ -2744,6 +2940,21 @@
       const deg = (r) => d(THREE.MathUtils.radToDeg(r));
       const v3 = (v) => `${d(v.x)}, ${d(v.y)}, ${d(v.z)}`;
       const eulerDeg = (e) => `${deg(e.x)}, ${deg(e.y)}, ${deg(e.z)}`;
+
+      function updatePerfStats() {
+        if (statFpsUI) statFpsUI.textContent = fpsEMA.toFixed(1);
+        if (statRegenMsUI) statRegenMsUI.textContent = regenMsEMA.toFixed(1);
+        if (statSegmentsUI) statSegmentsUI.textContent = String(lastBranchSegments);
+        if (statTerminalsUI) statTerminalsUI.textContent = String(lastTerminalPieces);
+        if (statInstancesUI)
+          statInstancesUI.textContent = String(
+            (leafInstanceCount | 0) + (petalInstanceCount | 0),
+          );
+        if (statQualityUI)
+          statQualityUI.textContent = String(
+            qualityModeUI ? qualityModeUI.value : "auto",
+          );
+      }
 
       function renderHUD() {
         if (!debugToggle || !hudOverlay) return;
@@ -2922,53 +3133,64 @@
       }
 
       function setPanelTab(tab) {
-        const panel = document.getElementById("panel");
-        if (!panel) return;
-        panel.setAttribute("data-tab", tab);
+        if (!panelRoot) return;
+        const nextTab = tab || "bonsai";
+        const prevTab = panelRoot.getAttribute("data-tab") || "bonsai";
+        if (prevTab === nextTab) {
+          syncRailTabState();
+          syncSectionDividers();
+          updatePanelPrimaryAction();
+          return;
+        }
+        panelRoot.setAttribute("data-tab", nextTab);
         syncRailTabState();
         const title = document.getElementById("panelTitle");
         if (title) {
-          if (tab === "app") title.textContent = "Settings";
-          else if (tab === "scene") title.textContent = "Scene";
-          else if (tab === "render") title.textContent = "Render";
-          else if (tab === "gallery") title.textContent = "Gallery";
-          else if (tab === "export") title.textContent = "Export";
+          if (nextTab === "app") title.textContent = "Settings";
+          else if (nextTab === "scene") title.textContent = "Scene";
+          else if (nextTab === "render") title.textContent = "Render";
+          else if (nextTab === "gallery") title.textContent = "Gallery";
+          else if (nextTab === "export") title.textContent = "Export";
           else title.textContent = "Bonsai";
         }
-        localStorage.setItem("bonsai.panelTab", tab);
+        localStorage.setItem("bonsai.panelTab", nextTab);
         requestAnimationFrame(updateCanvasToolbarOffset);
         syncSectionDividers();
+        updatePanelPrimaryAction();
       }
 
       function syncRailTabState(forceClear = false) {
-        const panel = document.getElementById("panel");
-        const tab = panel?.getAttribute("data-tab") || "bonsai";
-        document.querySelectorAll(".rail-tab").forEach((btn) => {
+        const tab = panelRoot?.getAttribute("data-tab") || "bonsai";
+        railTabs.forEach((btn) => {
           const on = !forceClear && btn.dataset.tab === tab;
           btn.setAttribute("aria-pressed", on ? "true" : "false");
         });
       }
 
       function setBonsaiTab(tab) {
-        const panel = document.getElementById("panel");
-        if (!panel) return;
-        panel.setAttribute("data-bonsai-tab", tab);
-        document.querySelectorAll(".bonsai-tab").forEach((btn) => {
-          const on = btn.dataset.bonsaiTab === tab;
+        if (!panelRoot) return;
+        const nextTab = tab || "plant";
+        const prevTab = panelRoot.getAttribute("data-bonsai-tab") || "plant";
+        if (prevTab === nextTab) {
+          syncSectionDividers();
+          return;
+        }
+        panelRoot.setAttribute("data-bonsai-tab", nextTab);
+        bonsaiTabs.forEach((btn) => {
+          const on = btn.dataset.bonsaiTab === nextTab;
           btn.setAttribute("aria-pressed", on ? "true" : "false");
         });
-        localStorage.setItem("bonsai.bonsaiTab", tab);
+        localStorage.setItem("bonsai.bonsaiTab", nextTab);
         requestAnimationFrame(updateCanvasToolbarOffset);
         syncSectionDividers();
       }
 
       function syncSectionDividers() {
-        const panel = document.getElementById("panel");
-        if (!panel) return;
-        const topTab = panel.getAttribute("data-tab") || "bonsai";
-        const bonsaiTab = panel.getAttribute("data-bonsai-tab") || "plant";
+        if (!panelRoot) return;
+        const topTab = panelRoot.getAttribute("data-tab") || "bonsai";
+        const bonsaiTab = panelRoot.getAttribute("data-bonsai-tab") || "plant";
         const sections = [
-          ...panel.querySelectorAll(".panel-scroll .section[data-tab]"),
+          ...panelRoot.querySelectorAll(".panel-scroll .section[data-tab]"),
         ];
         sections.forEach((section) =>
           section.removeAttribute("data-first-visible"),
@@ -2987,7 +3209,7 @@
       function spinBy(radPerSec, dt) {
         if (!radPerSec || !dt) return;
         // rotate the whole arrangement around Y at spin pivot
-        // keep rotation “in place” visually relative to pivot Y
+        // keep rotation "in place" visually relative to pivot Y
         ike.rotation.y += radPerSec * dt;
       }
 
@@ -3216,6 +3438,210 @@
           twist: 0.41,
           branchPattern: "tiers",
           colors: { branch: 0x3b2d44, leaf: 0xe8b736 },
+        },
+      };
+
+      const BONSAI_STYLE_PROFILES = {
+        formal: {
+          trunkBend: 0.55,
+          trunkTaper: 1.25,
+          trunkPitch: 0.12,
+          trunkTwist: 0.45,
+          branchDrop: 0.22,
+          branchPull: 0.0,
+          lowerClearance: 0.36,
+          apexCompact: 0.62,
+          lateralSpread: 0.42,
+          windBias: 0.18,
+        },
+        informal: {
+          trunkBend: 0.82,
+          trunkTaper: 1.08,
+          trunkPitch: 0.18,
+          trunkTwist: 0.72,
+          branchDrop: 0.34,
+          branchPull: 0.0,
+          lowerClearance: 0.28,
+          apexCompact: 0.5,
+          lateralSpread: 0.58,
+          windBias: 0.26,
+        },
+        slant: {
+          trunkBend: 1.0,
+          trunkTaper: 1.0,
+          trunkPitch: 0.16,
+          trunkTwist: 0.7,
+          branchDrop: 0.38,
+          branchPull: 0.3,
+          lowerClearance: 0.24,
+          apexCompact: 0.46,
+          lateralSpread: 0.66,
+          windBias: 0.48,
+        },
+        cascade: {
+          trunkBend: 1.22,
+          trunkTaper: 0.9,
+          trunkPitch: 0.04,
+          trunkTwist: 0.88,
+          branchDrop: 0.82,
+          branchPull: 0.36,
+          lowerClearance: 0.16,
+          apexCompact: 0.74,
+          lateralSpread: 0.38,
+          windBias: 0.62,
+        },
+        windswept: {
+          trunkBend: 1.2,
+          trunkTaper: 0.95,
+          trunkPitch: 0.08,
+          trunkTwist: 0.92,
+          branchDrop: 0.58,
+          branchPull: 0.72,
+          lowerClearance: 0.22,
+          apexCompact: 0.56,
+          lateralSpread: 0.84,
+          windBias: 0.82,
+        },
+        literati: {
+          trunkBend: 0.9,
+          trunkTaper: 1.42,
+          trunkPitch: 0.22,
+          trunkTwist: 1.05,
+          branchDrop: 0.28,
+          branchPull: 0.12,
+          lowerClearance: 0.44,
+          apexCompact: 0.7,
+          lateralSpread: 0.28,
+          windBias: 0.2,
+        },
+      };
+
+      const SPECIES_ARCH = {
+        magnolia: {
+          apexDominance: 0.46,
+          midLeafBias: 0.78,
+          apexLeafBias: 0.24,
+          attachStartShift: -0.06,
+          attachBiasShift: -0.1,
+          branchCountMul: 1.08,
+          depthFalloff: 0.82,
+          planarity: 0.2,
+          tierSnap: 0.18,
+          pitchLow: -0.08,
+          pitchMid: 0.02,
+          pitchHigh: 0.16,
+          apexPrune: 0.32,
+          cluster: "rosette",
+          minSiblingYaw: 0.4,
+          inwardBlock: 0.55,
+          rhythmAmp: 0.06,
+          rhythmFreq: 1.8,
+          rhythmPhase: 0.12,
+        },
+        maple: {
+          apexDominance: 0.52,
+          midLeafBias: 0.64,
+          apexLeafBias: 0.38,
+          attachStartShift: -0.02,
+          attachBiasShift: -0.06,
+          branchCountMul: 1.15,
+          depthFalloff: 0.84,
+          planarity: 0.28,
+          tierSnap: 0.26,
+          pitchLow: -0.12,
+          pitchMid: 0.0,
+          pitchHigh: 0.12,
+          apexPrune: 0.3,
+          cluster: "spray",
+          minSiblingYaw: 0.46,
+          inwardBlock: 0.52,
+          rhythmAmp: 0.08,
+          rhythmFreq: 2.15,
+          rhythmPhase: 0.0,
+        },
+        pine: {
+          apexDominance: 0.68,
+          midLeafBias: 0.48,
+          apexLeafBias: 0.62,
+          attachStartShift: 0.08,
+          attachBiasShift: 0.16,
+          branchCountMul: 0.9,
+          depthFalloff: 0.72,
+          planarity: 0.72,
+          tierSnap: 0.84,
+          pitchLow: -0.2,
+          pitchMid: -0.08,
+          pitchHigh: 0.06,
+          apexPrune: 0.58,
+          cluster: "pad",
+          minSiblingYaw: 0.62,
+          inwardBlock: 0.65,
+          rhythmAmp: 0.11,
+          rhythmFreq: 2.9,
+          rhythmPhase: 0.2,
+        },
+        olive: {
+          apexDominance: 0.6,
+          midLeafBias: 0.62,
+          apexLeafBias: 0.46,
+          attachStartShift: 0.04,
+          attachBiasShift: 0.08,
+          branchCountMul: 0.92,
+          depthFalloff: 0.76,
+          planarity: 0.5,
+          tierSnap: 0.58,
+          pitchLow: -0.16,
+          pitchMid: -0.04,
+          pitchHigh: 0.1,
+          apexPrune: 0.44,
+          cluster: "pad",
+          minSiblingYaw: 0.56,
+          inwardBlock: 0.6,
+          rhythmAmp: 0.13,
+          rhythmFreq: 2.6,
+          rhythmPhase: 0.34,
+        },
+        juniper: {
+          apexDominance: 0.42,
+          midLeafBias: 0.56,
+          apexLeafBias: 0.3,
+          attachStartShift: -0.08,
+          attachBiasShift: -0.12,
+          branchCountMul: 1.04,
+          depthFalloff: 0.79,
+          planarity: 0.62,
+          tierSnap: 0.52,
+          pitchLow: -0.24,
+          pitchMid: -0.1,
+          pitchHigh: 0.02,
+          apexPrune: 0.5,
+          cluster: "spray",
+          minSiblingYaw: 0.52,
+          inwardBlock: 0.62,
+          rhythmAmp: 0.16,
+          rhythmFreq: 3.4,
+          rhythmPhase: 0.41,
+        },
+        ginkgo: {
+          apexDominance: 0.64,
+          midLeafBias: 0.5,
+          apexLeafBias: 0.56,
+          attachStartShift: 0.06,
+          attachBiasShift: 0.12,
+          branchCountMul: 0.88,
+          depthFalloff: 0.74,
+          planarity: 0.7,
+          tierSnap: 0.9,
+          pitchLow: -0.1,
+          pitchMid: 0.02,
+          pitchHigh: 0.2,
+          apexPrune: 0.52,
+          cluster: "fan",
+          minSiblingYaw: 0.68,
+          inwardBlock: 0.58,
+          rhythmAmp: 0.09,
+          rhythmFreq: 2.35,
+          rhythmPhase: 0.07,
         },
       };
 
@@ -3770,47 +4196,61 @@
         mats.branch.color.set(preset.colors.branch);
         mats.leaf.color.set(preset.colors.leaf);
 
+        const nOr = (raw, fallback) => {
+          const n = Number(raw);
+          return Number.isFinite(n) ? n : fallback;
+        };
+        const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
         const depth = parseInt(levels.value, 10);
-        const sp = parseFloat(spread.value) || preset.spread;
-        const up = parseFloat(upBias.value) || preset.upBias;
+        const sp = clamp(nOr(spread.value, preset.spread), 0, 1.2);
+        const up = clamp(nOr(upBias.value, preset.upBias), 0, 1);
         const lenFall = preset.lenFalloff;
         const leavesKind = leafType.value || preset.leaves;
-        const curv = parseFloat(curvature.value);
-        const uni = parseFloat(uniformity.value);
+        const curv = clamp(nOr(curvature.value, 0.4), 0, 1);
+        const uni = clamp(nOr(uniformity.value, 0.5), 0, 1);
         const childMin = parseInt(bMin.value, 10);
         const childMax = parseInt(bMax.value, 10);
         const depthBranches = parseInt(bDepth.value, 10);
-        const branchLenMul = parseFloat(bLen.value);
-        const densityMul = parseFloat(density.value);
-        const leafSpreadMul = parseFloat(leafSpread.value);
+        const branchLenMul = nOr(bLen.value, 1);
+        const densityMul = nOr(density.value, 1);
+        const leafSpreadMul = nOr(leafSpread.value, 1);
         const styleMode =
           bonsaiStyleUI && bonsaiStyleUI.value ? bonsaiStyleUI.value : "auto";
         const trunkType =
           styleMode === "auto" ? preset.trunk || "formal" : styleMode;
+        const styleProfile =
+          BONSAI_STYLE_PROFILES[trunkType] || BONSAI_STYLE_PROFILES.formal;
+        const speciesArch = SPECIES_ARCH[treeType.value] || SPECIES_ARCH.maple;
         const drama = Math.max(
           0,
           Math.min(
             1,
-            parseFloat(dramaUI ? dramaUI.value : "") || preset.drama || 0.5,
+            nOr(dramaUI ? dramaUI.value : NaN, preset.drama ?? 0.5),
           ),
         );
         const asymmetry = Math.max(
           0,
           Math.min(
             1,
-            parseFloat(asymmetryUI ? asymmetryUI.value : "") ||
-              preset.asym ||
-              0.35,
+            nOr(asymmetryUI ? asymmetryUI.value : NaN, preset.asym ?? 0.35),
           ),
         );
         const branchTwist = Math.max(
           0,
           Math.min(
             1,
-            parseFloat(branchTwistUI ? branchTwistUI.value : "") ||
-              preset.twist ||
-              0.3,
+            nOr(branchTwistUI ? branchTwistUI.value : NaN, preset.twist ?? 0.3),
           ),
+        );
+        const trainingDrop = clamp(
+          nOr(branchDropUI ? branchDropUI.value : NaN, styleProfile.branchDrop),
+          0,
+          1,
+        );
+        const trainingPull = clamp(
+          nOr(branchPullUI ? branchPullUI.value : NaN, styleProfile.branchPull),
+          -1,
+          1,
         );
 
         globalLeafCount = 0; // <-- reset once per generation HERE
@@ -3858,19 +4298,36 @@
           bendDir.set(asymSign * rr(r, 0.75, 1.2), -0.25, rr(r, -0.25, 0.25));
         if (trunkType === "formal")
           bendDir.set(rr(r, -0.25, 0.25), 0, rr(r, -0.25, 0.25));
+        if (trunkType === "informal")
+          bendDir.set(asymSign * rr(r, 0.25, 0.65), 0, rr(r, -0.55, 0.55));
         if (trunkType === "literati")
           bendDir.set(asymSign * rr(r, 0.2, 0.7), 0, rr(r, -0.8, 0.8));
-        bendDir.normalize().multiplyScalar((0.35 + drama * 0.95) * curv);
+        bendDir
+          .normalize()
+          .multiplyScalar((0.32 + drama * 0.98) * curv * styleProfile.trunkBend);
+        const trunkRhythmAmp = clamp(speciesArch.rhythmAmp ?? 0.08, 0, 0.28);
+        const trunkRhythmFreq = Math.max(0.6, speciesArch.rhythmFreq ?? 2.0);
+        const trunkRhythmPhase = speciesArch.rhythmPhase ?? 0;
 
         for (let i = 0; i < depth; i++) {
           const tNorm = depth > 1 ? i / (depth - 1) : 0;
+          const rhythm =
+            Math.sin(
+              (tNorm * trunkRhythmFreq + trunkRhythmPhase) * Math.PI * 2,
+            ) *
+            trunkRhythmAmp;
+          const segLenMul =
+            1 + rhythm * (0.7 + drama * 0.4) - Math.max(0, rhythm) * 0.05;
           const dramaCurve = (0.35 + 0.9 * drama) * (0.8 + 0.35 * (1 - tNorm));
           let yawBias =
             bendDir.x * (0.22 + dramaCurve * 0.55) +
             asymSign * asymmetry * 0.08 +
             (1 - uni) * rr(r, -0.3, 0.3);
           let pitchBias =
-            0.08 * curv + (1 - uni) * rr(r, -0.2, 0.2) + up * 0.05;
+            0.08 * curv +
+            (1 - uni) * rr(r, -0.2, 0.2) +
+            up * 0.05 +
+            styleProfile.trunkPitch * (1 - tNorm);
           if (trunkType === "formal") {
             yawBias *= 0.45;
             pitchBias *= 0.55;
@@ -3878,6 +4335,10 @@
           if (trunkType === "slant") {
             yawBias += asymSign * (0.12 + drama * 0.22);
             pitchBias *= 0.8;
+          }
+          if (trunkType === "informal") {
+            yawBias += rr(r, -0.18, 0.18) + asymSign * (0.14 + drama * 0.2);
+            pitchBias *= 0.7;
           }
           if (trunkType === "windswept") {
             yawBias += asymSign * (0.35 + drama * 0.35);
@@ -3891,13 +4352,16 @@
             yawBias += rr(r, -0.08, 0.08) + asymSign * (0.08 + drama * 0.12);
             pitchBias *= 0.35;
           }
-          yawBias += branchTwist * rr(r, -0.11, 0.11);
+          yawBias +=
+            branchTwist * rr(r, -0.11, 0.11) * (0.45 + styleProfile.trunkTwist);
           dir0 = dir0
             .clone()
             .applyAxisAngle(upVec, yawBias)
             .applyAxisAngle(new THREE.Vector3(1, 0, 0), pitchBias)
             .normalize();
-          const np = p.clone().addScaledVector(dir0, len * heightMul);
+          const np = p
+            .clone()
+            .addScaledVector(dir0, len * heightMul * Math.max(0.4, segLenMul));
           np.add(
             new THREE.Vector3(
               rr(r, -0.1, 0.1),
@@ -3905,13 +4369,18 @@
               rr(r, -0.1, 0.1),
             ).multiplyScalar(curv * 0.35),
           );
-          pts.push([
-            p.clone(),
-            np.clone(),
-            Math.max(0.035, 0.1 * Math.pow(lenFall, i)),
-          ]);
+          const taperExp = 0.8 + styleProfile.trunkTaper * 0.85;
+          const taper =
+            0.11 *
+            Math.pow(lenFall, i * taperExp) *
+            (1 - Math.min(0.32, drama * 0.26 * tNorm)) *
+            (1 + Math.max(0, rhythm) * 0.16 - Math.max(0, -rhythm) * 0.12);
+          pts.push([p.clone(), np.clone(), Math.max(0.026, taper)]);
           p = np;
-          len *= lenFall * rr(r, 0.95, 1.05);
+          len *=
+            lenFall *
+            rr(r, 0.95, 1.05) *
+            (1 + rhythm * 0.08 - Math.max(0, tNorm - 0.72) * 0.04);
         }
         pts.forEach(([a, b, t]) => addSegment(a, b, t));
 
@@ -3957,11 +4426,37 @@
           // Read UI
           // Respect hard caps no matter what the UI says
           const uiMax = parseInt($("maxLeaves").value, 10) || 600;
-          const MAX_LEAVES = Math.min(SAFE_INST_LIMIT, Math.max(50, uiMax));
+          const leafSizeBase = Math.max(
+            0.05,
+            parseFloat($("leafSize").value) || 1.0,
+          );
+          const spreadR = Math.max(0.05, parseFloat(leafSpread.value) || 0.6);
+          const densityRaw = Math.max(
+            0.3,
+            Math.min(3.0, parseFloat($("density").value) || 1),
+          );
+          const clusterRadius = spreadR * (0.22 + leafSizeBase * 0.55);
+          const clusterArea = Math.PI * clusterRadius * clusterRadius;
+          const visualCap = Math.round(
+            120 + clusterArea * 190 * (0.68 + densityRaw * 0.38),
+          );
+          const terminalCap = Math.max(
+            80,
+            Math.round(terminals.length * (2 + 7.5 * spreadR + 6.5 * leafSizeBase)),
+          );
+          const MAX_LEAVES = Math.min(
+            SAFE_INST_LIMIT,
+            Math.max(80, Math.min(uiMax, visualCap, terminalCap)),
+          );
 
-          const lowerBias = Math.max(
+          let lowerBias = Math.max(
             0,
             Math.min(1, parseFloat($("lowerBias").value) || 0),
+          );
+          lowerBias = clamp(
+            lowerBias + (speciesArch.attachBiasShift || 0) * 0.45,
+            0,
+            1,
           );
 
           const uiMinPT = parseInt($("minPerTerminal").value, 10) || 0;
@@ -3971,10 +4466,7 @@
           let maxPT = Math.max(1, Math.min(uiMaxPT, PER_TERM_HARD_MAX));
           if (minPT > maxPT) [minPT, maxPT] = [maxPT, minPT];
           // Soft per-terminal density suggestion (does not affect branching anymore)
-          const densityMul = Math.max(
-            0.3,
-            Math.min(3.0, parseFloat($("density").value) || 1),
-          );
+          const densityMul = densityRaw;
           // We'll use it as a gentle multiplier when computing weights -> quotas per terminal
 
           // If no terminals, nothing to do
@@ -3992,20 +4484,14 @@
 
           // 1) Group terminals by level (avoid name clash with global "levels" slider)
           const lvlMap = new Map(); // levelIdx -> array of terminals
-          let minLevel = Infinity,
-            maxLevel = -Infinity;
           for (const t of terminals) {
             if (!lvlMap.has(t.level)) lvlMap.set(t.level, []);
             lvlMap.get(t.level).push(t);
-            if (t.level < minLevel) minLevel = t.level;
-            if (t.level > maxLevel) maxLevel = t.level;
           }
 
           // Normalize level indices to 0..L-1 for smoother shares
           const levelOrder = Array.from(lvlMap.keys()).sort((a, b) => a - b);
           const L = levelOrder.length;
-          const levelIndexMap = new Map();
-          levelOrder.forEach((lvl, i) => levelIndexMap.set(lvl, i));
 
           // 2) Decide per-level share of the global budget
           // Base: uniform
@@ -4025,6 +4511,21 @@
             }
             // renormalize
             for (let i = 0; i < L; i++) levelShares[i] /= sum;
+          }
+
+          const apex = clamp(speciesArch.apexDominance ?? 0.5, 0, 1);
+          if (L > 1) {
+            let sumA = 0;
+            for (let i = 0; i < L; i++) {
+              const lowW = (L - i) / L;
+              const highW = (i + 1) / L;
+              const mixW = lowW * (1 - apex) + highW * apex;
+              levelShares[i] *= 0.6 + mixW;
+              sumA += levelShares[i];
+            }
+            if (sumA > 0) {
+              for (let i = 0; i < L; i++) levelShares[i] /= sumA;
+            }
           }
 
           // 3) Allocate per-level quotas
@@ -4050,8 +4551,10 @@
             for (const t of arr) {
               const h = Math.max(0, Math.min(1, t.hNorm));
               const mid = Math.sin(Math.PI * h);
-              let w = 0.25 + 0.75 * mid;
-              // NEW: let density gently increase the “desire” to allocate here
+              const midBias = clamp(speciesArch.midLeafBias ?? 0.65, 0, 1);
+              const apexBias = clamp(speciesArch.apexLeafBias ?? 0.35, 0, 1);
+              let w = 0.2 + mid * (0.85 * midBias) + h * (0.55 * apexBias);
+              // NEW: let density gently increase the "desire" to allocate here
               w *= densityMul;
               weights.push(w);
               wsum += w;
@@ -4132,7 +4635,7 @@
                   if (pos % order.length === 0) passes++;
                 }
               }
-              // If we couldn’t fully reach Q due to bounds, that’s OK; we prefer stability over exact match.
+              // If we couldn't fully reach Q due to bounds, that's OK; we prefer stability over exact match.
             }
 
             // Record terminal targets
@@ -4166,13 +4669,21 @@
             }
             allocatedTotal = Math.min(SAFE_INST_LIMIT, sum);
           }
-          // If allocatedTotal <= SAFE_INST_LIMIT, do nothing — being under budget is fine.
+          // If allocatedTotal <= SAFE_INST_LIMIT, do nothing; being under budget is fine.
 
           // Reuse Phase A per-leaf placement code here (no cap checks now)
-          const spreadR = parseFloat(leafSpread.value);
+          const spreadEmit = spreadR;
           const uni = parseFloat(uniformity.value);
           const upBiasVal = parseFloat(upBias.value);
           const kind = leafType.value;
+          const clusterMode = String(speciesArch.cluster || "spray");
+          const sizeBase = leafSizeBase;
+          const sizeVar = Math.max(
+            0,
+            Math.min(0.9, parseFloat($("leafVar").value) || 0.25),
+          );
+          const minVisibleScale = 0.035;
+          const zAxis = new THREE.Vector3(0, 0, 1);
 
           const base = new THREE.Object3D();
           const tmp = new THREE.Object3D();
@@ -4185,37 +4696,51 @@
             // terminal local frame aligned with t.dir (Z-forward)
             base.position.copy(t.pos);
             base.quaternion.setFromUnitVectors(
-              new THREE.Vector3(0, 0, 1),
+              zAxis,
               t.dir,
             );
             base.updateMatrix();
 
             for (let i = 0; i < count; i++) {
-              const az =
-                (i / count) * Math.PI * 2 + (1 - uni) * (r() - 0.5) * 0.6;
-              const rad = spreadR * (0.15 + 0.85 * r());
-              const lx = Math.cos(az) * rad;
-              const ly = (r() - 0.3) * 0.2;
-              const lz = Math.sin(az) * rad;
+              const tH = clamp(t.hNorm || 0, 0, 1);
+              let az =
+                (i / Math.max(1, count)) * Math.PI * 2 +
+                (1 - uni) * (r() - 0.5) * 0.6;
+              let rad = spreadEmit * (0.15 + 0.85 * r());
+              let lx = Math.cos(az) * rad;
+              let ly = (r() - 0.3) * 0.2;
+              let lz = Math.sin(az) * rad;
+
+              if (clusterMode === "pad") {
+                rad = spreadEmit * (0.26 + 0.7 * r());
+                lx = Math.cos(az) * rad;
+                lz = Math.sin(az) * rad * 0.9;
+                ly = (r() - 0.45) * 0.08;
+              } else if (clusterMode === "fan") {
+                const fanT = count <= 1 ? 0 : i / (count - 1);
+                az = (fanT - 0.5) * Math.PI * (0.85 + 0.2 * (1 - uni));
+                rad = spreadEmit * (0.2 + 0.8 * r());
+                lx = Math.sin(az) * rad;
+                lz = Math.cos(az) * rad;
+                ly = (r() - 0.35) * 0.1 + 0.06;
+              } else if (clusterMode === "rosette") {
+                rad = spreadEmit * (0.1 + 0.55 * r());
+                lx = Math.cos(az) * rad;
+                lz = Math.sin(az) * rad;
+                ly = (r() - 0.5) * 0.12;
+              }
 
               tmp.position.set(lx, ly, lz);
               const yaw = (r() - 0.5) * (1 - uni) * 1.2;
-              const pitch = (r() - 0.5) * (1 - uni) * 0.6 - upBiasVal * 0.15;
+              let pitch = (r() - 0.5) * (1 - uni) * 0.6 - upBiasVal * 0.15;
+              if (clusterMode === "pad") pitch *= 0.45;
+              if (clusterMode === "fan") pitch += 0.2;
+              if (clusterMode === "rosette") pitch += 0.08 * (1 - tH);
               tmp.rotation.set(pitch, yaw, 0);
-              // Leaf size & variation
-              const sizeBase = Math.max(
-                0.05,
-                parseFloat($("leafSize").value) || 1.0,
-              ); // base scale
-              const sizeVar = Math.max(
-                0,
-                Math.min(0.9, parseFloat($("leafVar").value) || 0.25),
-              ); // 0..0.9
-
-              // random factor in [-sizeVar, +sizeVar]
               const jitter = (r() * 2 - 1) * sizeVar;
-              // final per-leaf scale
-              const s = sizeBase * (1 + jitter);
+              const sizeByHeight = 1 - 0.22 * tH;
+              const s = sizeBase * (1 + jitter) * sizeByHeight;
+              if (s < minVisibleScale) continue;
               tmp.scale.set(s, s, s);
               tmp.updateMatrix();
 
@@ -4244,12 +4769,12 @@
           const N = pts.length;
           if (N <= 2) return [];
 
-          // Build candidates: use each segment’s END point "b" as the attachment height sample
+          // Build candidates: use each segment end point "b" as the attachment height sample
           const cand = [];
           for (let i = 1; i < N; i++) {
             // normalized height 0..1 by index along trunk (cheap and robust)
             const h = i / (N - 1);
-            if (h < startNorm) continue; // below start height → skip
+            if (h < startNorm) continue; // below start height -> skip
             cand.push({ i, h });
           }
           if (cand.length === 0) return [];
@@ -4277,20 +4802,133 @@
           return Array.from(new Set(out)).sort((a, b) => a - b);
         }
 
+        function enforceTieredAttachment(indices, totalSegments, tierSnap = 0) {
+          if (!indices || !indices.length || tierSnap <= 0) return indices || [];
+          const sorted = Array.from(new Set(indices)).sort((a, b) => a - b);
+          const desiredTiers = Math.max(
+            2,
+            Math.min(6, Math.round(2 + tierSnap * 4)),
+          );
+          const picked = [];
+          const used = new Set();
+          for (let t = 0; t < desiredTiers; t++) {
+            const h = desiredTiers === 1 ? 1 : t / (desiredTiers - 1);
+            const target = Math.max(
+              1,
+              Math.min(totalSegments - 1, Math.round(h * (totalSegments - 1))),
+            );
+            let best = -1;
+            let bestDist = Infinity;
+            for (const idx of sorted) {
+              if (used.has(idx)) continue;
+              const d = Math.abs(idx - target);
+              if (d < bestDist) {
+                best = idx;
+                bestDist = d;
+              }
+            }
+            if (best >= 0) {
+              used.add(best);
+              picked.push(best);
+            }
+          }
+          if (!picked.length) return sorted;
+          if (tierSnap >= 0.65) return picked.sort((a, b) => a - b);
+          const blend = Array.from(
+            new Set([
+              ...picked,
+              ...sorted.filter((_, i) => i % 2 === 0 || i === sorted.length - 1),
+            ]),
+          ).sort((a, b) => a - b);
+          return blend;
+        }
+
+        function steerOutward(dirVec, origin, inwardBlock = 0.58) {
+          const dirOut = dirVec.clone().normalize();
+          const toCenter = new THREE.Vector3(-origin.x, 0, -origin.z);
+          if (toCenter.lengthSq() <= 1e-6) return dirOut;
+          toCenter.normalize();
+          const inwardDot = dirOut.dot(toCenter);
+          if (inwardDot <= inwardBlock) return dirOut;
+          const outward = toCenter.clone().multiplyScalar(-1);
+          return dirOut.lerp(outward, 0.35 + 0.4 * Math.min(1, inwardDot)).normalize();
+        }
+
+        function makeChildYawOffsets(n, minSep, fanWidth, randFn) {
+          if (n <= 0) return [];
+          if (n === 1) return [0];
+          const out = [];
+          const half = (n - 1) * 0.5;
+          const jitterAmp = Math.max(0.02, minSep * 0.22);
+          for (let k = 0; k < n; k++) {
+            const base = (k - half) * minSep;
+            const jitter = (randFn() * 2 - 1) * jitterAmp;
+            out.push(base + jitter);
+          }
+          const maxAbs = out.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+          if (maxAbs > fanWidth && maxAbs > 0.001) {
+            const s = fanWidth / maxAbs;
+            for (let i = 0; i < out.length; i++) out[i] *= s;
+          }
+          return out;
+        }
+
+        function styleBranchTarget(depthNorm) {
+          const windSign =
+            Math.abs(trainingPull) > 0.01 ? Math.sign(trainingPull) : asymSign;
+          if (trunkType === "windswept") {
+            return new THREE.Vector3(
+              windSign,
+              0.1 - depthNorm * 0.18,
+              windSign * 0.16,
+            ).normalize();
+          }
+          if (trunkType === "cascade") {
+            return new THREE.Vector3(windSign * 0.28, -0.68, 0).normalize();
+          }
+          if (trunkType === "slant") {
+            return new THREE.Vector3(asymSign * 0.54, 0.2, 0).normalize();
+          }
+          if (trunkType === "literati" && depthNorm > 0.62) {
+            return new THREE.Vector3(asymSign * 0.08, 0.9, 0).normalize();
+          }
+          return null;
+        }
+
         // Recursive branching
-        function grow(origin, dirBase, levelIdx, depthLeft) {
+        function grow(origin, dirBase, levelIdx, depthLeft, roleScale = 1) {
           if (lastBranchSegments >= SEGMENTS_HARD_MAX) {
             addTerminal(origin, dirBase, levelIdx);
             return;
           }
+          const depthNorm = clamp(
+            levelIdx / Math.max(1, depthBranches),
+            0,
+            1,
+          );
+          const pitchLow = speciesArch.pitchLow ?? -0.1;
+          const pitchMid = speciesArch.pitchMid ?? 0;
+          const pitchHigh = speciesArch.pitchHigh ?? 0.1;
+          let pitchEnvelope = pitchMid;
+          if (depthNorm < 0.33) pitchEnvelope = pitchLow;
+          else if (depthNorm > 0.66) pitchEnvelope = pitchHigh;
+          const apexPrune = clamp(speciesArch.apexPrune ?? 0.35, 0, 0.9);
+          const apexZone = Math.max(0, (depthNorm - 0.62) / 0.38);
+          const lowerClearance = clamp(styleProfile.lowerClearance ?? 0.24, 0, 0.7);
+          const apexCompact = clamp(styleProfile.apexCompact ?? 0.55, 0, 0.9);
+          const lateralSpread = clamp(styleProfile.lateralSpread ?? 0.5, 0.2, 1);
+          const windBias = clamp(styleProfile.windBias ?? 0.28, 0, 1);
           const pref = preferredDir(dirBase);
           const yaw =
             rr(r, -sp, sp) * Math.PI * (0.45 + drama * 0.45) * (1 - uni) +
             asymSign * asymmetry * 0.12 +
-            rr(r, -1, 1) * branchTwist * 0.15;
-          const pitch =
+            rr(r, -1, 1) * branchTwist * 0.15 +
+            trainingPull * (0.12 + drama * 0.26) * Math.pow(0.85, levelIdx);
+          let pitch =
             rr(r, -0.2, 0.2) * Math.PI * (0.24 + drama * 0.25) * (1 - uni) -
-            rr(r, 0, up) * 0.2;
+            rr(r, 0, up) * 0.2 -
+            trainingDrop * (0.12 + drama * 0.2) * Math.pow(0.86, levelIdx);
+          pitch += pitchEnvelope * (0.45 + 0.3 * drama);
           let dir = dirBase
             .clone()
             .applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw)
@@ -4298,6 +4936,18 @@
           if (pref) {
             dir = dir.lerp(pref, uni).normalize();
           } else dir.normalize();
+          if (trainingDrop > 0 || trainingPull !== 0) {
+            const train = new THREE.Vector3(
+              trainingPull,
+              -trainingDrop * (0.72 + 0.35 * drama),
+              0,
+            );
+            if (train.lengthSq() > 0.0001) {
+              dir = dir
+                .lerp(train.normalize(), 0.2 + 0.25 * drama)
+                .normalize();
+            }
+          }
           // --- Phase D: branch length with mean + variation + per-depth falloff ---
           const meanMul = Math.max(
             0.1,
@@ -4318,7 +4968,7 @@
           // a tiny micro-jitter so things aren't too uniform
           const micro = rr ? rr(r, 0.97, 1.03) : 1.0;
 
-          // Base unit you used before was (2.6 * 0.45). We’ll keep that.
+          // Base unit you used before was (2.6 * 0.45). We'll keep that.
           // IMPORTANT: We replace Math.pow(lenFall, levelIdx) with Math.pow(fallMul, levelIdx)
           // so the user slider controls per-depth taper for *branches*.
           const baseUnit = 2.6 * 0.45;
@@ -4327,7 +4977,10 @@
             meanMul *
             Math.pow(fallMul, levelIdx) *
             (1 + jitter) *
-            micro;
+            micro *
+            (1 - apexPrune * 0.55 * apexZone) *
+            (1 - apexCompact * 0.35 * apexZone) *
+            clamp(roleScale, 0.45, 1.35);
           const end = origin.clone().addScaledVector(dir, L);
           const t = Math.max(0.02, 0.07 * Math.pow(lenFall, levelIdx + 1));
           const seg = new THREE.Mesh(new THREE.BoxGeometry(t, t, L));
@@ -4353,36 +5006,104 @@
           if (PRESETS[treeType.value].branchPattern === "tiers")
             n = Math.max(2, 3);
 
-          // depth falloff (gentle): fewer children as we go up the levels
-          n = Math.max(1, Math.round(n * Math.pow(0.78, levelIdx)));
+          // depth falloff + species architecture
+          const depthFalloff = clamp(speciesArch.depthFalloff ?? 0.78, 0.62, 0.9);
+          n = Math.max(1, Math.round(n * Math.pow(depthFalloff, levelIdx)));
+          n = Math.max(
+            1,
+            Math.round(n * clamp(speciesArch.branchCountMul ?? 1, 0.7, 1.3)),
+          );
+          n = Math.max(1, Math.round(n * (1 - apexPrune * apexZone)));
+          n = Math.max(1, Math.round(n * clamp(roleScale, 0.6, 1.15)));
+          if (depthNorm < lowerClearance) {
+            const lowerT = depthNorm / Math.max(0.08, lowerClearance);
+            const clearanceMul = 0.35 + 0.65 * lowerT;
+            n = Math.max(1, Math.round(n * clearanceMul));
+          }
+          if (depthNorm > 0.66) {
+            const topT = (depthNorm - 0.66) / 0.34;
+            const topMul = 1 - apexCompact * 0.42 * topT;
+            n = Math.max(1, Math.round(n * topMul));
+          }
 
           // hard cap to stop explosion
           n = Math.min(n, CHILDREN_HARD_MAX);
 
+          const minSep = clamp(speciesArch.minSiblingYaw ?? 0.5, 0.2, 1.15);
+          const fanWidth =
+            Math.PI *
+            (0.24 + 0.26 * (1 - uni) + 0.18 * drama) *
+            (0.72 + lateralSpread * 0.6);
+          const yawOffsets =
+            PRESETS[treeType.value].branchPattern === "whorl"
+              ? [...Array(n).keys()].map((k) => (k / Math.max(1, n)) * Math.PI * 2)
+              : makeChildYawOffsets(n, minSep, fanWidth, r);
+
           for (let k = 0; k < n; k++) {
             let dirChild = dir.clone();
-            if (PRESETS[treeType.value].branchPattern === "whorl") {
-              const yawW = (k / n) * Math.PI * 2 + branchTwist * 0.35;
-              dirChild.applyAxisAngle(new THREE.Vector3(0, 1, 0), yawW);
+            const yawLocal = yawOffsets[k] + branchTwist * 0.2;
+            dirChild.applyAxisAngle(
+              new THREE.Vector3(0, 1, 0),
+              yawLocal + trainingPull * 0.2,
+            );
+            const planarity = clamp(speciesArch.planarity ?? 0, 0, 1);
+            if (planarity > 0) {
+              const flat = dirChild.clone();
+              flat.y *= 1 - planarity * 0.58;
+              if (flat.lengthSq() > 1e-6) {
+                dirChild = dirChild.lerp(flat.normalize(), 0.22 + planarity * 0.4);
+              }
             }
-            grow(end, dirChild, levelIdx + 1, depthLeft - 1);
+            dirChild = steerOutward(
+              dirChild,
+              end,
+              clamp(speciesArch.inwardBlock ?? 0.6, 0.35, 0.9),
+            );
+            const styleTarget = styleBranchTarget(depthNorm);
+            if (styleTarget) {
+              const targetBlend =
+                (0.1 + 0.35 * windBias + 0.08 * drama) * (0.85 + 0.25 * depthNorm);
+              dirChild = dirChild.lerp(styleTarget, targetBlend);
+            }
+            dirChild.normalize();
+            const childRole =
+              roleScale *
+              (k === 0 ? 0.92 : 0.76) *
+              (n > 2 ? 0.94 : 1) *
+              (1 - apexCompact * 0.25 * apexZone);
+            grow(end, dirChild, levelIdx + 1, depthLeft - 1, childRole);
           }
         }
 
         // Phase C: choose attachment joints along the trunk using bias + start height
-        const startNorm = Math.max(
+        const startNormBase = Math.max(
           0,
           Math.min(1, parseFloat($("branchStart").value) || 0),
         );
-        const attachBias = Math.max(
+        const attachBiasBase = Math.max(
           0,
           Math.min(1, parseFloat($("branchBias").value) || 0),
         );
-        const attachIndices = pickAttachmentIndices(
+        const startNorm = clamp(
+          startNormBase + (speciesArch.attachStartShift || 0),
+          0,
+          0.95,
+        );
+        const attachBias = clamp(
+          attachBiasBase + (speciesArch.attachBiasShift || 0),
+          0,
+          1,
+        );
+        let attachIndices = pickAttachmentIndices(
           pts,
           startNorm,
           attachBias,
           ATTACH_MAX,
+        );
+        attachIndices = enforceTieredAttachment(
+          attachIndices,
+          pts.length,
+          clamp(speciesArch.tierSnap ?? 0, 0, 1),
         );
 
         // Spawn first-level branches from chosen joints
@@ -4390,21 +5111,57 @@
           const i = attachIndices[ai];
           const [a, b] = pts[i];
           const dir = new THREE.Vector3().subVectors(b, a).normalize();
+          const firstDepthNorm = clamp(i / Math.max(1, pts.length - 1), 0, 1);
+          const lowerClearance = clamp(styleProfile.lowerClearance ?? 0.24, 0, 0.7);
+          const apexCompact = clamp(styleProfile.apexCompact ?? 0.55, 0, 0.9);
 
           // root fan of first-level branches from each joint (still capped; no density multiplier)
           let n0 = Math.max(1, Math.floor(rr(r, childMin, childMax + 1)));
           if (PRESETS[treeType.value].branchPattern === "whorl")
             n0 = Math.max(3, 4);
+          n0 = Math.max(
+            1,
+            Math.round(n0 * clamp(speciesArch.branchCountMul ?? 1, 0.7, 1.3)),
+          );
+          if (firstDepthNorm < lowerClearance) {
+            const lowerT = firstDepthNorm / Math.max(0.08, lowerClearance);
+            n0 = Math.max(1, Math.round(n0 * (0.36 + 0.64 * lowerT)));
+          }
+          if (firstDepthNorm > 0.7) {
+            const topT = (firstDepthNorm - 0.7) / 0.3;
+            n0 = Math.max(1, Math.round(n0 * (1 - apexCompact * 0.34 * topT)));
+          }
           n0 = Math.min(n0, CHILDREN_HARD_MAX);
 
           for (let m = 0; m < n0; m++) {
             let d0 = dir.clone();
             if (PRESETS[treeType.value].branchPattern === "whorl") {
               const yaw0 = (m / n0) * Math.PI * 2 + branchTwist * 0.35;
+              d0.applyAxisAngle(new THREE.Vector3(0, 1, 0), trainingPull * 0.4);
               d0.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw0);
+            } else if (n0 > 1) {
+              const fan0 = (m / (n0 - 1) - 0.5) * Math.PI * 0.5;
+              d0.applyAxisAngle(
+                new THREE.Vector3(0, 1, 0),
+                fan0 + trainingPull * 0.25,
+              );
             }
+            const planarity0 = clamp(speciesArch.planarity ?? 0, 0, 1);
+            if (planarity0 > 0) {
+              const flat0 = d0.clone();
+              flat0.y *= 1 - planarity0 * 0.55;
+              if (flat0.lengthSq() > 1e-6)
+                d0 = d0.lerp(flat0.normalize(), 0.18 + planarity0 * 0.35);
+            }
+            d0 = steerOutward(
+              d0,
+              b,
+              clamp(speciesArch.inwardBlock ?? 0.6, 0.35, 0.9),
+            );
+            d0.normalize();
             // Use i as levelIdx anchor (consistent with your existing scheme)
-            grow(b, d0, i, depthBranches);
+            const primaryRole = m === 0 ? 1.12 : 0.84;
+            grow(b, d0, i, depthBranches, primaryRole);
           }
         }
 
@@ -4488,6 +5245,7 @@
         const regenMs = performance.now() - regenT0;
         regenMsEMA =
           regenMsEMA === 0 ? regenMs : regenMsEMA * 0.82 + regenMs * 0.18;
+        updatePerfStats();
       }
 
       function applyVesselOnly() {
@@ -4509,13 +5267,19 @@
       let selectedSnapshotId = null;
       let pendingDeleteSnapshotId = null;
 
-      function showToast(message, kind = "info", ms = 2200) {
+      function showToast(message, kind = "info", ms) {
         if (!toastStack) return;
+        const ttl =
+          typeof ms === "number" && Number.isFinite(ms)
+            ? ms
+            : kind === "warn"
+              ? 5200
+              : 3600;
         const el = document.createElement("div");
         el.className = `toast${kind === "warn" ? " is-warn" : ""}`;
         el.textContent = String(message || "");
         toastStack.appendChild(el);
-        window.setTimeout(() => el.remove(), ms);
+        window.setTimeout(() => el.remove(), ttl);
       }
 
       function closeDeleteConfirm() {
@@ -4617,6 +5381,8 @@
           "bLen",
           "branchStart",
           "branchBias",
+          "branchDrop",
+          "branchPull",
           "bLenVar",
           "bFall",
           "vesselType",
@@ -4959,8 +5725,9 @@
       }
 
       function getExportOptionsFromUI(kind) {
+        const selectedKind = String(kind || getSelectedExportKind() || "png");
         return {
-          kind: String(kind || exportKindUI?.value || "png"),
+          kind: selectedKind,
           quality: parseFloat(exportQualityUI?.value || "0.92") || 0.92,
           cropMode: String(exportCropModeUI?.value || "full"),
           sizePreset: String(exportSizePresetUI?.value || "current"),
@@ -4970,9 +5737,49 @@
         };
       }
 
+      function getSelectedExportKind() {
+        if (activeExportTab === "model") {
+          return String(exportModelKindUI?.value || "glb");
+        }
+        if (activeExportTab === "gif") return "gif";
+        return String(exportImageKindUI?.value || "png");
+      }
+
+      function updatePanelPrimaryAction() {
+        if (!snapSaveBtn) return;
+        const topTab = panelRoot?.getAttribute("data-tab") || "bonsai";
+        if (topTab !== "export") {
+          snapSaveBtn.textContent = "Save Snapshot";
+          return;
+        }
+        const mode = getSelectedExportKind();
+        if (mode === "glb") snapSaveBtn.textContent = "Export GLB";
+        else if (mode === "scene-json") snapSaveBtn.textContent = "Export JSON";
+        else if (mode === "gif") snapSaveBtn.textContent = "Export GIF";
+        else snapSaveBtn.textContent = `Export ${String(mode).toUpperCase()}`;
+      }
+
+      function setExportTab(tab) {
+        const nextTab = tab === "model" || tab === "gif" ? tab : "image";
+        activeExportTab = nextTab;
+        exportTabButtons.forEach((btn) => {
+          const on = btn.dataset.exportTab === nextTab;
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        if (exportPanelImage) exportPanelImage.hidden = nextTab !== "image";
+        if (exportPanelModel) exportPanelModel.hidden = nextTab !== "model";
+        if (exportPanelGif) exportPanelGif.hidden = nextTab !== "gif";
+        updateExportSettingsVisibility();
+        updatePanelPrimaryAction();
+      }
+
       function exportCurrentView(kind, opts = {}) {
         try {
           const mode = String(kind || "png");
+          if (mode === "gif") {
+            exportLoopGif();
+            return;
+          }
           if (mode === "png" || mode === "jpeg" || mode === "webp") {
             const options = {
               ...getExportOptionsFromUI(mode),
@@ -5045,8 +5852,129 @@
         }
       }
 
+      function loadGifExporter() {
+        if (window.GIF) return Promise.resolve(window.GIF);
+        if (gifLibPromise) return gifLibPromise;
+        gifLibPromise = new Promise(async (resolve, reject) => {
+          const sources = [
+            {
+              lib: "https://unpkg.com/gif.js@0.2.0/dist/gif.js",
+              worker: "https://unpkg.com/gif.js@0.2.0/dist/gif.worker.js",
+            },
+            {
+              lib: "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js",
+              worker:
+                "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js",
+            },
+            {
+              lib: "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js",
+              worker:
+                "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js",
+            },
+          ];
+
+          const loadScript = (url) =>
+            new Promise((res, rej) => {
+              const script = document.createElement("script");
+              script.src = url;
+              script.async = true;
+              script.onload = () => res();
+              script.onerror = () => rej(new Error(`Failed to load: ${url}`));
+              document.head.appendChild(script);
+            });
+
+          for (const src of sources) {
+            try {
+              await loadScript(src.lib);
+              if (window.GIF) {
+                gifWorkerUrl = src.worker;
+                resolve(window.GIF);
+                return;
+              }
+            } catch (err) {
+              // try next CDN
+            }
+          }
+          reject(new Error("Unable to load GIF exporter from available CDNs"));
+        });
+        return gifLibPromise;
+      }
+
+      async function exportLoopGif() {
+        const {
+          size: outSize,
+          frames,
+          fps,
+          fitMargin,
+        } = GIF_EXPORT_RULES;
+        const frameDelayMs = Math.max(10, Math.round(1000 / fps));
+        const prevRot = ike.rotation.y;
+        const prevTarget = controls.target.clone();
+        const prevCameraPos = camera.position.clone();
+        const prevAuto = autoOn;
+        const prevHold = holdSpin;
+        try {
+          const GIF = await loadGifExporter();
+          showToast("Rendering GIF...");
+          setAutoRotate(false);
+          holdSpin = 0;
+
+          const { center, radius } = getBonsaiSphere();
+          const dist = fitDistanceForSphere(radius, camera.fov, 1, fitMargin);
+          const baseViewDir = new THREE.Vector3(1, 0.62, 1).normalize();
+          controls.target.copy(center);
+          camera.position.copy(center).addScaledVector(baseViewDir, dist);
+          controls.update();
+
+          const gif = new GIF({
+            workers: 1,
+            quality: 10,
+            width: outSize,
+            height: outSize,
+            workerScript:
+              gifWorkerUrl ||
+              "https://unpkg.com/gif.js@0.2.0/dist/gif.worker.js",
+          });
+
+          for (let i = 0; i < frames; i++) {
+            ike.rotation.y = prevRot + (Math.PI * 2 * i) / frames;
+            const frameCanvas = buildExportCanvas({
+              cropMode: "square",
+              sizePreset: "custom",
+              width: outSize,
+              height: outSize,
+              transparent: false,
+            });
+            gif.addFrame(frameCanvas, { copy: true, delay: frameDelayMs });
+          }
+
+          await new Promise((resolve, reject) => {
+            gif.on("finished", (blob) => {
+              downloadBlob(blob, `bonsai_loop_${Date.now()}.gif`);
+              resolve();
+            });
+            gif.on("abort", () => reject(new Error("GIF render aborted")));
+            gif.on("error", (err) => reject(err || new Error("GIF render failed")));
+            gif.render();
+          });
+          showToast("Exported GIF (square seamless loop)");
+        } catch (err) {
+          console.warn("GIF export failed", err);
+          const reason =
+            err && err.message ? String(err.message) : "Unknown error";
+          showToast(`GIF export failed: ${reason}`, "warn");
+        } finally {
+          ike.rotation.y = prevRot;
+          controls.target.copy(prevTarget);
+          camera.position.copy(prevCameraPos);
+          controls.update();
+          holdSpin = prevHold;
+          setAutoRotate(prevAuto);
+        }
+      }
+
       function updateExportSettingsVisibility() {
-        const kind = String(exportKindUI?.value || "png");
+        const kind = getSelectedExportKind();
         const isImage = kind === "png" || kind === "jpeg" || kind === "webp";
         const isLossy = kind === "jpeg" || kind === "webp";
         const isPng = kind === "png";
@@ -5073,6 +6001,7 @@
         controls.update();
         renderer.render(scene, camera);
         renderHUD();
+        updatePerfStats();
         if (debugToggle && debugToggle.checked) {
           gizmo.visible = true;
           gizmo.position.copy(controls.target);
@@ -5196,6 +6125,12 @@
         if (!treeType) return;
         const p = PRESETS[treeType.value];
         if (!p) return;
+        const styleKey =
+          bonsaiStyleUI && bonsaiStyleUI.value && bonsaiStyleUI.value !== "auto"
+            ? bonsaiStyleUI.value
+            : p.trunk || "formal";
+        const styleProfile =
+          BONSAI_STYLE_PROFILES[styleKey] || BONSAI_STYLE_PROFILES.formal;
         if (bonsaiStyleUI && bonsaiStyleUI.value === "auto") {
           if (dramaUI) dramaUI.value = String(p.drama ?? dramaUI.value ?? 0.55);
           if (asymmetryUI)
@@ -5203,6 +6138,22 @@
           if (branchTwistUI)
             branchTwistUI.value = String(
               p.twist ?? branchTwistUI.value ?? 0.35,
+            );
+          if (branchDropUI)
+            branchDropUI.value = String(
+              styleProfile.branchDrop ?? branchDropUI.value ?? 0.35,
+            );
+          if (branchPullUI)
+            branchPullUI.value = String(
+              styleProfile.branchPull ?? branchPullUI.value ?? 0,
+            );
+          if ($("branchDrop_val"))
+            $("branchDrop_val").textContent = String(
+              Number(branchDropUI?.value || 0).toFixed(2),
+            );
+          if ($("branchPull_val"))
+            $("branchPull_val").textContent = String(
+              Number(branchPullUI?.value || 0).toFixed(2),
             );
         }
       }
@@ -5228,6 +6179,8 @@
         $("maxPerTerminal"),
         $("branchStart"),
         $("branchBias"),
+        branchDropUI,
+        branchPullUI,
         $("heightScale"),
         $("leafSize"),
         $("leafVar"),
@@ -5284,6 +6237,14 @@
       $("branchBias").addEventListener(
         "input",
         (e) => ($("branchBias_val").textContent = e.target.value),
+      );
+      $("branchDrop").addEventListener(
+        "input",
+        (e) => ($("branchDrop_val").textContent = Number(e.target.value).toFixed(2)),
+      );
+      $("branchPull").addEventListener(
+        "input",
+        (e) => ($("branchPull_val").textContent = Number(e.target.value).toFixed(2)),
       );
       $("heightScale").addEventListener(
         "input",
@@ -5344,7 +6305,7 @@
       if (randomizeAllBtn) {
         randomizeAllBtn.addEventListener("click", randomizeAllProperties);
       }
-      document.querySelectorAll(".rail-tab").forEach((btn) => {
+      railTabs.forEach((btn) => {
         btn.addEventListener("click", () => {
           setPanelTab(btn.dataset.tab || "bonsai");
           if (appRoot.classList.contains("panel-hidden")) {
@@ -5352,7 +6313,7 @@
           }
         });
       });
-      document.querySelectorAll(".bonsai-tab").forEach((btn) => {
+      bonsaiTabs.forEach((btn) => {
         btn.addEventListener("click", () =>
           setBonsaiTab(btn.dataset.bonsaiTab || "plant"),
         );
@@ -5416,7 +6377,14 @@
         camZoomResetBtn.addEventListener("click", () => setViewPreset("home"));
       }
       if (snapSaveBtn) {
-        snapSaveBtn.addEventListener("click", createSnapshot);
+        snapSaveBtn.addEventListener("click", () => {
+          const topTab = panelRoot?.getAttribute("data-tab") || "bonsai";
+          if (topTab === "export") {
+            exportCurrentView(getSelectedExportKind());
+            return;
+          }
+          createSnapshot();
+        });
       }
       if (galleryExportAllBtn) {
         galleryExportAllBtn.addEventListener("click", () => {
@@ -5506,8 +6474,28 @@
           galleryMenuBtn.setAttribute("aria-expanded", "false");
         });
       }
-      if (exportKindUI) {
-        exportKindUI.addEventListener("change", updateExportSettingsVisibility);
+      exportTabButtons.forEach((btn) => {
+        btn.addEventListener("click", () =>
+          setExportTab(btn.dataset.exportTab || "image"),
+        );
+      });
+      if (exportImageKindUI) {
+        exportImageKindUI.addEventListener(
+          "change",
+          () => {
+            updateExportSettingsVisibility();
+            updatePanelPrimaryAction();
+          },
+        );
+      }
+      if (exportModelKindUI) {
+        exportModelKindUI.addEventListener(
+          "change",
+          () => {
+            updateExportSettingsVisibility();
+            updatePanelPrimaryAction();
+          },
+        );
       }
       if (exportSizePresetUI) {
         exportSizePresetUI.addEventListener(
@@ -5515,12 +6503,6 @@
           updateExportSettingsVisibility,
         );
       }
-      if (exportCurrentBtn) {
-        exportCurrentBtn.addEventListener("click", () =>
-          exportCurrentView(exportKindUI?.value || "png"),
-        );
-      }
-
       // Left/Right: smooth while held; also pause auto when you touch them
       function onHold(dir, isDown) {
         setAutoRotate(false);
@@ -5731,53 +6713,112 @@
 
       // === Theme switching (DesignSystemizer) ===
       (() => {
-        const app = document.getElementById("app");
         const themeSelect = document.getElementById("themeSelect");
-        if (!app || !themeSelect) return;
+        if (!themeSelect) return;
         const rootEl = document.documentElement;
-        const legacyAccentToTheme = {
-          cyan: "steel-night",
-          magenta: "eva-unit-01",
-          amber: "amber-terminal",
-          lime: "industrial-terminal",
-          black: "mono-slate",
-          white: "paper-mint",
+
+        const formatThemeLabel = (name) =>
+          String(name || "")
+            .trim()
+            .split("-")
+            .filter(Boolean)
+            .map((part) =>
+              part.length <= 3
+                ? part.toUpperCase()
+                : part.charAt(0).toUpperCase() + part.slice(1),
+            )
+            .join(" ");
+
+        const discoverDesignSystemThemes = () => {
+          const set = new Set();
+          const push = (v) => {
+            const t = String(v || "").trim();
+            if (t) set.add(t);
+          };
+          const collectFromSelector = (text) => {
+            if (!text || text.indexOf("[data-theme") < 0) return;
+            const rx =
+              /\[data-theme(?:\s*=\s*(?:(['"])([^'"]+)\1|([^\]'"\s]+)))?\]/g;
+            let m;
+            while ((m = rx.exec(text))) {
+              const name = m[2] || m[3] || "";
+              if (name) push(name);
+            }
+          };
+          const visitRules = (rules) => {
+            if (!rules) return;
+            for (const rule of Array.from(rules)) {
+              const text = String(rule.selectorText || "");
+              collectFromSelector(text);
+              if (rule.cssRules && rule.cssRules.length) {
+                visitRules(rule.cssRules);
+              } else if (rule.styleSheet) {
+                // CSSImportRule: recurse into imported stylesheet
+                try {
+                  if (rule.styleSheet.cssRules) {
+                    visitRules(rule.styleSheet.cssRules);
+                  }
+                } catch (err) {}
+              }
+            }
+          };
+          push(rootEl.getAttribute("data-theme"));
+          for (const opt of Array.from(themeSelect.options || [])) {
+            push(opt.value);
+          }
+          for (const sheet of Array.from(document.styleSheets || [])) {
+            let rules;
+            try {
+              rules = sheet.cssRules || sheet.rules;
+            } catch (err) {
+              continue;
+            }
+            visitRules(rules);
+          }
+          return Array.from(set).sort((a, b) => a.localeCompare(b));
+        };
+
+        const buildThemeOptions = (themeNames) => {
+          const options = themeNames.length
+            ? themeNames
+            : [rootEl.getAttribute("data-theme") || "steel-night"];
+          themeSelect.innerHTML = "";
+          for (const theme of options) {
+            const opt = document.createElement("option");
+            opt.value = theme;
+            opt.textContent = formatThemeLabel(theme);
+            themeSelect.appendChild(opt);
+          }
         };
 
         const setTheme = (theme) => {
-          if (theme) rootEl.setAttribute("data-theme", theme);
-          app.style.setProperty(
-            "--text-on-accent",
-            cssVar("--ds-btn-primary-text", cssVar("--ds-text-inverse")),
-          );
-
-          // Persist
-          localStorage.setItem(
-            "bonsai.theme",
-            rootEl.getAttribute("data-theme"),
-          );
+          if (!theme) return;
+          rootEl.setAttribute("data-theme", theme);
+          localStorage.setItem("bonsai.theme", theme);
         };
 
-        themeSelect.addEventListener("change", () => {
-          const theme = themeSelect.value;
-          setTheme(theme);
-        });
+        const themes = discoverDesignSystemThemes();
+        buildThemeOptions(themes);
 
-        // --- initial sync (from storage or existing attrs) ---
-        const legacyAccent = localStorage.getItem("bonsai.accent");
         const storedTheme =
           localStorage.getItem("bonsai.theme") ||
-          (legacyAccent ? legacyAccentToTheme[legacyAccent] : null) ||
           rootEl.getAttribute("data-theme") ||
-          "steel-night";
-
-        // reflect in UI
-        if ([...themeSelect.options].some((opt) => opt.value === storedTheme)) {
-          themeSelect.value = storedTheme;
-        } else {
-          themeSelect.value = "steel-night";
+          (themes[0] || "steel-night");
+        const hasStored = Array.from(themeSelect.options).some(
+          (opt) => opt.value === storedTheme,
+        );
+        if (!hasStored) {
+          const opt = document.createElement("option");
+          opt.value = storedTheme;
+          opt.textContent = formatThemeLabel(storedTheme);
+          themeSelect.appendChild(opt);
         }
-        setTheme(themeSelect.value);
+        themeSelect.value = storedTheme;
+        setTheme(storedTheme);
+
+        themeSelect.addEventListener("change", () => {
+          setTheme(themeSelect.value);
+        });
       })();
 
       // Toolbar actions – forward to existing controls
@@ -6053,7 +7094,7 @@
         const storedBonsaiTab =
           localStorage.getItem("bonsai.bonsaiTab") || "plant";
         setBonsaiTab(storedBonsaiTab);
-        updateExportSettingsVisibility();
+        setExportTab("image");
         syncSectionDividers();
         syncFormDefaultsFromSpecies();
         setSeed((Math.random() * 0xffffffff) >>> 0);
@@ -6074,3 +7115,4 @@
     </script>
   </body>
 </html>
+
