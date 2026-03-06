@@ -16,9 +16,11 @@
    ----------------------------------------------------------------------------- */
       :root {
         /* Layout */
-        --panel-w: 380px;
+        --panel-w: 420px;
         --rail-w: 58px;
         --mobile-rail-h: 52px;
+        --bo-shell-gap: 10px;
+        --bo-shell-pad: 10px;
         --bo-breakpoint-md: 900px;
         --bo-panel-head-h: 42px;
         --bo-app-head-h: 52px;
@@ -29,9 +31,22 @@
         --bo-control-gap-lg: 8px;
         --bo-panel-pad-x: 12px;
         --bo-panel-pad-y: 8px;
-        --bo-field-label-w: 108px;
+        --bo-field-label-w: 124px;
+        --bo-field-value-w: 56px;
         --bo-cam-cell: 36px;
         --bo-cam-gap: 6px;
+        --bo-shell-radius: var(--ds-radius-3);
+        --bo-shell-surface: color-mix(
+          in oklab,
+          var(--ds-bg-elevated) 94%,
+          transparent
+        );
+        --bo-shell-border: var(--ds-border-w) var(--ds-border-style)
+          color-mix(in oklab, var(--ds-accent-strong) 26%, var(--ds-border));
+        --bo-shell-shadow: var(
+          --ds-card-shadow,
+          0 12px 26px color-mix(in oklab, var(--ds-bg) 55%, transparent)
+        );
 
         --hud-border: var(--ds-border-w) var(--ds-border-style)
           color-mix(in oklab, var(--ds-accent) 45%, var(--ds-border));
@@ -82,8 +97,11 @@
         grid-template-areas:
           "apphead apphead stage"
           "rail panel stage";
+        gap: var(--bo-shell-gap);
+        padding: var(--bo-shell-pad);
         background: var(--ds-bg);
         color: var(--ds-text);
+        box-sizing: border-box;
       }
 
       #sidebar {
@@ -97,19 +115,18 @@
           180deg,
           color-mix(
             in oklab,
-            var(--ds-bg-elevated) 96%,
+            var(--bo-shell-surface) 96%,
             color-mix(in oklab, var(--ds-accent-strong) 48%, black) 4%
           ),
           color-mix(
             in oklab,
-            var(--ds-bg-elevated) 92%,
+            var(--bo-shell-surface) 92%,
             color-mix(in oklab, var(--ds-accent-strong) 48%, black) 8%
           )
         );
-        border-right: 1px solid
-          color-mix(in oklab, var(--ds-accent-strong) 30%, var(--ds-border));
-        box-shadow: inset -1px 0 0
-          color-mix(in oklab, var(--ds-accent) 12%, transparent);
+        border: var(--bo-shell-border);
+        box-shadow: var(--bo-shell-shadow);
+        border-radius: var(--bo-shell-radius);
       }
 
       .side-fill {
@@ -120,6 +137,11 @@
         width: 100%;
         min-height: var(--bo-rail-btn-h);
         height: var(--bo-rail-btn-h);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
         border: 1px solid
           color-mix(in oklab, var(--ds-accent-strong) 28%, var(--ds-border));
         background: color-mix(
@@ -136,6 +158,24 @@
           background var(--t-fast) var(--e-out),
           border-color var(--t-fast) var(--e-out),
           color var(--t-fast) var(--e-out);
+      }
+
+      .side-btn .side-icon {
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .side-divider {
+        width: 100%;
+        height: 1px;
+        margin: 2px 0;
+        background: color-mix(
+          in oklab,
+          var(--ds-accent-strong) 32%,
+          var(--ds-border)
+        );
+        opacity: 0.65;
+        flex: 0 0 auto;
       }
 
       .side-btn[aria-pressed="true"] {
@@ -170,17 +210,14 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        background: var(--ds-bg-elevated);
-        box-shadow:
-          inset -1px 0 0 var(--ds-border),
-          10px 0 24px
-            color-mix(in oklab, var(--ds-accent-strong) 10%, transparent);
-        border-right: 1px solid
-          color-mix(in oklab, var(--ds-border) 75%, transparent);
+        background: var(--bo-shell-surface);
+        box-shadow: var(--bo-shell-shadow);
+        border: var(--bo-shell-border);
         padding: 0;
         box-sizing: border-box;
         position: relative;
         min-height: 0;
+        border-radius: var(--bo-shell-radius);
       }
 
       .app-head {
@@ -191,21 +228,22 @@
         gap: var(--bo-control-gap-lg);
         min-height: var(--bo-app-head-h);
         padding: var(--ds-space-3) var(--ds-space-3);
-        border-bottom: 1px solid
-          color-mix(in oklab, var(--ds-accent-strong) 28%, var(--ds-border));
+        border: var(--bo-shell-border);
         background: linear-gradient(
           180deg,
           color-mix(
             in oklab,
-            var(--ds-bg-raised) 90%,
+            var(--bo-shell-surface) 90%,
             color-mix(in oklab, var(--ds-accent-strong) 48%, black) 10%
           ),
           color-mix(
             in oklab,
-            var(--ds-bg-elevated) 98%,
+            var(--bo-shell-surface) 98%,
             color-mix(in oklab, var(--ds-accent-strong) 48%, black) 2%
           )
         );
+        box-shadow: var(--bo-shell-shadow);
+        border-radius: var(--bo-shell-radius);
       }
 
       .app-title {
@@ -241,7 +279,7 @@
           color-mix(in oklab, var(--ds-accent) 8%, transparent) 0 1px,
           transparent 1px 12px
         );
-        opacity: 0.18;
+        opacity: 0.1;
       }
 
       /* Section */
@@ -328,6 +366,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 6px;
       }
 
       .bonsai-tab:last-child {
@@ -383,6 +422,34 @@
         opacity: 0.92;
         font-weight: 600;
       }
+      .section-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .section-toggle .section-chevron {
+        font-size: 14px;
+        line-height: 1;
+        transition: transform var(--t-fast) var(--e-out);
+      }
+
+      .section.is-collapsed .section-chevron {
+        transform: rotate(-90deg);
+      }
+
+      .section.is-collapsed > :not(h2) {
+        display: none !important;
+      }
 
       /* Form grid */
       .form {
@@ -410,10 +477,9 @@
       }
 
       .form .field.field-inline {
-        grid-template-columns: minmax(
-            var(--bo-field-label-w),
-            auto
-          ) 1fr auto auto;
+        grid-template-columns:
+          minmax(var(--bo-field-label-w), auto)
+          1fr auto auto;
       }
 
       .form .field > label:not(.ds-switch) {
@@ -426,13 +492,18 @@
         grid-column: 2;
       }
 
-      .form .field span {
+      .form .field > span {
         grid-column: 3;
         justify-self: end;
-        min-width: 4ch;
+        width: var(--bo-field-value-w);
+        min-width: var(--bo-field-value-w);
+        max-width: var(--bo-field-value-w);
         color: var(--ds-text-muted);
         text-align: right;
         font-variant-numeric: tabular-nums;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .form .field.no-val > input:not([type="checkbox"]),
@@ -565,6 +636,11 @@
         flex: 0 0 var(--ds-control-h-sm);
       }
 
+      /* Debug demo row keeps interval + switch aligned on one line */
+      .form .field.demo-row > input:not([type="checkbox"]) {
+        grid-column: 2;
+      }
+
       /* Color */
       input[type="color"] {
         width: var(--ds-control-h);
@@ -632,53 +708,30 @@
         align-content: start;
       }
 
-      .gallery-menu-wrap {
+      .gallery-head-actions {
         display: flex;
         align-items: center;
         gap: 6px;
-        position: relative;
       }
 
-      #galleryHeadMenu {
-        display: flex;
-      }
-
-      .gallery-menu-btn {
-        width: var(--ds-control-h-sm);
-        min-width: var(--ds-control-h-sm);
-        height: var(--ds-control-h-sm);
-        padding: 0;
-        display: grid;
-        place-items: center;
-      }
-
-      .gallery-menu {
-        position: absolute;
-        right: 0;
-        top: calc(100% + 6px);
-        z-index: 15;
-        display: grid;
-        gap: 6px;
-        min-width: 180px;
-        padding: 6px;
-        border: 1px solid
-          color-mix(in oklab, var(--ds-accent-strong) 34%, var(--ds-border));
-        background: color-mix(
-          in oklab,
-          var(--ds-bg-elevated) 96%,
-          color-mix(in oklab, var(--ds-accent-strong) 48%, black) 4%
-        );
-        box-shadow: var(--glow-outer);
-      }
-
-      .gallery-menu[hidden] {
-        display: none;
+      .snapshot-count {
+        margin-left: 6px;
+        color: var(--ds-text-muted);
+        font: 600 0.62rem/1 var(--ds-font-mono);
+        letter-spacing: 0.02em;
+        text-transform: none;
       }
 
       .gallery-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: 8px;
+      }
+
+      .gallery-more-row {
+        margin-top: 8px;
+        display: flex;
+        justify-content: center;
       }
 
       @media (max-width: 480px) {
@@ -826,6 +879,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 6px;
       }
 
       .export-tab:last-child {
@@ -840,6 +894,12 @@
           color-mix(in oklab, var(--ds-accent-strong) 82%, black) 12%,
           var(--ds-bg-raised)
         );
+      }
+
+      .bonsai-tab .tab-icon,
+      .export-tab .tab-icon {
+        font-size: 14px;
+        line-height: 1;
       }
 
       .export-panel {
@@ -885,10 +945,9 @@
 
       .control-row {
         display: grid;
-        grid-template-columns: minmax(110px, var(--bo-field-label-w)) minmax(
-            0,
-            1fr
-          ) auto;
+        grid-template-columns:
+          minmax(110px, var(--bo-field-label-w)) minmax(0, 1fr)
+          auto;
         align-items: center;
         gap: var(--bo-control-gap);
         min-height: var(--ds-control-h-sm);
@@ -916,6 +975,50 @@
 
       .control-input > :is(input, select, .res-inputs) {
         width: 100%;
+      }
+
+      .res-inputs {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        align-items: center;
+        gap: var(--bo-control-gap);
+      }
+
+      .res-inputs > input {
+        min-width: 0;
+      }
+
+      #exportAlphaRow .control-input {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .terminal-pair-row .terminal-pair-inputs {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: var(--bo-control-gap);
+        width: 100%;
+      }
+
+      .terminal-pair-row .terminal-pair-inputs .ds-input {
+        min-width: 0;
+      }
+
+      .emissive-row {
+        display: grid;
+        grid-template-columns: var(--ds-control-h) minmax(0, 1fr);
+        align-items: center;
+        gap: var(--bo-control-gap);
+        width: 100%;
+      }
+
+      .emissive-row input[type="color"] {
+        width: var(--ds-control-h);
+        min-width: var(--ds-control-h);
+      }
+
+      #emissiveField.is-disabled {
+        opacity: 0.56;
       }
 
       .export-settings {
@@ -1028,6 +1131,11 @@
 
       .gallery-label-row .section-title {
         margin: 0;
+        font-size: 0.74rem;
+        color: color-mix(in oklab, var(--ds-text) 70%, var(--ds-accent));
+        letter-spacing: 0.03em;
+        font-weight: 600;
+        text-transform: none;
       }
 
       /* -----------------------------------------------------------------------------
@@ -1036,6 +1144,11 @@
       #stageWrap {
         grid-area: stage;
         position: relative;
+        border: var(--bo-shell-border);
+        border-radius: var(--bo-shell-radius);
+        background: var(--bo-shell-surface);
+        box-shadow: var(--bo-shell-shadow);
+        overflow: hidden;
       }
 
       #bgOverlay {
@@ -1098,9 +1211,41 @@
         cursor: pointer;
       }
 
+      #tipsMessage {
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .help-card {
+        max-height: min(78vh, 640px);
+        overflow: auto;
+      }
+
+      .help-section {
+        margin-top: 10px;
+      }
+
+      .help-section h4 {
+        margin: 0 0 6px;
+        font: 700 0.72rem/1.2 var(--ds-font-mono);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: color-mix(in oklab, var(--ds-text) 84%, var(--ds-accent));
+      }
+
+      .help-section ul {
+        margin: 0;
+        padding-left: 18px;
+        color: color-mix(in oklab, var(--ds-text-muted) 74%, var(--ds-accent));
+        font-size: 0.7rem;
+        line-height: 1.45;
+      }
+
       .hud-camera {
         position: absolute;
-        left: 12px;
+        right: 12px;
         bottom: 12px;
         border: 1px solid
           color-mix(in oklab, var(--ds-accent-strong) 36%, var(--ds-border));
@@ -1348,7 +1493,10 @@
       /* === Collapsible Panel (desktop & mobile) === */
       /* When collapsed, hide the left column (settings panel) and expand the stage */
       #app.panel-hidden {
-        grid-template-columns: var(--rail-w) 0 1fr;
+        grid-template-columns: var(--rail-w) 1fr;
+        grid-template-areas:
+          "apphead stage"
+          "rail stage";
       }
 
       #app.panel-hidden #panel {
@@ -1366,6 +1514,8 @@
           grid-template-areas:
             "apphead"
             "stage";
+          gap: 0;
+          padding: 0;
         }
 
         /* Stage fills available height */
@@ -1375,6 +1525,9 @@
           position: relative;
           z-index: 1;
           /* lower than #panel */
+          border: none;
+          border-radius: 0;
+          box-shadow: none;
         }
 
         /* Renderer canvas should never bleed over into the panel area */
@@ -1399,6 +1552,7 @@
           border-top: 1px solid var(--ds-border);
           box-shadow: none;
           border-right: none;
+          border-radius: 0;
         }
 
         /* When the class is present, THEN hide the panel (hamburger toggles this) */
@@ -1429,9 +1583,14 @@
           overflow-x: auto;
           overflow-y: hidden;
           scrollbar-width: none;
+          border-radius: 0;
         }
         #sidebar::-webkit-scrollbar {
           display: none;
+        }
+
+        .app-head {
+          border-radius: 0;
         }
 
         .side-fill {
@@ -1441,10 +1600,16 @@
         .side-btn {
           min-height: var(--bo-rail-btn-h-mobile);
           height: var(--bo-rail-btn-h-mobile);
-          font-size: 0.58rem;
-          letter-spacing: 0.06em;
           flex: 0 0 auto;
-          min-width: 72px;
+          min-width: 42px;
+          width: 42px;
+          padding: 0;
+        }
+
+        .side-divider {
+          width: 1px;
+          height: calc(var(--bo-rail-btn-h-mobile) - 10px);
+          margin: 0 3px;
         }
         #app.panel-hidden #panel {
           display: none !important;
@@ -1514,7 +1679,7 @@
         }
 
         .hud-camera {
-          left: 8px;
+          right: 8px;
           bottom: calc(var(--mobile-rail-h) + 10px);
         }
 
@@ -1607,44 +1772,88 @@
           class="side-btn ds-btn rail-tab"
           data-tab="bonsai"
           aria-pressed="true"
+          title="Bonsai"
+          aria-label="Bonsai"
         >
-          Bonsai
+          <span
+            class="iconoir iconoir-tree side-icon"
+            aria-hidden="true"
+          ></span>
         </button>
         <button
           class="side-btn ds-btn rail-tab"
           data-tab="scene"
           aria-pressed="false"
+          title="Scene"
+          aria-label="Scene"
         >
-          Scene
+          <span
+            class="iconoir iconoir-sun-light side-icon"
+            aria-hidden="true"
+          ></span>
         </button>
         <button
           class="side-btn ds-btn rail-tab"
           data-tab="render"
           aria-pressed="false"
+          title="Render"
+          aria-label="Render"
         >
-          Render
+          <span
+            class="iconoir iconoir-xray-view side-icon"
+            aria-hidden="true"
+          ></span>
         </button>
+        <div class="side-divider" aria-hidden="true"></div>
         <button
           class="side-btn ds-btn rail-tab"
           data-tab="gallery"
           aria-pressed="false"
+          title="Gallery"
+          aria-label="Gallery"
         >
-          Gallery
+          <span
+            class="iconoir iconoir-media-image side-icon"
+            aria-hidden="true"
+          ></span>
         </button>
         <button
           class="side-btn ds-btn rail-tab"
           data-tab="export"
           aria-pressed="false"
+          title="Export"
+          aria-label="Export"
         >
-          Export
+          <span
+            class="iconoir iconoir-folder side-icon"
+            aria-hidden="true"
+          ></span>
         </button>
         <div class="side-fill"></div>
+        <button
+          id="helpBtn"
+          class="side-btn ds-btn"
+          type="button"
+          title="Help"
+          aria-label="Help"
+        >
+          <span
+            class="iconoir iconoir-help-circle side-icon"
+            aria-hidden="true"
+          ></span>
+        </button>
+        <div class="side-divider" aria-hidden="true"></div>
         <button
           class="side-btn ds-btn rail-tab"
           data-tab="app"
           aria-pressed="false"
+          title="Settings"
+          aria-label="Settings"
         >
-          Settings
+          <span
+            class="iconoir iconoir-settings side-icon"
+            aria-hidden="true"
+          ></span>
         </button>
       </nav>
       <aside id="panel" data-tab="bonsai" data-bonsai-tab="plant">
@@ -1658,14 +1867,22 @@
               data-bonsai-tab="plant"
               aria-pressed="true"
             >
-              Plant
+              <span
+                class="iconoir iconoir-tree tab-icon"
+                aria-hidden="true"
+              ></span>
+              <span>Plant</span>
             </button>
             <button
               class="bonsai-tab ds-btn"
               data-bonsai-tab="vessel"
               aria-pressed="false"
             >
-              Vessel
+              <span
+                class="iconoir iconoir-home-alt tab-icon"
+                aria-hidden="true"
+              ></span>
+              <span>Vessel</span>
             </button>
           </div>
           <div class="export-tabs" role="tablist" aria-label="Export type">
@@ -1674,21 +1891,33 @@
               data-export-tab="image"
               aria-pressed="true"
             >
-              Image
+              <span
+                class="iconoir iconoir-screenshot tab-icon"
+                aria-hidden="true"
+              ></span>
+              <span>Image</span>
             </button>
             <button
               class="btn ds-btn export-tab"
               data-export-tab="model"
               aria-pressed="false"
             >
-              Model
+              <span
+                class="iconoir iconoir-cube tab-icon"
+                aria-hidden="true"
+              ></span>
+              <span>Model</span>
             </button>
             <button
               class="btn ds-btn export-tab"
               data-export-tab="gif"
               aria-pressed="false"
             >
-              GIF
+              <span
+                class="iconoir iconoir-refresh tab-icon"
+                aria-hidden="true"
+              ></span>
+              <span>GIF</span>
             </button>
           </div>
           <div class="panel-scroll ds-scroll">
@@ -1702,8 +1931,67 @@
                     <option value="grain">Grain</option>
                     <option value="gradient">Gradient</option>
                     <option value="paper">Paper</option>
+                    <option value="mist">Mist</option>
+                    <option value="sunburst">Sunburst</option>
+                    <option value="contours">Contours</option>
                   </select>
                   <input id="bgColor" type="color" value="#0e1115" />
+                </div>
+              </div>
+            </div>
+            <div class="section" data-tab="scene">
+              <h2>ATMOSPHERE</h2>
+              <div class="form">
+                <div class="field no-val">
+                  <label>Falling Leaves</label>
+                  <label class="ds-switch" aria-label="Falling leaves effect">
+                    <input id="fallingLeavesToggle" type="checkbox" />
+                    <span class="ds-switch-track"></span>
+                  </label>
+                </div>
+                <div class="field no-val">
+                  <label>Amount</label>
+                  <input
+                    id="fallingLeavesAmount"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.35"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Rate</label>
+                  <input
+                    id="fallingLeavesRate"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.45"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Diameter</label>
+                  <input
+                    id="fallingLeavesDiameter"
+                    type="range"
+                    min="0.4"
+                    max="2.6"
+                    step="0.01"
+                    value="1.1"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Size Variance</label>
+                  <input
+                    id="fallingLeavesSizeVar"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.4"
+                  />
                 </div>
               </div>
             </div>
@@ -1768,7 +2056,12 @@
                 </div>
               </div>
             </div>
-            <div class="section" data-tab="bonsai" data-bonsai="plant">
+            <div
+              id="speciesSection"
+              class="section"
+              data-tab="bonsai"
+              data-bonsai="plant"
+            >
               <h2>SPECIES</h2>
               <div class="form">
                 <div class="field seed-row">
@@ -1839,6 +2132,78 @@
                     value="0.55"
                   />
                 </div>
+                <div class="field">
+                  <label>Trunk Arch</label>
+                  <input
+                    id="trunkArch"
+                    type="range"
+                    min="0"
+                    max="1.6"
+                    step="0.01"
+                    value="0.55"
+                  />
+                  <span id="trunkArch_val">0.55</span>
+                </div>
+                <div class="field">
+                  <label>Trunk Drop</label>
+                  <input
+                    id="trunkDrop"
+                    type="range"
+                    min="0"
+                    max="1.4"
+                    step="0.01"
+                    value="0.25"
+                  />
+                  <span id="trunkDrop_val">0.25</span>
+                </div>
+                <div class="field">
+                  <label>Base Lean</label>
+                  <input
+                    id="trunkLean"
+                    type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value="0.00"
+                  />
+                  <span id="trunkLean_val">0.00</span>
+                </div>
+                <div class="field">
+                  <label>Trunk Twist</label>
+                  <input
+                    id="trunkTwistAmp"
+                    type="range"
+                    min="0"
+                    max="1.6"
+                    step="0.01"
+                    value="0.55"
+                  />
+                  <span id="trunkTwistAmp_val">0.55</span>
+                </div>
+                <div class="field">
+                  <label>Base Width</label>
+                  <input
+                    id="trunkBaseWidth"
+                    type="range"
+                    min="0.07"
+                    max="0.34"
+                    step="0.001"
+                    value="0.11"
+                  />
+                  <span id="trunkBaseWidth_val">0.110</span>
+                </div>
+                <div class="field">
+                  <label>Width Variance</label>
+                  <input
+                    id="trunkWidthVar"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.35"
+                  />
+                  <span id="trunkWidthVar_val">0.35</span>
+                </div>
                 <div class="field no-val">
                   <label>Uniformity</label>
                   <input
@@ -1884,6 +2249,20 @@
                     <option value="literati">Literati</option>
                   </select>
                 </div>
+                <div class="field field-inline">
+                  <label>Extreme</label>
+                  <select class="ds-select" id="extremeModePreset">
+                    <option value="">None</option>
+                    <option value="dramatic-sweep">Dramatic Sweep</option>
+                    <option value="reverse-cascade">Reverse Cascade</option>
+                    <option value="serpentine-drift">Serpentine Drift</option>
+                    <option value="literati-whip">Literati Whip</option>
+                    <option value="dragon-cascade">Dragon Cascade</option>
+                  </select>
+                  <button id="applyExtremePreset" class="btn ds-btn">
+                    Apply
+                  </button>
+                </div>
                 <div class="field no-val">
                   <label>Drama</label>
                   <input
@@ -1919,13 +2298,27 @@
                 </div>
               </div>
             </div>
-            <div class="section" data-tab="bonsai" data-bonsai="plant">
+            <div id="trunkSection" class="section" data-tab="bonsai" data-bonsai="plant">
+              <h2>TRUNK</h2>
+              <div id="trunkForm" class="form"></div>
+            </div>
+            <div
+              id="leavesSection"
+              class="section"
+              data-tab="bonsai"
+              data-bonsai="plant"
+            >
               <h2>LEAVES</h2>
               <div class="form">
                 <div class="field field-inline">
                   <label>Type</label>
                   <select class="ds-select" id="leafType">
                     <option value="diamond">Diamond</option>
+                    <option value="lanceolate">Lanceolate</option>
+                    <option value="maple-lobed">Maple Lobed</option>
+                    <option value="fan">Fan</option>
+                    <option value="fern">Fern Frond</option>
+                    <option value="scale">Scale Cluster</option>
                     <option value="needle">Needle</option>
                     <option value="slab">Slab</option>
                     <option value="sphere">Sphere</option>
@@ -2043,34 +2436,38 @@
                   />
                   <span id="lowerBias_val">0.35</span>
                 </div>
-                <div class="field no-val">
-                  <label>Min / Terminal</label>
-                  <input
-                    class="ds-input"
-                    id="minPerTerminal"
-                    type="number"
-                    min="0"
-                    max="40"
-                    step="1"
-                    value="2"
-                  />
-                </div>
-                <div class="field no-val">
-                  <label>Max / Terminal</label>
-                  <input
-                    class="ds-input"
-                    id="maxPerTerminal"
-                    type="number"
-                    min="1"
-                    max="120"
-                    step="1"
-                    value="24"
-                  />
+                <div class="field no-val no-readout terminal-pair-row">
+                  <label>Terminal Min/Max</label>
+                  <div class="terminal-pair-inputs">
+                    <input
+                      class="ds-input"
+                      id="minPerTerminal"
+                      type="number"
+                      min="0"
+                      max="40"
+                      step="1"
+                      value="2"
+                    />
+                    <input
+                      class="ds-input"
+                      id="maxPerTerminal"
+                      type="number"
+                      min="1"
+                      max="120"
+                      step="1"
+                      value="24"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="section" data-tab="bonsai" data-bonsai="plant">
+            <div
+              id="branchesSection"
+              class="section"
+              data-tab="bonsai"
+              data-bonsai="plant"
+            >
               <h2>BRANCHES</h2>
               <div class="form">
                 <div class="field no-val">
@@ -2187,10 +2584,15 @@
                 <div class="field field-inline">
                   <label>Type</label>
                   <select class="ds-select" id="vesselType">
+                    <option value="none">None</option>
                     <option value="glass-cylinder">Glass Cylinder</option>
                     <option value="shallow-bowl">Shallow Bowl</option>
                     <option value="faceted">Faceted Prism</option>
                     <option value="stone-disc">Stone Disc</option>
+                    <option value="oval-pot">Oval Pot</option>
+                    <option value="rect-tray">Rectangular Tray</option>
+                    <option value="cascade-tube">Cascade Tube</option>
+                    <option value="rings">Rings</option>
                   </select>
                   <input id="vesselColor" type="color" value="#a5b2bd" />
                 </div>
@@ -2216,32 +2618,214 @@
                     value="1.6"
                   />
                 </div>
+                <div class="field no-val">
+                  <label>Height</label>
+                  <input
+                    id="vesselOffsetY"
+                    type="range"
+                    min="-1.5"
+                    max="1.5"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+                <div class="field">
+                  <label>Lip</label>
+                  <input
+                    id="vesselLip"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.35"
+                  />
+                  <span id="vesselLip_val">0.35</span>
+                </div>
+                <div class="field">
+                  <label>Foot</label>
+                  <input
+                    id="vesselFoot"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.35"
+                  />
+                  <span id="vesselFoot_val">0.35</span>
+                </div>
+                <div class="field no-val">
+                  <label>Opacity</label>
+                  <input
+                    id="vesselOpacity"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.85"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Blur</label>
+                  <input
+                    id="vesselBlur"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.22"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="section" data-tab="bonsai" data-bonsai="vessel">
+              <h2>MEDIUM</h2>
+              <div class="form">
+                <div class="field field-inline">
+                  <label>Type</label>
+                  <select class="ds-select" id="mediumType">
+                    <option value="none">None</option>
+                    <option value="water">Water</option>
+                    <option value="moss">Moss</option>
+                    <option value="sand">Sand</option>
+                    <option value="gel">Glass Gel</option>
+                    <option value="rock">Rock</option>
+                    <option value="kokedama">Kokedama</option>
+                  </select>
+                  <input id="mediumColor" type="color" value="#6eaec9" />
+                </div>
+                <div class="field no-val">
+                  <label>Diameter</label>
+                  <input
+                    id="mediumDia"
+                    type="range"
+                    min="0.4"
+                    max="2.8"
+                    step="0.01"
+                    value="1.1"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Depth</label>
+                  <input
+                    id="mediumDepth"
+                    type="range"
+                    min="0.05"
+                    max="2"
+                    step="0.01"
+                    value="0.35"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Height</label>
+                  <input
+                    id="mediumOffsetY"
+                    type="range"
+                    min="-1.5"
+                    max="1.5"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Opacity</label>
+                  <input
+                    id="mediumOpacity"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.78"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Blur</label>
+                  <input
+                    id="mediumBlur"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.3"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="section" data-tab="bonsai" data-bonsai="vessel">
+              <h2>PLATFORM</h2>
+              <div class="form">
+                <div class="field field-inline">
+                  <label>Type</label>
+                  <select class="ds-select" id="platformType">
+                    <option value="none">None</option>
+                    <option value="disc">Disc</option>
+                    <option value="tray">Tray</option>
+                    <option value="slab">Stone Slab</option>
+                  </select>
+                  <input id="platformColor" type="color" value="#858b94" />
+                </div>
+                <div class="field no-val">
+                  <label>Diameter</label>
+                  <input
+                    id="platformDia"
+                    type="range"
+                    min="0.5"
+                    max="3.2"
+                    step="0.01"
+                    value="1.35"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Depth</label>
+                  <input
+                    id="platformDepth"
+                    type="range"
+                    min="0.04"
+                    max="1.1"
+                    step="0.01"
+                    value="0.16"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Height</label>
+                  <input
+                    id="platformOffsetY"
+                    type="range"
+                    min="-1.5"
+                    max="1.5"
+                    step="0.01"
+                    value="0"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Opacity</label>
+                  <input
+                    id="platformOpacity"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.95"
+                  />
+                </div>
+                <div class="field no-val">
+                  <label>Blur</label>
+                  <input
+                    id="platformBlur"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value="0.12"
+                  />
+                </div>
               </div>
             </div>
 
             <div class="section" data-tab="render">
               <h2>RENDER</h2>
               <div class="form">
-                <div class="field no-val">
-                  <label>Spin</label>
-                  <div class="row">
-                    <button id="autoBtn" class="btn ds-btn">
-                      <span
-                        class="iconoir iconoir-pause"
-                        aria-hidden="true"
-                      ></span>
-                      Pause
-                    </button>
-                    <input
-                      id="autoSpeed"
-                      type="range"
-                      min="-4"
-                      max="4"
-                      step="0.01"
-                      value="0.8"
-                    />
-                  </div>
-                </div>
                 <div class="field no-val">
                   <label>Wireframe</label>
                   <label class="ds-switch" aria-label="Wireframe">
@@ -2258,18 +2842,20 @@
                     <option value="holographic">Holographic</option>
                     <option value="emissive">Emissive</option>
                   </select>
-                  <input id="emissiveColor" type="color" value="#94e3ff" />
                 </div>
-                <div class="field no-val">
+                <div id="emissiveField" class="field no-val no-readout">
                   <label>Emissive</label>
-                  <input
-                    id="emissiveStrength"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value="0.5"
-                  />
+                  <div class="emissive-row">
+                    <input id="emissiveColor" type="color" value="#94e3ff" />
+                    <input
+                      id="emissiveStrength"
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value="0.5"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -2285,13 +2871,6 @@
                   >
                     <option value="">Loading themes...</option>
                   </select>
-                </div>
-                <div class="field no-val">
-                  <label>Tips Overlay</label>
-                  <label class="ds-switch" aria-label="Tips overlay">
-                    <input id="tipsToggle" type="checkbox" checked />
-                    <span class="ds-switch-track"></span>
-                  </label>
                 </div>
               </div>
             </div>
@@ -2341,9 +2920,55 @@
               <h2>DEBUG</h2>
               <div class="form">
                 <div class="field no-val">
-                  <label>Overlay HUD</label>
+                  <label>[P] Tips Overlay</label>
+                  <label class="ds-switch" aria-label="Tips overlay">
+                    <input id="tipsToggle" type="checkbox" checked />
+                    <span class="ds-switch-track"></span>
+                  </label>
+                </div>
+                <div class="field no-val">
+                  <label>[O] Overlay HUD</label>
                   <label class="ds-switch" aria-label="Debug overlay HUD">
                     <input id="debugToggle" type="checkbox" />
+                    <span class="ds-switch-track"></span>
+                  </label>
+                </div>
+                <div class="field no-val">
+                  <label>[T] Toolbar</label>
+                  <label class="ds-switch" aria-label="Canvas toolbar">
+                    <input id="toolbarToggle" type="checkbox" checked />
+                    <span class="ds-switch-track"></span>
+                  </label>
+                </div>
+                <div class="field no-val">
+                  <label>[C] Camera Controls</label>
+                  <label class="ds-switch" aria-label="Camera controls pad">
+                    <input id="cameraPadToggle" type="checkbox" checked />
+                    <span class="ds-switch-track"></span>
+                  </label>
+                </div>
+                <div class="field no-val">
+                  <label>[S] Side Panel</label>
+                  <label class="ds-switch" aria-label="Side panel visibility">
+                    <input id="sidePanelToggle" type="checkbox" checked />
+                    <span class="ds-switch-track"></span>
+                  </label>
+                </div>
+                <div class="field no-val no-readout demo-row">
+                  <label>[D] Demo (sec./interval)</label>
+                  <input
+                    id="demoInterval"
+                    class="ds-input"
+                    type="number"
+                    min="2"
+                    max="120"
+                    step="1"
+                    value="6"
+                    aria-label="Demo interval seconds"
+                    title="Demo interval (seconds)"
+                  />
+                  <label class="ds-switch" aria-label="Demo mode auto-randomize">
+                    <input id="demoModeToggle" type="checkbox" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
@@ -2353,33 +2978,35 @@
               <div class="form">
                 <div class="field no-label no-val no-readout">
                   <div class="gallery-label-row">
-                    <h2 class="section-title">Snapshots</h2>
-                    <div id="galleryHeadMenu" class="gallery-menu-wrap">
-                      <span id="snapshotCount" class="kbd">0</span>
-                      <button
-                        id="galleryMenuBtn"
-                        class="btn ds-btn gallery-menu-btn"
-                        aria-expanded="false"
-                        title="Gallery menu"
+                    <h2 class="section-title">
+                      Snapshots<span id="snapshotCount" class="snapshot-count"
+                        >0</span
                       >
-                        <span
-                          class="iconoir iconoir-more-horiz-circle"
-                          aria-hidden="true"
-                        ></span>
+                    </h2>
+                    <div class="gallery-head-actions">
+                      <button
+                        id="galleryImportAllBtn"
+                        class="btn ds-btn btn-ghost ds-btn-ghost"
+                      >
+                        Import
                       </button>
-                      <div id="galleryMenu" class="gallery-menu" hidden>
-                        <button id="galleryExportAllBtn" class="btn ds-btn">
-                          Export Gallery JSON
-                        </button>
-                        <button id="galleryImportAllBtn" class="btn ds-btn">
-                          Import Gallery JSON
-                        </button>
-                      </div>
+                      <button id="galleryExportAllBtn" class="btn ds-btn">
+                        Export
+                      </button>
                     </div>
                   </div>
                 </div>
                 <div class="field no-val no-readout no-label">
                   <div id="snapshotGallery" class="gallery-grid"></div>
+                  <div class="gallery-more-row">
+                    <button
+                      id="galleryLoadMoreBtn"
+                      class="btn ds-btn btn-ghost ds-btn-ghost"
+                      hidden
+                    >
+                      Load More
+                    </button>
+                  </div>
                 </div>
               </div>
               <input
@@ -2504,7 +3131,8 @@
           </div>
           <div class="panel-actions">
             <button id="snapSave" class="btn ds-btn btn-primary ds-btn-primary">
-              Save Snapshot
+              <span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span>
+              Snapshot
             </button>
           </div>
         </div>
@@ -2528,8 +3156,7 @@
           <div id="markerVessel" class="hud-marker" aria-hidden="true"></div>
         </div>
         <div id="tipsBar" role="note">
-          <div>Tip: drag to orbit, wheel/pinch to zoom</div>
-          <div>Press <span class="kbd">Frame</span> to refit</div>
+          <div id="tipsMessage">Tip: drag to orbit, wheel/pinch to zoom.</div>
           <button id="tipsClose" class="tip-close" aria-label="Close tips">
             <span class="iconoir iconoir-xmark" aria-hidden="true"></span>
           </button>
@@ -2538,13 +3165,18 @@
           <button
             id="randomizeAll"
             class="btn ds-btn btn-icon ds-btn-icon"
-            title="Randomize All"
+            title="Randomize All (R)"
           >
-            <span
-              class="iconoir iconoir-dice-three"
-              aria-hidden="true"
-            ></span>
+            <span class="iconoir iconoir-dice-three" aria-hidden="true"></span>
           </button>
+          <button
+            id="tbFxToggle"
+            class="btn ds-btn btn-icon ds-btn-icon"
+            title="Toggle Falling FX"
+          >
+            <span class="iconoir iconoir-eye-solid" aria-hidden="true"></span>
+          </button>
+          <span class="split" aria-hidden="true"></span>
           <button
             id="tbSpinL"
             class="btn ds-btn btn-icon ds-btn-icon"
@@ -2586,12 +3218,20 @@
               aria-hidden="true"
             ></span>
           </button>
+          <span class="split" aria-hidden="true"></span>
           <button
             id="tbShot"
             class="btn ds-btn btn-icon ds-btn-icon"
             title="Screenshot (X)"
           >
             <span class="iconoir iconoir-screenshot" aria-hidden="true"></span>
+          </button>
+          <button
+            id="tbSnapAdd"
+            class="btn ds-btn btn-icon ds-btn-icon"
+            title="Snapshot (Enter)"
+          >
+            <span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span>
           </button>
         </div>
         <div class="hud-camera" aria-label="Camera view controls">
@@ -2609,19 +3249,19 @@
           <div class="camera-gizmo">
             <button class="btn ds-btn g-front" id="viewFront" title="Front">
               <span
-                class="iconoir iconoir-nav-arrow-up"
+                class="iconoir iconoir-view-grid"
                 aria-hidden="true"
               ></span>
             </button>
             <button class="btn ds-btn g-top" id="viewTop" title="Top">
               <span
-                class="iconoir iconoir-arrow-up-circle"
+                class="iconoir iconoir-nav-arrow-up"
                 aria-hidden="true"
               ></span>
             </button>
             <button class="btn ds-btn g-back" id="viewBack" title="Back">
               <span
-                class="iconoir iconoir-nav-arrow-down"
+                class="iconoir iconoir-view-columns-3"
                 aria-hidden="true"
               ></span>
             </button>
@@ -2645,7 +3285,7 @@
             </button>
             <button class="btn ds-btn g-bottom" id="viewBottom" title="Bottom">
               <span
-                class="iconoir iconoir-arrow-down-circle"
+                class="iconoir iconoir-nav-arrow-down"
                 aria-hidden="true"
               ></span>
             </button>
@@ -2665,6 +3305,59 @@
       aria-live="polite"
       aria-atomic="false"
     ></div>
+    <div id="helpModal" class="confirm-modal" hidden>
+      <div
+        class="confirm-card help-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="helpTitle"
+      >
+        <h3 id="helpTitle">Bonsai Help</h3>
+        <div class="help-section">
+          <h4>Overview</h4>
+          <ul>
+            <li>Generate and refine stylized bonsai models in real-time.</li>
+            <li>Use Bonsai, Scene, Render, Gallery, Export, and Settings tabs to control the app.</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h4>Navigation</h4>
+          <ul>
+            <li>Drag to orbit camera.</li>
+            <li>Mouse wheel or pinch to zoom.</li>
+            <li>Use Frame to re-center and fit the tree.</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h4>Main Hotkeys</h4>
+          <ul>
+            <li><span class="kbd">Space</span> play/pause rotation</li>
+            <li><span class="kbd">F</span> frame bonsai</li>
+            <li><span class="kbd">X</span> screenshot</li>
+            <li><span class="kbd">R</span> randomize all properties</li>
+            <li><span class="kbd">Enter</span> save snapshot</li>
+            <li><span class="kbd">[</span>/<span class="kbd">]</span> hold manual spin</li>
+            <li><span class="kbd">P</span> tips overlay</li>
+            <li><span class="kbd">O</span>, <span class="kbd">T</span>, <span class="kbd">C</span>, <span class="kbd">S</span>, <span class="kbd">D</span> debug toggles</li>
+            <li><span class="kbd">\</span> debug master toggle</li>
+            <li><span class="kbd">Esc</span> close Help modal</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <h4>Tips</h4>
+          <ul id="helpTipsList"></ul>
+        </div>
+        <div class="confirm-actions">
+          <button
+            id="helpCloseBtn"
+            class="btn ds-btn btn-primary ds-btn-primary"
+            type="button"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
     <div id="confirmModal" class="confirm-modal" hidden>
       <div
         class="confirm-card"
@@ -2710,6 +3403,12 @@
       const treeType = $("treeType");
       const levels = $("levels");
       const curvature = $("curvature");
+      const trunkArchUI = $("trunkArch");
+      const trunkDropUI = $("trunkDrop");
+      const trunkLeanUI = $("trunkLean");
+      const trunkTwistAmpUI = $("trunkTwistAmp");
+      const trunkBaseWidthUI = $("trunkBaseWidth");
+      const trunkWidthVarUI = $("trunkWidthVar");
       const uniformity = $("uniformity");
       const spread = $("spread");
       const upBias = $("upBias");
@@ -2724,9 +3423,33 @@
       const vesselType = $("vesselType");
       const vesselDia = $("vesselDia");
       const vesselDepth = $("vesselDepth");
+      const vesselLip = $("vesselLip");
+      const vesselFoot = $("vesselFoot");
       const vesselColor = $("vesselColor");
+      const vesselOpacityUI = $("vesselOpacity");
+      const vesselBlurUI = $("vesselBlur");
+      const vesselOffsetYUI = $("vesselOffsetY");
+      const mediumTypeUI = $("mediumType");
+      const mediumColorUI = $("mediumColor");
+      const mediumDiaUI = $("mediumDia");
+      const mediumDepthUI = $("mediumDepth");
+      const mediumOpacityUI = $("mediumOpacity");
+      const mediumBlurUI = $("mediumBlur");
+      const mediumOffsetYUI = $("mediumOffsetY");
+      const platformTypeUI = $("platformType");
+      const platformColorUI = $("platformColor");
+      const platformDiaUI = $("platformDia");
+      const platformDepthUI = $("platformDepth");
+      const platformOpacityUI = $("platformOpacity");
+      const platformBlurUI = $("platformBlur");
+      const platformOffsetYUI = $("platformOffsetY");
       const bgColor = $("bgColor");
       const bgTex = $("bgTex");
+      const fallingLeavesToggle = $("fallingLeavesToggle");
+      const fallingLeavesAmountUI = $("fallingLeavesAmount");
+      const fallingLeavesRateUI = $("fallingLeavesRate");
+      const fallingLeavesDiameterUI = $("fallingLeavesDiameter");
+      const fallingLeavesSizeVarUI = $("fallingLeavesSizeVar");
       const keyLightUI = $("keyLight");
       const hemiLightUI = $("hemiLight");
       const exposureUI = $("exposure");
@@ -2737,11 +3460,11 @@
       const randomizeAllBtn = $("randomizeAll");
       const wireToggle = $("wireToggle");
       const renderMode = $("renderMode");
+      const emissiveField = $("emissiveField");
       const emissiveStrengthUI = document.getElementById("emissiveStrength");
-      const autoBtn = document.getElementById("autoBtn");
-      const autoRotate = $("autoRotate");
-      const autoSpeedUI = $("autoSpeed");
       const bonsaiStyleUI = $("bonsaiStyle");
+      const extremeModePresetUI = $("extremeModePreset");
+      const applyExtremePresetBtn = $("applyExtremePreset");
       const dramaUI = $("drama");
       const asymmetryUI = $("asymmetry");
       const branchTwistUI = $("branchTwist");
@@ -2791,23 +3514,28 @@
       let frameNo = 0;
       let fpsEMA = 0; // exponential moving avg
       const FPS_ALPHA = 0.12; // smoothing factor
+      let perfUiTick = 0;
+      let lastPerfSnapshot = "";
 
       // Floating toolbar buttons
       const panelToggle = document.getElementById("panelToggle");
+      const tbSnapAdd = document.getElementById("tbSnapAdd");
       const tbShot = document.getElementById("tbShot");
       const tbSpinL = document.getElementById("tbSpinL");
       const tbSlower = document.getElementById("tbSlower");
       const tbAuto = document.getElementById("tbAuto");
       const tbFaster = document.getElementById("tbFaster");
       const tbSpinR = document.getElementById("tbSpinR");
+      const tbFxToggle = document.getElementById("tbFxToggle");
+      const helpBtn = $("helpBtn");
       const tipsToggle = $("tipsToggle");
       const tipsClose = $("tipsClose");
+      const tipsMessage = $("tipsMessage");
       const snapSaveBtn = $("snapSave");
       const snapshotCount = $("snapshotCount");
       const snapImportFile = $("snapImportFile");
       const snapshotGallery = $("snapshotGallery");
-      const galleryMenuBtn = $("galleryMenuBtn");
-      const galleryMenu = $("galleryMenu");
+      const galleryLoadMoreBtn = $("galleryLoadMoreBtn");
       const galleryExportAllBtn = $("galleryExportAllBtn");
       const galleryImportAllBtn = $("galleryImportAllBtn");
       const exportTabButtons = Array.from(
@@ -2843,11 +3571,19 @@
       const camZoomOutBtn = $("camZoomOut");
       const camZoomResetBtn = $("camZoomReset");
       const toastStack = $("toastStack");
+      const helpModal = $("helpModal");
+      const helpCloseBtn = $("helpCloseBtn");
+      const helpTipsList = $("helpTipsList");
       const confirmModal = $("confirmModal");
       const confirmDeleteBtn = $("confirmDeleteBtn");
       const confirmCancelBtn = $("confirmCancelBtn");
       const confirmSkip = $("confirmSkip");
       const panelRoot = $("panel");
+      const speciesSection = $("speciesSection");
+      const trunkSection = $("trunkSection");
+      const trunkForm = $("trunkForm");
+      const branchesSection = $("branchesSection");
+      const leavesSection = $("leavesSection");
       const railTabs = Array.from(document.querySelectorAll(".rail-tab"));
       const bonsaiTabs = Array.from(document.querySelectorAll(".bonsai-tab"));
       let activeExportTab = "image";
@@ -2896,6 +3632,7 @@
       controls.maxPolarAngle = Math.PI * 0.95;
       controls.target.set(0, 0, 0);
       controls.autoRotate = false; // disable internal camera spin
+      controls.autoRotateSpeed = 0.8;
 
       const hemi = new THREE.HemisphereLight(
         0xf4efe8,
@@ -2916,6 +3653,16 @@
       let vesselGroup = null,
         treeGroup = null,
         sketchOverlay = null;
+      const fallingLeavesGroup = new THREE.Group();
+      scene.add(fallingLeavesGroup);
+      const fallingLeafGeometry = new THREE.PlaneGeometry(0.1, 0.18);
+      const fallingLeafMaterial = new THREE.MeshBasicMaterial({
+        color: leafColorUI ? leafColorUI.value : 0x2d6e52,
+        transparent: true,
+        opacity: 0.72,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
       let didInitialFrame = false;
 
       // --- Smooth autorotation & manual spin ---
@@ -2923,8 +3670,15 @@
       let autoOn = true; // default ON
       let holdSpin = 0; // -1 = right, +1 = left while pressed
       const AUTO_BASE = 0.8; // base radians/sec scale for speed slider
+      const AUTO_SPEED_MIN = 0;
+      const AUTO_SPEED_MAX = 3;
 
       const debugToggle = $("debugToggle");
+      const toolbarToggle = $("toolbarToggle");
+      const cameraPadToggle = $("cameraPadToggle");
+      const sidePanelToggle = $("sidePanelToggle");
+      const demoModeToggle = $("demoModeToggle");
+      const demoIntervalUI = $("demoInterval");
       const hudOverlay = $("hudOverlay");
       const hudRuntime = $("hudRuntime");
       const hudCamera = $("hudCamera");
@@ -2934,6 +3688,26 @@
       const markerCanopy = $("markerCanopy");
       const markerTrunk = $("markerTrunk");
       const markerVessel = $("markerVessel");
+      let demoTimer = 0;
+      const TIP_ROTATION_MS = 9000;
+      const TIP_MESSAGES = [
+        "Tip: drag to orbit, wheel or pinch to zoom.",
+        "Tip: use [F] to frame the bonsai in view.",
+        "Tip: press [R] to randomize all bonsai properties.",
+        "Tip: press [Enter] to save a snapshot instantly.",
+        "Tip: press [X] to capture a screenshot.",
+        "Tip: press [P] to toggle this tips overlay.",
+        "Tip: press [D] to run demo auto-random mode.",
+        "Tip: debug quick toggles: [O] overlay, [T] toolbar, [C] camera, [S] panel.",
+        "Tip: hold [ and ] for continuous manual rotation.",
+        "Tip: press [\\] to toggle core debug controls; [Esc] closes Help.",
+      ];
+      let tipIndex = 0;
+      let tipsTimer = 0;
+      const FALLING_LEAF_MAX = 56;
+      let fallingLeaves = [];
+      let fallingSpawnAcc = 0;
+      let fallingLeafTime = 0;
 
       // handy formatters
       const d = (n) => (Number.isFinite(n) ? n.toFixed(3) : "NaN");
@@ -2942,18 +3716,23 @@
       const eulerDeg = (e) => `${deg(e.x)}, ${deg(e.y)}, ${deg(e.z)}`;
 
       function updatePerfStats() {
-        if (statFpsUI) statFpsUI.textContent = fpsEMA.toFixed(1);
-        if (statRegenMsUI) statRegenMsUI.textContent = regenMsEMA.toFixed(1);
-        if (statSegmentsUI) statSegmentsUI.textContent = String(lastBranchSegments);
-        if (statTerminalsUI) statTerminalsUI.textContent = String(lastTerminalPieces);
-        if (statInstancesUI)
-          statInstancesUI.textContent = String(
-            (leafInstanceCount | 0) + (petalInstanceCount | 0),
-          );
-        if (statQualityUI)
-          statQualityUI.textContent = String(
-            qualityModeUI ? qualityModeUI.value : "auto",
-          );
+        const fpsT = fpsEMA.toFixed(1);
+        const regenT = regenMsEMA.toFixed(1);
+        const segT = String(lastBranchSegments);
+        const termT = String(lastTerminalPieces);
+        const instT = String(
+          (leafInstanceCount | 0) + (petalInstanceCount | 0),
+        );
+        const qT = String(qualityModeUI ? qualityModeUI.value : "auto");
+        const snap = `${fpsT}|${regenT}|${segT}|${termT}|${instT}|${qT}`;
+        if (snap === lastPerfSnapshot) return;
+        lastPerfSnapshot = snap;
+        if (statFpsUI) statFpsUI.textContent = fpsT;
+        if (statRegenMsUI) statRegenMsUI.textContent = regenT;
+        if (statSegmentsUI) statSegmentsUI.textContent = segT;
+        if (statTerminalsUI) statTerminalsUI.textContent = termT;
+        if (statInstancesUI) statInstancesUI.textContent = instT;
+        if (statQualityUI) statQualityUI.textContent = qT;
       }
 
       function renderHUD() {
@@ -3003,7 +3782,7 @@
                 <div class="hdr">runtime</div>
                 <div><span class="k">frame</span> <span class="v">${frameNo}</span>  <span class="k">fps~</span> <span class="v">${fpsEMA.toFixed(1)}</span></div>
                 <div><span class="k">regen~ms</span> <span class="v">${regenMsEMA.toFixed(1)}</span>  <span class="k">quality</span> <span class="v">${qualityModeUI ? qualityModeUI.value : "auto"}</span></div>
-                <div><span class="k">auto</span> <span class="v">${autoOn ? "on" : "off"}</span>  <span class="k">speed</span> <span class="v">${autoSpeedUI ? autoSpeedUI.value : "-"}</span></div>`;
+                <div><span class="k">auto</span> <span class="v">${autoOn ? "on" : "off"}</span>  <span class="k">speed</span> <span class="v">${(parseFloat(controls.autoRotateSpeed) || 0).toFixed(1)}</span></div>`;
         if (hudCamera)
           hudCamera.innerHTML = `
                 <div class="hdr">camera</div>
@@ -3126,9 +3905,9 @@
           SEGMENTS_HARD_MAX = 900;
           ATTACH_MAX = 50;
         }
-        renderer.setPixelRatio(
-          Math.min(q === "mobile" ? 1.5 : 2, window.devicePixelRatio || 1),
-        );
+        const dpr = window.devicePixelRatio || 1;
+        const dprCap = q === "high" ? 1.75 : q === "mobile" ? 1.2 : 1.4;
+        renderer.setPixelRatio(Math.min(dprCap, dpr));
         onResizeCore();
       }
 
@@ -3185,6 +3964,84 @@
         syncSectionDividers();
       }
 
+      function organizePlantSections() {
+        if (!speciesSection || !trunkForm) return;
+        const host = speciesSection.parentElement;
+        if (host && trunkSection && branchesSection && leavesSection) {
+          host.insertBefore(trunkSection, branchesSection);
+          host.insertBefore(branchesSection, leavesSection);
+        }
+        const moveFieldByControlId = (id) => {
+          const el = $(id);
+          const field = el ? el.closest(".field") : null;
+          if (field && field.parentElement !== trunkForm) {
+            trunkForm.appendChild(field);
+          }
+        };
+        [
+          "curvature",
+          "trunkArch",
+          "trunkDrop",
+          "trunkLean",
+          "trunkTwistAmp",
+          "trunkBaseWidth",
+          "trunkWidthVar",
+          "uniformity",
+          "spread",
+          "upBias",
+          "bonsaiStyle",
+          "extremeModePreset",
+          "drama",
+          "asymmetry",
+          "branchTwist",
+        ].forEach(moveFieldByControlId);
+      }
+
+      function sectionStorageKey(section) {
+        const top = section.getAttribute("data-tab") || "panel";
+        const sub = section.getAttribute("data-bonsai") || "all";
+        const raw = section.querySelector(":scope > h2")?.textContent || "section";
+        const name = raw
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        return `bonsai.sectionCollapsed.${top}.${sub}.${name}`;
+      }
+
+      function setSectionCollapsed(section, on) {
+        if (!section) return;
+        const collapsed = !!on;
+        section.classList.toggle("is-collapsed", collapsed);
+        const btn = section.querySelector(":scope > h2 .section-toggle");
+        if (btn) btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        localStorage.setItem(sectionStorageKey(section), collapsed ? "1" : "0");
+      }
+
+      function initSectionCollapsers() {
+        if (!panelRoot) return;
+        const sections = panelRoot.querySelectorAll(".panel-scroll .section[data-tab]");
+        sections.forEach((section) => {
+          const h2 = section.querySelector(":scope > h2");
+          if (!h2) return;
+          let btn = h2.querySelector(":scope > .section-toggle");
+          if (!btn) {
+            const title = h2.textContent.trim();
+            h2.textContent = "";
+            btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "section-toggle";
+            btn.innerHTML = `<span>${title}</span><span class="iconoir iconoir-nav-arrow-down section-chevron" aria-hidden="true"></span>`;
+            btn.setAttribute("aria-expanded", "true");
+            h2.appendChild(btn);
+            btn.addEventListener("click", () => {
+              setSectionCollapsed(section, !section.classList.contains("is-collapsed"));
+            });
+          }
+          const stored = localStorage.getItem(sectionStorageKey(section));
+          setSectionCollapsed(section, stored === "1");
+        });
+      }
+
       function syncSectionDividers() {
         if (!panelRoot) return;
         const topTab = panelRoot.getAttribute("data-tab") || "bonsai";
@@ -3214,7 +4071,7 @@
       }
 
       function applySpins(dt) {
-        const uiSpeed = autoSpeedUI ? parseFloat(autoSpeedUI.value) : 0.8;
+        const uiSpeed = parseFloat(controls.autoRotateSpeed) || 0.8;
         if (autoOn && uiSpeed !== 0) spinBy(uiSpeed * AUTO_BASE, dt);
         if (holdSpin !== 0) spinBy(holdSpin * 1.2, dt);
       }
@@ -3222,15 +4079,6 @@
       // convenience from UI
       function setAutoRotate(on) {
         autoOn = !!on; // our smooth rot flag
-        if (autoRotate) autoRotate.value = autoOn ? "on" : "off";
-        if (autoBtn) {
-          const icon = autoOn ? "iconoir-pause" : "iconoir-play";
-          autoBtn.innerHTML = `<span class="iconoir ${icon}" aria-hidden="true"></span> ${autoOn ? "Pause" : "Play"}`;
-          autoBtn.classList.toggle("btn-primary", autoOn);
-          autoBtn.classList.toggle("btn-ghost", !autoOn);
-          autoBtn.classList.toggle("ds-btn-primary", autoOn);
-          autoBtn.classList.toggle("ds-btn-ghost", !autoOn);
-        }
         refreshTbAutoIcon();
       }
 
@@ -3447,6 +4295,10 @@
           trunkTaper: 1.25,
           trunkPitch: 0.12,
           trunkTwist: 0.45,
+          basalBendBoost: 0.08,
+          basalDropBoost: 0.05,
+          basalLeanBoost: 0.06,
+          basalAttachBoost: 0.04,
           branchDrop: 0.22,
           branchPull: 0.0,
           lowerClearance: 0.36,
@@ -3459,6 +4311,10 @@
           trunkTaper: 1.08,
           trunkPitch: 0.18,
           trunkTwist: 0.72,
+          basalBendBoost: 0.26,
+          basalDropBoost: 0.2,
+          basalLeanBoost: 0.18,
+          basalAttachBoost: 0.12,
           branchDrop: 0.34,
           branchPull: 0.0,
           lowerClearance: 0.28,
@@ -3471,6 +4327,10 @@
           trunkTaper: 1.0,
           trunkPitch: 0.16,
           trunkTwist: 0.7,
+          basalBendBoost: 0.42,
+          basalDropBoost: 0.3,
+          basalLeanBoost: 0.34,
+          basalAttachBoost: 0.18,
           branchDrop: 0.38,
           branchPull: 0.3,
           lowerClearance: 0.24,
@@ -3483,6 +4343,10 @@
           trunkTaper: 0.9,
           trunkPitch: 0.04,
           trunkTwist: 0.88,
+          basalBendBoost: 0.72,
+          basalDropBoost: 0.76,
+          basalLeanBoost: 0.44,
+          basalAttachBoost: 0.28,
           branchDrop: 0.82,
           branchPull: 0.36,
           lowerClearance: 0.16,
@@ -3495,6 +4359,10 @@
           trunkTaper: 0.95,
           trunkPitch: 0.08,
           trunkTwist: 0.92,
+          basalBendBoost: 0.66,
+          basalDropBoost: 0.5,
+          basalLeanBoost: 0.58,
+          basalAttachBoost: 0.24,
           branchDrop: 0.58,
           branchPull: 0.72,
           lowerClearance: 0.22,
@@ -3507,6 +4375,10 @@
           trunkTaper: 1.42,
           trunkPitch: 0.22,
           trunkTwist: 1.05,
+          basalBendBoost: 0.52,
+          basalDropBoost: 0.44,
+          basalLeanBoost: 0.26,
+          basalAttachBoost: 0.22,
           branchDrop: 0.28,
           branchPull: 0.12,
           lowerClearance: 0.44,
@@ -3515,6 +4387,130 @@
           windBias: 0.2,
         },
       };
+
+      const FORM_STYLE_CONSTRAINTS = {
+        formal: {
+          radialBase: 0.42,
+          radialApex: 0.14,
+          trunkCenterPull: 0.34,
+          attachMin: 0.34,
+          apexUpBias: 0.2,
+          lowDropLimit: -0.05,
+          lowSpread: 0.5,
+        },
+        informal: {
+          radialBase: 0.54,
+          radialApex: 0.2,
+          trunkCenterPull: 0.22,
+          attachMin: 0.28,
+          apexUpBias: 0.15,
+          lowDropLimit: -0.08,
+          lowSpread: 0.62,
+        },
+        slant: {
+          radialBase: 0.62,
+          radialApex: 0.24,
+          trunkCenterPull: 0.12,
+          attachMin: 0.24,
+          apexUpBias: 0.08,
+          lowDropLimit: -0.12,
+          lowSpread: 0.76,
+        },
+        cascade: {
+          radialBase: 0.5,
+          radialApex: 0.18,
+          trunkCenterPull: 0.08,
+          attachMin: 0.16,
+          apexUpBias: -0.18,
+          lowDropLimit: -0.4,
+          lowSpread: 0.42,
+        },
+        windswept: {
+          radialBase: 0.86,
+          radialApex: 0.46,
+          trunkCenterPull: 0.08,
+          attachMin: 0.2,
+          apexUpBias: 0.06,
+          lowDropLimit: -0.14,
+          lowSpread: 0.9,
+        },
+        literati: {
+          radialBase: 0.34,
+          radialApex: 0.12,
+          trunkCenterPull: 0.3,
+          attachMin: 0.42,
+          apexUpBias: 0.24,
+          lowDropLimit: -0.02,
+          lowSpread: 0.32,
+        },
+      };
+
+      const SPECIES_STYLE_WEIGHTS = {
+        magnolia: {
+          informal: 0.34,
+          formal: 0.22,
+          slant: 0.16,
+          literati: 0.14,
+          windswept: 0.08,
+          cascade: 0.06,
+        },
+        maple: {
+          informal: 0.32,
+          formal: 0.24,
+          slant: 0.18,
+          windswept: 0.1,
+          literati: 0.1,
+          cascade: 0.06,
+        },
+        pine: {
+          formal: 0.36,
+          windswept: 0.24,
+          slant: 0.16,
+          cascade: 0.12,
+          literati: 0.08,
+          informal: 0.04,
+        },
+        olive: {
+          informal: 0.3,
+          slant: 0.22,
+          windswept: 0.2,
+          formal: 0.14,
+          literati: 0.1,
+          cascade: 0.04,
+        },
+        juniper: {
+          windswept: 0.36,
+          slant: 0.2,
+          cascade: 0.16,
+          literati: 0.14,
+          informal: 0.1,
+          formal: 0.04,
+        },
+        ginkgo: {
+          literati: 0.34,
+          formal: 0.24,
+          informal: 0.16,
+          slant: 0.12,
+          windswept: 0.1,
+          cascade: 0.04,
+        },
+      };
+
+      function pickStyleWeighted(styleWeights, rand01) {
+        if (!styleWeights) return "formal";
+        const entries = Object.entries(styleWeights).filter(
+          ([, w]) => Number.isFinite(w) && w > 0,
+        );
+        if (!entries.length) return "formal";
+        const total = entries.reduce((s, [, w]) => s + w, 0);
+        if (total <= 0) return entries[0][0];
+        let t = Math.max(0, Math.min(0.999999, rand01)) * total;
+        for (const [style, w] of entries) {
+          if (t < w) return style;
+          t -= w;
+        }
+        return entries[entries.length - 1][0];
+      }
 
       const SPECIES_ARCH = {
         magnolia: {
@@ -3607,6 +4603,7 @@
           apexLeafBias: 0.3,
           attachStartShift: -0.08,
           attachBiasShift: -0.12,
+          lowerAttachBonus: 0.14,
           branchCountMul: 1.04,
           depthFalloff: 0.79,
           planarity: 0.62,
@@ -3670,6 +4667,10 @@
       function applyBackground() {
         const color = bgColor.value;
         bgOverlay.style.backgroundImage = "";
+        bgOverlay.style.backgroundBlendMode = "normal";
+        bgOverlay.style.backgroundSize = "";
+        bgOverlay.style.backgroundPosition = "center";
+        bgOverlay.style.backgroundRepeat = "repeat";
         if (bgTex.value === "solid") {
           bgOverlay.style.background = color;
         } else if (bgTex.value === "grain") {
@@ -3683,6 +4684,23 @@
           bgOverlay.style.background = color;
           bgOverlay.style.backgroundImage = `linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px)`;
           bgOverlay.style.backgroundSize = "6px 6px, 6px 6px";
+        } else if (bgTex.value === "mist") {
+          const fog = cssVar("--ds-bg-elevated", "#1a212b");
+          bgOverlay.style.background = `radial-gradient(1200px 760px at 20% 10%, ${color}, ${fog})`;
+          bgOverlay.style.backgroundImage = `radial-gradient(circle at 18% 24%, rgba(255,255,255,0.09), rgba(255,255,255,0) 42%), radial-gradient(circle at 72% 58%, rgba(255,255,255,0.07), rgba(255,255,255,0) 48%)`;
+          bgOverlay.style.backgroundBlendMode = "screen";
+          bgOverlay.style.backgroundRepeat = "no-repeat";
+        } else if (bgTex.value === "sunburst") {
+          const deep = cssVar("--ds-bg", "#090d12");
+          bgOverlay.style.background = `conic-gradient(from 90deg at 50% 40%, ${color}, ${deep}, ${color})`;
+          bgOverlay.style.backgroundImage = `radial-gradient(900px 900px at 50% 40%, rgba(255,255,255,0.2), rgba(255,255,255,0) 58%)`;
+          bgOverlay.style.backgroundBlendMode = "soft-light";
+          bgOverlay.style.backgroundRepeat = "no-repeat";
+        } else if (bgTex.value === "contours") {
+          bgOverlay.style.background = color;
+          bgOverlay.style.backgroundImage =
+            "repeating-radial-gradient(circle at 50% 45%, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, rgba(255,255,255,0) 2px, rgba(255,255,255,0) 16px)";
+          bgOverlay.style.backgroundSize = "220px 220px";
         }
         applyLightingFromUI();
       }
@@ -3733,98 +4751,333 @@
         refreshAllReadouts();
       }
 
-      function makeVessel(type, dia = 1.2, depth = 1.6) {
+      function makeVessel(
+        type,
+        dia = 1.2,
+        depth = 1.6,
+        lip = 0.35,
+        foot = 0.35,
+      ) {
         if (vesselGroup) {
           ike.remove(vesselGroup);
           vesselGroup.traverse((o) => {
             if (o.geometry) o.geometry.dispose();
+            if (o.material) disposeOwnedMaterial(o.material);
           });
         }
         const g = new THREE.Group();
-        g.position.y = -1.6;
+        const vesselOffsetY = parseFloat(vesselOffsetYUI?.value || "0") || 0;
+        g.position.y = -1.6 + vesselOffsetY;
         vesselGroup = g;
         ike.add(g);
-        const tint = new THREE.Color(vesselColor.value);
-        mats.glass.color.copy(tint);
-        mats.stone.color.copy(tint);
-        if (type === "glass-cylinder") {
+        const tint = new THREE.Color(vesselColor?.value || "#a5b2bd");
+        const lipMul = Math.max(0, Math.min(1, Number(lip)));
+        const footMul = Math.max(0, Math.min(1, Number(foot)));
+        const lipScale = 0.82 + lipMul * 0.5;
+        const footScale = 0.62 + footMul * 0.45;
+        const safeDepth = Math.max(0.2, depth);
+        const safeDia = Math.max(0.5, dia);
+        const vesselOpacity = Math.max(
+          0,
+          Math.min(1, parseFloat(vesselOpacityUI?.value || "0.85")),
+        );
+        const vesselBlur = Math.max(
+          0,
+          Math.min(1, parseFloat(vesselBlurUI?.value || "0.22")),
+        );
+        const vesselMat = new THREE.MeshPhysicalMaterial({
+          color: tint,
+          metalness: 0.04,
+          roughness: 0.18 + vesselBlur * 0.78,
+          transmission: 0.2 + (1 - vesselBlur) * 0.7,
+          transparent: true,
+          opacity: vesselOpacity,
+          thickness: 0.6,
+          side: DS,
+        });
+        const stoneMat = new THREE.MeshStandardMaterial({
+          color: tint,
+          roughness: 0.58 + vesselBlur * 0.35,
+          metalness: 0.06,
+          transparent: vesselOpacity < 1,
+          opacity: Math.max(0.2, vesselOpacity),
+          side: DS,
+        });
+
+        if (type === "none") {
+          // intentionally empty
+        } else if (type === "glass-cylinder") {
           const outer = new THREE.Mesh(
             new THREE.CylinderGeometry(
-              dia * 0.9,
-              dia * 0.9,
-              depth,
+              safeDia * 0.9 * lipScale,
+              safeDia * 0.9,
+              safeDepth,
               36,
               1,
               true,
             ),
-            mats.glass,
+            vesselMat,
           );
-          const inner = new THREE.Mesh(
-            new THREE.CylinderGeometry(
-              dia * 0.82,
-              dia * 0.82,
-              depth * 0.92,
-              36,
-              1,
-              true,
-            ),
-            mats.glass,
-          );
-          const water = new THREE.Mesh(
-            new THREE.CylinderGeometry(
-              dia * 0.8,
-              dia * 0.8,
-              Math.max(0.2, depth * 0.45),
-              36,
-            ),
-            mats.water,
-          );
-          water.position.y = -depth * 0.25;
-          g.add(outer, inner, water);
+          g.add(outer);
         } else if (type === "shallow-bowl") {
           const bowl = new THREE.Mesh(
             new THREE.CylinderGeometry(
-              dia * 1.3,
-              dia * 1.5,
-              Math.max(0.25, depth * 0.35),
+              safeDia * 1.3,
+              safeDia * 1.5 * lipScale,
+              Math.max(0.25, safeDepth * 0.35),
               24,
               1,
               true,
             ),
-            mats.glass,
+            vesselMat,
           );
-          bowl.position.y = -Math.max(0.05, depth * 0.1);
+          bowl.position.y = -Math.max(0.05, safeDepth * 0.1);
           g.add(bowl);
-          const pool = new THREE.Mesh(
-            new THREE.CylinderGeometry(
-              dia * 1.2,
-              dia * 1.2,
-              Math.max(0.1, depth * 0.12),
-              24,
-            ),
-            mats.water,
-          );
-          pool.position.y = -Math.max(0.08, depth * 0.18);
-          g.add(pool);
         } else if (type === "faceted") {
           const prism = new THREE.Mesh(
-            new THREE.DodecahedronGeometry(Math.max(0.6, dia * 0.7), 0),
-            mats.glass,
+            new THREE.DodecahedronGeometry(Math.max(0.6, safeDia * 0.7), 0),
+            vesselMat,
           );
           prism.position.y = 0.1;
           g.add(prism);
         } else if (type === "stone-disc") {
           const disc = new THREE.Mesh(
             new THREE.CylinderGeometry(
-              dia * 1.4,
-              dia * 1.4,
-              Math.max(0.2, depth * 0.16),
+              safeDia * (1.18 + lipMul * 0.5),
+              safeDia * (1.18 + lipMul * 0.5),
+              Math.max(0.2, safeDepth * (0.14 + footMul * 0.18)),
               36,
             ),
-            mats.stone,
+            stoneMat,
           );
-          disc.position.y = -depth * 0.6;
+          disc.position.y = -safeDepth * (0.5 + footMul * 0.22);
           g.add(disc);
+        } else if (type === "oval-pot") {
+          const body = new THREE.Mesh(
+            new THREE.CylinderGeometry(
+              safeDia * (1.08 + lipMul * 0.18),
+              safeDia * 1.16,
+              Math.max(0.24, safeDepth * 0.46),
+              28,
+            ),
+            stoneMat,
+          );
+          body.scale.set(1.28, 1, 0.92);
+          body.position.y = -safeDepth * 0.16;
+          const rim = new THREE.Mesh(
+            new THREE.TorusGeometry(
+              safeDia * (0.72 + lipMul * 0.22),
+              0.05,
+              10,
+              28,
+            ),
+            stoneMat,
+          );
+          rim.rotation.x = Math.PI / 2;
+          rim.scale.set(1.3, 1, 0.92);
+          rim.position.y = body.position.y + Math.max(0.05, safeDepth * 0.24);
+          const footRing = new THREE.Mesh(
+            new THREE.TorusGeometry(safeDia * 0.58, 0.045 * footScale, 10, 28),
+            stoneMat,
+          );
+          footRing.rotation.x = Math.PI / 2;
+          footRing.scale.set(1.15, 1, 0.9);
+          footRing.position.y =
+            body.position.y - Math.max(0.06, safeDepth * 0.28);
+          g.add(body, rim, footRing);
+        } else if (type === "rect-tray") {
+          const w = safeDia * (1.65 + lipMul * 0.25);
+          const dTray = safeDia * (1.08 + lipMul * 0.22);
+          const h = Math.max(0.14, safeDepth * (0.18 + footMul * 0.1));
+          const tray = new THREE.Mesh(
+            new THREE.BoxGeometry(w, h, dTray),
+            stoneMat,
+          );
+          tray.position.y = -safeDepth * 0.32;
+          const feet = [-1, 1]
+            .map((sx) => [-1, 1].map((sz) => [sx, sz]))
+            .flat()
+            .map(([sx, sz]) => {
+              const ft = new THREE.Mesh(
+                new THREE.BoxGeometry(
+                  w * 0.12,
+                  h * (0.45 + footMul * 0.3),
+                  dTray * 0.12,
+                ),
+                stoneMat,
+              );
+              ft.position.set(
+                sx * w * 0.36,
+                tray.position.y - h * 0.5,
+                sz * dTray * 0.36,
+              );
+              return ft;
+            });
+          g.add(tray, ...feet);
+        } else if (type === "cascade-tube") {
+          const tube = new THREE.Mesh(
+            new THREE.CylinderGeometry(
+              safeDia * (0.52 + lipMul * 0.2),
+              safeDia * (0.6 + footMul * 0.14),
+              Math.max(0.6, safeDepth * 1.28),
+              30,
+              1,
+              true,
+            ),
+            stoneMat,
+          );
+          tube.position.y = -safeDepth * 0.08;
+          const base = new THREE.Mesh(
+            new THREE.CylinderGeometry(
+              safeDia * (0.72 + footMul * 0.22),
+              safeDia * (0.74 + footMul * 0.26),
+              Math.max(0.16, safeDepth * 0.18),
+              28,
+            ),
+            stoneMat,
+          );
+          base.position.y = tube.position.y - safeDepth * 0.72;
+          g.add(tube, base);
+        } else if (type === "rings") {
+          const ropeMat = new THREE.MeshStandardMaterial({
+            color: 0x8a6b47,
+            metalness: 0.02,
+            roughness: 0.86,
+            side: DS,
+          });
+          const ropeA = new THREE.Mesh(
+            new THREE.TorusGeometry(Math.max(0.24, safeDia * 0.3), 0.012, 8, 28),
+            ropeMat,
+          );
+          ropeA.rotation.x = Math.PI / 2;
+          ropeA.position.y = -safeDepth * 0.32;
+          const ropeB = ropeA.clone();
+          ropeB.rotation.y = Math.PI / 2;
+          g.add(ropeA, ropeB);
+        }
+
+        const mediumType = String(mediumTypeUI?.value || "none");
+        const mediumDia = Math.max(
+          0.2,
+          parseFloat(mediumDiaUI?.value || String(safeDia * 0.88)),
+        );
+        const mediumDepth = Math.max(
+          0.02,
+          parseFloat(mediumDepthUI?.value || String(Math.max(0.1, safeDepth * 0.2))),
+        );
+        const mediumOpacity = Math.max(
+          0,
+          Math.min(1, parseFloat(mediumOpacityUI?.value || "0.78")),
+        );
+        const mediumBlur = Math.max(
+          0,
+          Math.min(1, parseFloat(mediumBlurUI?.value || "0.3")),
+        );
+        const mediumOffsetY = parseFloat(mediumOffsetYUI?.value || "0") || 0;
+        const mediumColor = new THREE.Color(mediumColorUI?.value || "#6eaec9");
+        if (mediumType !== "none") {
+          const mediumMat = new THREE.MeshPhysicalMaterial({
+            color: mediumColor,
+            roughness: 0.08 + mediumBlur * 0.78,
+            metalness:
+              mediumType === "sand" || mediumType === "rock" ? 0.08 : 0.02,
+            transmission:
+              mediumType === "moss" ||
+              mediumType === "sand" ||
+              mediumType === "rock" ||
+              mediumType === "kokedama"
+                ? 0
+                : 0.85 - mediumBlur * 0.45,
+            transparent: true,
+            opacity: mediumOpacity,
+            thickness: 0.5,
+            side: DS,
+          });
+          let mediumMesh = null;
+          if (mediumType === "water" || mediumType === "gel") {
+            mediumMesh = new THREE.Mesh(
+              new THREE.CylinderGeometry(mediumDia * 0.92, mediumDia * 0.92, mediumDepth, 28),
+              mediumMat,
+            );
+          } else if (mediumType === "moss") {
+            mediumMesh = new THREE.Mesh(
+              new THREE.SphereGeometry(Math.max(0.18, mediumDia * 0.42), 20, 14),
+              mediumMat,
+            );
+            mediumMesh.scale.y = 0.55;
+          } else if (mediumType === "sand") {
+            mediumMesh = new THREE.Mesh(
+              new THREE.CylinderGeometry(mediumDia * 0.95, mediumDia * 1.02, Math.max(0.04, mediumDepth * 0.55), 24),
+              mediumMat,
+            );
+          } else if (mediumType === "rock") {
+            mediumMesh = new THREE.Mesh(
+              new THREE.DodecahedronGeometry(Math.max(0.22, mediumDia * 0.3), 1),
+              mediumMat,
+            );
+            mediumMesh.scale.set(1.26, 0.9 + footMul * 0.3, 1.14);
+          } else if (mediumType === "kokedama") {
+            mediumMesh = new THREE.Mesh(
+              new THREE.SphereGeometry(Math.max(0.24, mediumDia * 0.38), 24, 18),
+              mediumMat,
+            );
+            mediumMesh.scale.y = 0.94;
+          }
+          if (mediumMesh) {
+            mediumMesh.position.y = -Math.max(0.06, safeDepth * 0.24) + mediumOffsetY;
+            g.add(mediumMesh);
+          }
+        }
+
+        const platformType = String(platformTypeUI?.value || "none");
+        const platformDia = Math.max(0.2, parseFloat(platformDiaUI?.value || "1.35"));
+        const platformDepth = Math.max(
+          0.02,
+          parseFloat(platformDepthUI?.value || "0.16"),
+        );
+        const platformOpacity = Math.max(
+          0,
+          Math.min(1, parseFloat(platformOpacityUI?.value || "0.95")),
+        );
+        const platformBlur = Math.max(
+          0,
+          Math.min(1, parseFloat(platformBlurUI?.value || "0.12")),
+        );
+        const platformOffsetY = parseFloat(platformOffsetYUI?.value || "0") || 0;
+        const platformColor = new THREE.Color(platformColorUI?.value || "#858b94");
+        if (platformType !== "none") {
+          const platformMat = new THREE.MeshStandardMaterial({
+            color: platformColor,
+            roughness: 0.48 + platformBlur * 0.45,
+            metalness: 0.08,
+            transparent: platformOpacity < 1,
+            opacity: platformOpacity,
+            side: DS,
+          });
+          let plat = null;
+          if (platformType === "disc") {
+            plat = new THREE.Mesh(
+              new THREE.CylinderGeometry(platformDia, platformDia * 1.03, platformDepth, 26),
+              platformMat,
+            );
+          } else if (platformType === "tray") {
+            plat = new THREE.Mesh(
+              new THREE.BoxGeometry(platformDia * 1.5, platformDepth, platformDia),
+              platformMat,
+            );
+          } else if (platformType === "slab") {
+            plat = new THREE.Mesh(
+              new THREE.CylinderGeometry(platformDia * 1.1, platformDia * 1.15, platformDepth * 1.2, 8),
+              platformMat,
+            );
+          }
+          if (plat) {
+            plat.position.y =
+              -Math.max(0.2, safeDepth * 0.7) -
+              platformDepth * 0.5 +
+              platformOffsetY;
+            g.add(plat);
+          }
         }
         return g;
       }
@@ -3842,10 +5095,124 @@
         controls.target.set(0, baseY, 0);
       }
 
-      // Render styles (tree only)
+      function syncFallingLeafColor() {
+        if (!fallingLeafMaterial) return;
+        const color = leafColorUI ? leafColorUI.value : "#2d6e52";
+        fallingLeafMaterial.color.set(color);
+      }
+
+      function clearFallingLeaves() {
+        fallingSpawnAcc = 0;
+        fallingLeafTime = 0;
+        for (const p of fallingLeaves) {
+          if (p.mesh && p.mesh.parent) p.mesh.parent.remove(p.mesh);
+        }
+        fallingLeaves = [];
+      }
+
+      function getFallingLeafBounds() {
+        const src = treeGroup || ike;
+        if (!src) return null;
+        const box = new THREE.Box3().setFromObject(src);
+        if (!isFinite(box.min.x) || !isFinite(box.max.x)) return null;
+        return box;
+      }
+
+      function spawnFallingLeaf(bounds) {
+        if (!bounds || fallingLeaves.length >= FALLING_LEAF_MAX) return;
+        const leaf = new THREE.Mesh(fallingLeafGeometry, fallingLeafMaterial);
+        const diaMul = Math.max(
+          0.4,
+          Math.min(2.6, parseFloat(fallingLeavesDiameterUI?.value || "1.1")),
+        );
+        const spanX = Math.max(0.6, (bounds.max.x - bounds.min.x) * diaMul);
+        const spanZ = Math.max(0.6, (bounds.max.z - bounds.min.z) * diaMul);
+        const x = rr(Math.random, bounds.min.x - spanX * 0.15, bounds.max.x + spanX * 0.15);
+        const z = rr(Math.random, bounds.min.z - spanZ * 0.15, bounds.max.z + spanZ * 0.15);
+        const y = rr(
+          Math.random,
+          bounds.max.y - Math.max(0.2, (bounds.max.y - bounds.min.y) * 0.25),
+          bounds.max.y + 0.3,
+        );
+        leaf.position.set(x, y, z);
+        leaf.rotation.set(
+          rr(Math.random, -0.4, 0.4),
+          rr(Math.random, 0, Math.PI * 2),
+          rr(Math.random, -0.4, 0.4),
+        );
+        const sizeVar = Math.max(
+          0,
+          Math.min(1, parseFloat(fallingLeavesSizeVarUI?.value || "0.4")),
+        );
+        const scale = rr(
+          Math.random,
+          Math.max(0.3, 0.85 - sizeVar * 0.5),
+          0.95 + sizeVar * 0.95,
+        );
+        leaf.scale.setScalar(scale);
+        fallingLeavesGroup.add(leaf);
+        fallingLeaves.push({
+          mesh: leaf,
+          vx: rr(Math.random, -0.09, 0.09),
+          vy: rr(Math.random, -0.45, -0.18),
+          vz: rr(Math.random, -0.08, 0.08),
+          swayAmp: rr(Math.random, 0.03, 0.12),
+          swayFreq: rr(Math.random, 0.6, 2.1),
+          swayPhase: rr(Math.random, 0, Math.PI * 2),
+          spin: rr(Math.random, -2.2, 2.2),
+        });
+      }
+
+      function updateFallingLeaves(dt) {
+        const enabled = !!(fallingLeavesToggle && fallingLeavesToggle.checked);
+        if (!enabled) {
+          if (fallingLeaves.length) clearFallingLeaves();
+          return;
+        }
+        const amount = Math.max(
+          0,
+          Math.min(1, parseFloat(fallingLeavesAmountUI?.value || "0.35")),
+        );
+        if (amount <= 0.001) return;
+        const rateMul = Math.max(
+          0,
+          Math.min(1, parseFloat(fallingLeavesRateUI?.value || "0.45")),
+        );
+        fallingLeafTime += dt;
+        const bounds = getFallingLeafBounds();
+        if (!bounds) return;
+        const spawnRate = 0.2 + amount * (0.8 + rateMul * 4.6);
+        fallingSpawnAcc += dt * spawnRate;
+        while (fallingSpawnAcc >= 1 && fallingLeaves.length < FALLING_LEAF_MAX) {
+          spawnFallingLeaf(bounds);
+          fallingSpawnAcc -= 1;
+        }
+        const minY = Math.min(bounds.min.y - 1.5, -4.2);
+        const maxR = Math.max(4, Math.hypot(bounds.max.x - bounds.min.x, bounds.max.z - bounds.min.z) * 1.4);
+        for (let i = fallingLeaves.length - 1; i >= 0; i--) {
+          const p = fallingLeaves[i];
+          const m = p.mesh;
+          if (!m) continue;
+          const sway = Math.sin(fallingLeafTime * p.swayFreq + p.swayPhase) * p.swayAmp;
+          m.position.x += (p.vx + sway) * dt;
+          m.position.y += p.vy * dt * (0.8 + amount * 0.9);
+          m.position.z += p.vz * dt;
+          m.rotation.z += p.spin * dt;
+          if (
+            m.position.y < minY ||
+            Math.hypot(m.position.x, m.position.z) > maxR + 2
+          ) {
+            if (m.parent) m.parent.remove(m);
+            fallingLeaves.splice(i, 1);
+          }
+        }
+      }
+
+      // Render styles (tree + vessel)
       function applyRenderStyle() {
         const mode = renderMode.value;
         const wire = !!wireToggle.checked;
+        const isSketchy = mode === "sketchy";
         const branchColor = new THREE.Color(
           branchColorUI ? branchColorUI.value : mats.branch.color,
         );
@@ -3859,7 +5226,22 @@
 
         const setMat = (mesh, kind) => {
           let mat;
-          if (mode === "metallic") {
+          if (isSketchy) {
+            const baseColor =
+              kind === "branch"
+                ? branchColor
+                : kind === "petal"
+                  ? petalColor
+                  : leafColor;
+            // Sketchy keeps filled shading + overlays; wireframe is only explicit via toggle.
+            mat = new THREE.MeshStandardMaterial({
+              color: baseColor,
+              metalness: 0.04,
+              roughness: 0.9,
+              wireframe: wire,
+              side: DS,
+            });
+          } else if (mode === "metallic") {
             mat = new THREE.MeshStandardMaterial({
               color:
                 kind === "branch"
@@ -3927,6 +5309,9 @@
                 : kind === "branch"
                   ? mats.branch.clone()
                   : mats.leaf.clone();
+            if (kind === "branch") mat.color.copy(branchColor);
+            else if (kind === "petal") mat.color.copy(petalColor);
+            else mat.color.copy(leafColor);
             mat.wireframe = wire;
             mat.side = DS;
           }
@@ -3942,38 +5327,85 @@
             }
           });
         }
-
-        if (sketchOverlay) {
-          ike.remove(sketchOverlay);
-          sketchOverlay.traverse((o) => {
-            if (o.geometry) o.geometry.dispose();
-            if (o.material) disposeOwnedMaterial(o.material);
-          });
-          sketchOverlay = null;
-        }
-        if (mode === "sketchy") {
-          sketchOverlay = new THREE.Group();
-          treeGroup.traverse((o) => {
-            if (o.isMesh && o.geometry) {
-              const e = new THREE.EdgesGeometry(o.geometry, 15);
-              const lines = new THREE.LineSegments(
-                e,
-                new THREE.LineBasicMaterial({
-                  color: 0x0b0b0b,
-                  transparent: true,
-                  opacity: 0.6,
-                }),
-              );
-              lines.position.copy(o.position);
-              lines.rotation.copy(o.rotation);
-              lines.scale.copy(o.scale);
-              lines.quaternion.copy(o.quaternion);
-              lines.userData.kind = "sketch";
-              o.add(lines);
-              sketchOverlay.add(lines);
+        if (vesselGroup) {
+          vesselGroup.traverse((o) => {
+            if (!o.isMesh) return;
+            // Sketchy also covers vessel; keep the vessel's base color/material family.
+            if (isSketchy && o.material) {
+              const wm = o.material.clone();
+              wm.wireframe = wire || !!o.isInstancedMesh;
+              wm.side = DS;
+              disposeOwnedMaterial(o.material);
+              o.material = wm;
+            } else if (
+              !isSketchy &&
+              o.material &&
+              o.material.wireframe &&
+              !wire
+            ) {
+              const wm = o.material.clone();
+              wm.wireframe = false;
+              wm.side = DS;
+              disposeOwnedMaterial(o.material);
+              o.material = wm;
             }
           });
         }
+
+        const clearSketchOverlays = () => {
+          [treeGroup, vesselGroup].forEach((grp) => {
+            if (!grp) return;
+            grp.traverse((o) => {
+              if (!o.children || !o.children.length) return;
+              for (let i = o.children.length - 1; i >= 0; i--) {
+                const ch = o.children[i];
+                if (ch?.userData?.kind !== "sketch") continue;
+                o.remove(ch);
+                if (ch.geometry) ch.geometry.dispose();
+                if (ch.material) disposeOwnedMaterial(ch.material);
+              }
+            });
+          });
+          sketchOverlay = null;
+        };
+        clearSketchOverlays();
+
+        const addSketchEdges = (grp) => {
+          if (!grp) return;
+          grp.traverse((o) => {
+            if (!o.isMesh || o.isInstancedMesh || !o.geometry) return;
+            const e = new THREE.EdgesGeometry(o.geometry, 15);
+            const lines = new THREE.LineSegments(
+              e,
+              new THREE.LineBasicMaterial({
+                color: 0x0d1116,
+                transparent: true,
+                opacity: 0.85,
+                depthTest: true,
+                depthWrite: false,
+              }),
+            );
+            lines.userData.kind = "sketch";
+            // Keep normal depth ordering; do not force a high render order.
+            lines.renderOrder = (o.renderOrder || 0) + 0.01;
+            o.add(lines);
+          });
+        };
+
+        if (isSketchy) {
+          sketchOverlay = { kind: "mesh-attached" };
+          addSketchEdges(treeGroup);
+          addSketchEdges(vesselGroup);
+        }
+        syncFallingLeafColor();
+      }
+
+      function updateEmissiveFieldState() {
+        const active = !!(renderMode && renderMode.value === "emissive");
+        if (emissiveStrengthUI) emissiveStrengthUI.disabled = !active;
+        if (emissiveColorUI) emissiveColorUI.disabled = !active;
+        if (emissiveField)
+          emissiveField.classList.toggle("is-disabled", !active);
       }
 
       // ---- Improved single-geometry factories for instancing (cached)
@@ -4081,6 +5513,88 @@
             break;
           }
 
+          // Long, narrow broadleaf
+          case "lanceolate":
+          case "lance": {
+            const shape = new THREE.Shape();
+            shape.moveTo(0, 0.32);
+            shape.bezierCurveTo(0.13, 0.2, 0.1, -0.15, 0, -0.3);
+            shape.bezierCurveTo(-0.1, -0.15, -0.13, 0.2, 0, 0.32);
+            const extrude = { depth: 0.015, bevelEnabled: false };
+            g = new THREE.ExtrudeGeometry(shape, extrude);
+            g.rotateX(Math.PI / 2);
+            break;
+          }
+
+          // Broad lobed maple-like leaf
+          case "maple-lobed":
+          case "maple":
+          case "lobed": {
+            const shape = new THREE.Shape();
+            shape.moveTo(0, 0.34);
+            shape.lineTo(0.06, 0.2);
+            shape.lineTo(0.2, 0.24);
+            shape.lineTo(0.12, 0.08);
+            shape.lineTo(0.28, -0.02);
+            shape.lineTo(0.1, -0.08);
+            shape.lineTo(0.14, -0.26);
+            shape.lineTo(0, -0.14);
+            shape.lineTo(-0.14, -0.26);
+            shape.lineTo(-0.1, -0.08);
+            shape.lineTo(-0.28, -0.02);
+            shape.lineTo(-0.12, 0.08);
+            shape.lineTo(-0.2, 0.24);
+            shape.lineTo(-0.06, 0.2);
+            shape.closePath();
+            const extrude = { depth: 0.014, bevelEnabled: false };
+            g = new THREE.ExtrudeGeometry(shape, extrude);
+            g.rotateX(Math.PI / 2);
+            break;
+          }
+
+          // Ginkgo-like fan
+          case "fan":
+          case "ginkgo-fan": {
+            g = new THREE.CircleGeometry(
+              0.26,
+              28,
+              Math.PI * 0.08,
+              Math.PI * 0.84,
+            );
+            g.rotateX(-Math.PI / 2);
+            break;
+          }
+
+          // Conifer scale cluster
+          case "scale":
+          case "scale-cluster": {
+            g = new THREE.IcosahedronGeometry(0.16, 1);
+            break;
+          }
+
+          // Flat fern-frond style leaflet
+          case "fern":
+          case "frond": {
+            const shape = new THREE.Shape();
+            shape.moveTo(0, 0.34);
+            shape.lineTo(0.09, 0.22);
+            shape.lineTo(0.05, 0.1);
+            shape.lineTo(0.11, -0.02);
+            shape.lineTo(0.05, -0.15);
+            shape.lineTo(0.08, -0.31);
+            shape.lineTo(0, -0.22);
+            shape.lineTo(-0.08, -0.31);
+            shape.lineTo(-0.05, -0.15);
+            shape.lineTo(-0.11, -0.02);
+            shape.lineTo(-0.05, 0.1);
+            shape.lineTo(-0.09, 0.22);
+            shape.closePath();
+            const extrude = { depth: 0.012, bevelEnabled: false };
+            g = new THREE.ExtrudeGeometry(shape, extrude);
+            g.rotateX(Math.PI / 2);
+            break;
+          }
+
           // Half circle leaf (fan). Use CircleGeometry partial arc.
           case "half":
           case "half-circle":
@@ -4153,15 +5667,19 @@
           ike.remove(vesselGroup);
           vesselGroup.traverse((o) => {
             if (o.geometry) o.geometry.dispose();
+            if (o.material) disposeOwnedMaterial(o.material);
           });
           vesselGroup = null;
         }
+        clearFallingLeaves();
 
         // Rebuild vessel + tree as children of the *same* `ike`
         makeVessel(
           vesselType.value,
           parseFloat(vesselDia.value),
           parseFloat(vesselDepth.value),
+          parseFloat(vesselLip?.value || "0.35"),
+          parseFloat(vesselFoot?.value || "0.35"),
         );
 
         // NOTE: do NOT re-center the camera target here.
@@ -4207,6 +5725,36 @@
         const lenFall = preset.lenFalloff;
         const leavesKind = leafType.value || preset.leaves;
         const curv = clamp(nOr(curvature.value, 0.4), 0, 1);
+        const trunkArch = clamp(
+          nOr(trunkArchUI ? trunkArchUI.value : NaN, 0.55),
+          0,
+          1.6,
+        );
+        const trunkDrop = clamp(
+          nOr(trunkDropUI ? trunkDropUI.value : NaN, 0.25),
+          0,
+          1.4,
+        );
+        const trunkLean = clamp(
+          nOr(trunkLeanUI ? trunkLeanUI.value : NaN, 0),
+          -1,
+          1,
+        );
+        const trunkTwistAmp = clamp(
+          nOr(trunkTwistAmpUI ? trunkTwistAmpUI.value : NaN, 0.55),
+          0,
+          1.6,
+        );
+        const trunkBaseWidth = clamp(
+          nOr(trunkBaseWidthUI ? trunkBaseWidthUI.value : NaN, 0.11),
+          0.07,
+          0.34,
+        );
+        const trunkWidthVar = clamp(
+          nOr(trunkWidthVarUI ? trunkWidthVarUI.value : NaN, 0.35),
+          0,
+          1,
+        );
         const uni = clamp(nOr(uniformity.value, 0.5), 0, 1);
         const childMin = parseInt(bMin.value, 10);
         const childMax = parseInt(bMax.value, 10);
@@ -4216,17 +5764,23 @@
         const leafSpreadMul = nOr(leafSpread.value, 1);
         const styleMode =
           bonsaiStyleUI && bonsaiStyleUI.value ? bonsaiStyleUI.value : "auto";
-        const trunkType =
-          styleMode === "auto" ? preset.trunk || "formal" : styleMode;
+        const styleSeedRand = seeded((currentSeed ^ 0x9e3779b9) >>> 0)();
+        const autoStyle =
+          pickStyleWeighted(
+            SPECIES_STYLE_WEIGHTS[treeType.value],
+            styleSeedRand,
+          ) ||
+          preset.trunk ||
+          "formal";
+        const trunkType = styleMode === "auto" ? autoStyle : styleMode;
         const styleProfile =
           BONSAI_STYLE_PROFILES[trunkType] || BONSAI_STYLE_PROFILES.formal;
+        const formStyle =
+          FORM_STYLE_CONSTRAINTS[trunkType] || FORM_STYLE_CONSTRAINTS.formal;
         const speciesArch = SPECIES_ARCH[treeType.value] || SPECIES_ARCH.maple;
         const drama = Math.max(
           0,
-          Math.min(
-            1,
-            nOr(dramaUI ? dramaUI.value : NaN, preset.drama ?? 0.5),
-          ),
+          Math.min(1, nOr(dramaUI ? dramaUI.value : NaN, preset.drama ?? 0.5)),
         );
         const asymmetry = Math.max(
           0,
@@ -4304,18 +5858,24 @@
           bendDir.set(asymSign * rr(r, 0.2, 0.7), 0, rr(r, -0.8, 0.8));
         bendDir
           .normalize()
-          .multiplyScalar((0.32 + drama * 0.98) * curv * styleProfile.trunkBend);
+          .multiplyScalar(
+            (0.3 + drama * 1.05) *
+              curv *
+              styleProfile.trunkBend *
+              (0.8 + trunkArch * 1.15),
+          );
         const trunkRhythmAmp = clamp(speciesArch.rhythmAmp ?? 0.08, 0, 0.28);
         const trunkRhythmFreq = Math.max(0.6, speciesArch.rhythmFreq ?? 2.0);
         const trunkRhythmPhase = speciesArch.rhythmPhase ?? 0;
 
         for (let i = 0; i < depth; i++) {
           const tNorm = depth > 1 ? i / (depth - 1) : 0;
+          const baseInfluence = 1 - tNorm;
+          const basalInfluence = Math.pow(baseInfluence, 1.25);
           const rhythm =
             Math.sin(
               (tNorm * trunkRhythmFreq + trunkRhythmPhase) * Math.PI * 2,
-            ) *
-            trunkRhythmAmp;
+            ) * trunkRhythmAmp;
           const segLenMul =
             1 + rhythm * (0.7 + drama * 0.4) - Math.max(0, rhythm) * 0.05;
           const dramaCurve = (0.35 + 0.9 * drama) * (0.8 + 0.35 * (1 - tNorm));
@@ -4323,42 +5883,116 @@
             bendDir.x * (0.22 + dramaCurve * 0.55) +
             asymSign * asymmetry * 0.08 +
             (1 - uni) * rr(r, -0.3, 0.3);
+          yawBias += bendDir.x * trunkArch * (0.18 + 0.55 * baseInfluence);
+          yawBias += trunkLean * (0.12 + 0.44 * baseInfluence);
+          yawBias +=
+            bendDir.z *
+            (0.1 + trunkArch * 0.26) *
+            Math.sin(tNorm * Math.PI * 1.2);
           let pitchBias =
             0.08 * curv +
             (1 - uni) * rr(r, -0.2, 0.2) +
             up * 0.05 +
             styleProfile.trunkPitch * (1 - tNorm);
+          pitchBias -=
+            trunkDrop *
+            (0.1 + 0.42 * baseInfluence + 0.18 * Math.pow(tNorm, 1.2));
           if (trunkType === "formal") {
             yawBias *= 0.45;
             pitchBias *= 0.55;
           }
           if (trunkType === "slant") {
-            yawBias += asymSign * (0.12 + drama * 0.22);
-            pitchBias *= 0.8;
+            yawBias +=
+              asymSign *
+              (0.14 + drama * 0.26 + trunkArch * 0.24) *
+              (0.7 + 0.3 * baseInfluence);
+            pitchBias -= trunkDrop * 0.12 * (0.75 + 0.25 * baseInfluence);
           }
           if (trunkType === "informal") {
             yawBias += rr(r, -0.18, 0.18) + asymSign * (0.14 + drama * 0.2);
             pitchBias *= 0.7;
           }
           if (trunkType === "windswept") {
-            yawBias += asymSign * (0.35 + drama * 0.35);
-            pitchBias -= 0.03 + drama * 0.08;
+            yawBias +=
+              asymSign *
+              (0.42 + drama * 0.4 + trunkArch * 0.42) *
+              (0.72 + 0.28 * baseInfluence);
+            pitchBias -=
+              (0.04 + drama * 0.1) * (0.75 + 0.25 * baseInfluence) +
+              trunkDrop * 0.1;
           }
           if (trunkType === "cascade") {
-            pitchBias -= 0.11 + drama * 0.18 + tNorm * 0.1;
-            yawBias += asymSign * (0.2 + drama * 0.28);
+            pitchBias -=
+              (0.14 + drama * 0.24 + trunkDrop * 0.4) *
+              (0.85 + 0.15 * baseInfluence);
+            yawBias +=
+              asymSign *
+              (0.24 + drama * 0.3 + trunkArch * 0.26) *
+              (0.75 + 0.25 * baseInfluence);
           }
           if (trunkType === "literati") {
             yawBias += rr(r, -0.08, 0.08) + asymSign * (0.08 + drama * 0.12);
             pitchBias *= 0.35;
           }
+          const basalBendBoost = clamp(styleProfile.basalBendBoost ?? 0, 0, 1.2);
+          const basalDropBoost = clamp(styleProfile.basalDropBoost ?? 0, 0, 1.2);
+          const basalLeanBoost = clamp(styleProfile.basalLeanBoost ?? 0, 0, 1.2);
+          yawBias +=
+            bendDir.x *
+            basalInfluence *
+            basalBendBoost *
+            (0.16 + drama * 0.34 + trunkArch * 0.22);
+          yawBias +=
+            asymSign *
+            trunkLean *
+            basalInfluence *
+            basalLeanBoost *
+            (0.12 + drama * 0.2);
+          pitchBias -=
+            trunkDrop *
+            basalInfluence *
+            basalDropBoost *
+            (0.14 + drama * 0.28);
           yawBias +=
             branchTwist * rr(r, -0.11, 0.11) * (0.45 + styleProfile.trunkTwist);
+          yawBias += trunkTwistAmp * rr(r, -0.14, 0.14) * (0.5 + 0.6 * tNorm);
           dir0 = dir0
             .clone()
             .applyAxisAngle(upVec, yawBias)
             .applyAxisAngle(new THREE.Vector3(1, 0, 0), pitchBias)
             .normalize();
+          // Keep lower trunk segments within a tighter tilt envelope.
+          // Base starts around 45deg max from vertical; allowance increases up the trunk.
+          const maxBaseAngleDeg = 45;
+          const maxUpperAngleDeg =
+            trunkType === "cascade"
+              ? 128
+              : trunkType === "windswept"
+                ? 116
+                : trunkType === "slant"
+                  ? 112
+                  : 104;
+          const angleRamp =
+            trunkType === "cascade" || trunkType === "windswept" ? 0.72 : 0.9;
+          const maxAngleDeg =
+            maxBaseAngleDeg +
+            (maxUpperAngleDeg - maxBaseAngleDeg) *
+              Math.pow(Math.max(0, Math.min(1, tNorm)), angleRamp);
+          const minUp = Math.cos(THREE.MathUtils.degToRad(maxAngleDeg));
+          if (dir0.y < minUp) {
+            const horiz = Math.hypot(dir0.x, dir0.z);
+            const targetHoriz = Math.sqrt(Math.max(0, 1 - minUp * minUp));
+            if (horiz > 1e-6) {
+              const s = targetHoriz / horiz;
+              dir0.x *= s;
+              dir0.z *= s;
+            } else {
+              dir0.x = targetHoriz;
+              dir0.z = 0;
+            }
+            dir0.y = minUp;
+            dir0.normalize();
+          }
           const np = p
             .clone()
             .addScaledVector(dir0, len * heightMul * Math.max(0.4, segLenMul));
@@ -4369,13 +6003,81 @@
               rr(r, -0.1, 0.1),
             ).multiplyScalar(curv * 0.35),
           );
+          const formRadius =
+            (formStyle.radialBase * (1 - tNorm) +
+              formStyle.radialApex * tNorm) *
+            (1 + trunkArch * 0.6 * baseInfluence);
+          const radialNow = Math.hypot(np.x, np.z);
+          if (radialNow > formRadius && radialNow > 1e-6) {
+            const rs = formRadius / radialNow;
+            np.x *= rs;
+            np.z *= rs;
+          }
+          if (formStyle.trunkCenterPull > 0) {
+            const pull =
+              formStyle.trunkCenterPull *
+              (0.16 + 0.84 * tNorm) *
+              (1 - trunkArch * 0.45);
+            np.x *= 1 - pull;
+            np.z *= 1 - pull;
+          }
+          if (i < Math.max(2, Math.floor(depth * 0.34))) {
+            const leadDrop =
+              trunkDrop * (0.12 + 0.18 * baseInfluence) * (0.55 + drama * 0.55);
+            const baseDropEase = 0.34 + 0.66 * Math.pow(tNorm, 0.9);
+            np.y -= leadDrop * baseDropEase;
+            np.x += trunkLean * (0.08 + 0.26 * baseInfluence);
+            if (
+              trunkType === "cascade" ||
+              trunkType === "windswept" ||
+              trunkType === "slant"
+            ) {
+              const leanSign =
+                Math.abs(trainingPull) > 0.01
+                  ? Math.sign(trainingPull)
+                  : asymSign;
+              np.x += leanSign * trunkArch * 0.18 * (0.8 + 0.2 * baseInfluence);
+            }
+          }
+          if (trunkType === "cascade" && tNorm > 0.42) {
+            np.y -= (tNorm - 0.42) * (0.22 + drama * 0.5 + trunkDrop * 0.35);
+          }
+          if ((trunkType === "cascade" || trunkType === "windswept") && tNorm < 0.48) {
+            const basalDropEase = 0.42 + 0.58 * (tNorm / 0.48);
+            np.y -=
+              trunkDrop *
+              basalInfluence *
+              (0.08 + 0.14 * drama + 0.08 * (styleProfile.basalDropBoost ?? 0)) *
+              basalDropEase;
+          }
+          if (trunkType === "literati" && tNorm < 0.4) {
+            np.x +=
+              asymSign *
+              trunkArch *
+              basalInfluence *
+              (0.08 + 0.12 * (styleProfile.basalBendBoost ?? 0));
+          }
+          if (trunkType === "slant" || trunkType === "windswept") {
+            const leanSign =
+              Math.abs(trainingPull) > 0.01
+                ? Math.sign(trainingPull)
+                : asymSign;
+            np.x += leanSign * tNorm * 0.08 * (0.45 + drama);
+          }
+          if (trunkDrop > 0.75 && tNorm > 0.55) {
+            np.y -= (trunkDrop - 0.75) * (tNorm - 0.55) * (0.55 + drama * 0.45);
+          }
           const taperExp = 0.8 + styleProfile.trunkTaper * 0.85;
+          const widthJitter =
+            1 +
+            (r() * 2 - 1) * trunkWidthVar * 0.45 * (0.4 + 0.6 * (1 - tNorm));
           const taper =
-            0.11 *
+            trunkBaseWidth *
             Math.pow(lenFall, i * taperExp) *
             (1 - Math.min(0.32, drama * 0.26 * tNorm)) *
-            (1 + Math.max(0, rhythm) * 0.16 - Math.max(0, -rhythm) * 0.12);
-          pts.push([p.clone(), np.clone(), Math.max(0.026, taper)]);
+            (1 + Math.max(0, rhythm) * 0.16 - Math.max(0, -rhythm) * 0.12) *
+            widthJitter;
+          pts.push([p.clone(), np.clone(), Math.max(0.018, taper)]);
           p = np;
           len *=
             lenFall *
@@ -4442,7 +6144,9 @@
           );
           const terminalCap = Math.max(
             80,
-            Math.round(terminals.length * (2 + 7.5 * spreadR + 6.5 * leafSizeBase)),
+            Math.round(
+              terminals.length * (2 + 7.5 * spreadR + 6.5 * leafSizeBase),
+            ),
           );
           const MAX_LEAVES = Math.min(
             SAFE_INST_LIMIT,
@@ -4695,10 +6399,7 @@
 
             // terminal local frame aligned with t.dir (Z-forward)
             base.position.copy(t.pos);
-            base.quaternion.setFromUnitVectors(
-              zAxis,
-              t.dir,
-            );
+            base.quaternion.setFromUnitVectors(zAxis, t.dir);
             base.updateMatrix();
 
             for (let i = 0; i < count; i++) {
@@ -4803,7 +6504,8 @@
         }
 
         function enforceTieredAttachment(indices, totalSegments, tierSnap = 0) {
-          if (!indices || !indices.length || tierSnap <= 0) return indices || [];
+          if (!indices || !indices.length || tierSnap <= 0)
+            return indices || [];
           const sorted = Array.from(new Set(indices)).sort((a, b) => a - b);
           const desiredTiers = Math.max(
             2,
@@ -4837,7 +6539,9 @@
           const blend = Array.from(
             new Set([
               ...picked,
-              ...sorted.filter((_, i) => i % 2 === 0 || i === sorted.length - 1),
+              ...sorted.filter(
+                (_, i) => i % 2 === 0 || i === sorted.length - 1,
+              ),
             ]),
           ).sort((a, b) => a - b);
           return blend;
@@ -4851,7 +6555,9 @@
           const inwardDot = dirOut.dot(toCenter);
           if (inwardDot <= inwardBlock) return dirOut;
           const outward = toCenter.clone().multiplyScalar(-1);
-          return dirOut.lerp(outward, 0.35 + 0.4 * Math.min(1, inwardDot)).normalize();
+          return dirOut
+            .lerp(outward, 0.35 + 0.4 * Math.min(1, inwardDot))
+            .normalize();
         }
 
         function makeChildYawOffsets(n, minSep, fanWidth, randFn) {
@@ -4876,6 +6582,12 @@
         function styleBranchTarget(depthNorm) {
           const windSign =
             Math.abs(trainingPull) > 0.01 ? Math.sign(trainingPull) : asymSign;
+          if (trunkType === "formal") {
+            return new THREE.Vector3(0, 0.72 + depthNorm * 0.22, 0).normalize();
+          }
+          if (trunkType === "informal") {
+            return new THREE.Vector3(asymSign * 0.22, 0.72, 0).normalize();
+          }
           if (trunkType === "windswept") {
             return new THREE.Vector3(
               windSign,
@@ -4895,17 +6607,35 @@
           return null;
         }
 
+        function constrainBranchVectorForForm(v, depthNorm, origin) {
+          const out = v.clone();
+          const lowDropLimit = formStyle.lowDropLimit ?? -0.08;
+          if (depthNorm < 0.45 && out.y < lowDropLimit) {
+            out.y = lowDropLimit;
+          }
+          if (depthNorm > 0.72) {
+            out.y = Math.max(out.y, formStyle.apexUpBias ?? 0.12);
+          }
+          if (trunkType === "formal" || trunkType === "literati") {
+            const maxR =
+              formStyle.radialBase * (1 - depthNorm) +
+              formStyle.radialApex * depthNorm;
+            const rNow = Math.hypot(origin.x, origin.z);
+            if (rNow > maxR && rNow > 1e-6) {
+              out.x *= 0.82;
+              out.z *= 0.82;
+            }
+          }
+          return out.normalize();
+        }
+
         // Recursive branching
         function grow(origin, dirBase, levelIdx, depthLeft, roleScale = 1) {
           if (lastBranchSegments >= SEGMENTS_HARD_MAX) {
             addTerminal(origin, dirBase, levelIdx);
             return;
           }
-          const depthNorm = clamp(
-            levelIdx / Math.max(1, depthBranches),
-            0,
-            1,
-          );
+          const depthNorm = clamp(levelIdx / Math.max(1, depthBranches), 0, 1);
           const pitchLow = speciesArch.pitchLow ?? -0.1;
           const pitchMid = speciesArch.pitchMid ?? 0;
           const pitchHigh = speciesArch.pitchHigh ?? 0.1;
@@ -4914,9 +6644,17 @@
           else if (depthNorm > 0.66) pitchEnvelope = pitchHigh;
           const apexPrune = clamp(speciesArch.apexPrune ?? 0.35, 0, 0.9);
           const apexZone = Math.max(0, (depthNorm - 0.62) / 0.38);
-          const lowerClearance = clamp(styleProfile.lowerClearance ?? 0.24, 0, 0.7);
+          const lowerClearance = clamp(
+            styleProfile.lowerClearance ?? 0.24,
+            0,
+            0.7,
+          );
           const apexCompact = clamp(styleProfile.apexCompact ?? 0.55, 0, 0.9);
-          const lateralSpread = clamp(styleProfile.lateralSpread ?? 0.5, 0.2, 1);
+          const lateralSpread = clamp(
+            styleProfile.lateralSpread ?? 0.5,
+            0.2,
+            1,
+          );
           const windBias = clamp(styleProfile.windBias ?? 0.28, 0, 1);
           const pref = preferredDir(dirBase);
           const yaw =
@@ -4943,9 +6681,7 @@
               0,
             );
             if (train.lengthSq() > 0.0001) {
-              dir = dir
-                .lerp(train.normalize(), 0.2 + 0.25 * drama)
-                .normalize();
+              dir = dir.lerp(train.normalize(), 0.2 + 0.25 * drama).normalize();
             }
           }
           // --- Phase D: branch length with mean + variation + per-depth falloff ---
@@ -5007,7 +6743,11 @@
             n = Math.max(2, 3);
 
           // depth falloff + species architecture
-          const depthFalloff = clamp(speciesArch.depthFalloff ?? 0.78, 0.62, 0.9);
+          const depthFalloff = clamp(
+            speciesArch.depthFalloff ?? 0.78,
+            0.62,
+            0.9,
+          );
           n = Math.max(1, Math.round(n * Math.pow(depthFalloff, levelIdx)));
           n = Math.max(
             1,
@@ -5033,10 +6773,13 @@
           const fanWidth =
             Math.PI *
             (0.24 + 0.26 * (1 - uni) + 0.18 * drama) *
-            (0.72 + lateralSpread * 0.6);
+            (0.72 + lateralSpread * 0.6) *
+            (0.68 + (formStyle.lowSpread ?? 0.6) * 0.5);
           const yawOffsets =
             PRESETS[treeType.value].branchPattern === "whorl"
-              ? [...Array(n).keys()].map((k) => (k / Math.max(1, n)) * Math.PI * 2)
+              ? [...Array(n).keys()].map(
+                  (k) => (k / Math.max(1, n)) * Math.PI * 2,
+                )
               : makeChildYawOffsets(n, minSep, fanWidth, r);
 
           for (let k = 0; k < n; k++) {
@@ -5051,7 +6794,10 @@
               const flat = dirChild.clone();
               flat.y *= 1 - planarity * 0.58;
               if (flat.lengthSq() > 1e-6) {
-                dirChild = dirChild.lerp(flat.normalize(), 0.22 + planarity * 0.4);
+                dirChild = dirChild.lerp(
+                  flat.normalize(),
+                  0.22 + planarity * 0.4,
+                );
               }
             }
             dirChild = steerOutward(
@@ -5062,10 +6808,11 @@
             const styleTarget = styleBranchTarget(depthNorm);
             if (styleTarget) {
               const targetBlend =
-                (0.1 + 0.35 * windBias + 0.08 * drama) * (0.85 + 0.25 * depthNorm);
+                (0.1 + 0.35 * windBias + 0.08 * drama) *
+                (0.85 + 0.25 * depthNorm);
               dirChild = dirChild.lerp(styleTarget, targetBlend);
             }
-            dirChild.normalize();
+            dirChild = constrainBranchVectorForForm(dirChild, depthNorm, end);
             const childRole =
               roleScale *
               (k === 0 ? 0.92 : 0.76) *
@@ -5105,6 +6852,35 @@
           pts.length,
           clamp(speciesArch.tierSnap ?? 0, 0, 1),
         );
+        const formAttachMinRaw =
+          (formStyle.attachMin ?? 0.2) *
+          (1 - trunkArch * 0.42) *
+          (1 - trunkDrop * 0.32);
+        const lowerAttachBonus = clamp(
+          (styleProfile.basalAttachBoost ?? 0) +
+            (speciesArch.lowerAttachBonus ?? 0) +
+            trunkArch * 0.06 +
+            trunkDrop * 0.08,
+          0,
+          0.45,
+        );
+        const targetAttachFloor = Math.max(
+          0.01,
+          startNormBase * (0.78 - lowerAttachBonus * 0.42),
+        );
+        const formAttachMin = clamp(
+          Math.min(formAttachMinRaw - lowerAttachBonus, targetAttachFloor),
+          0.01,
+          0.9,
+        );
+        attachIndices = attachIndices.filter(
+          (idx) => idx / Math.max(1, pts.length - 1) >= formAttachMin,
+        );
+        if (!attachIndices.length) {
+          attachIndices = [
+            Math.max(1, Math.floor((pts.length - 1) * formAttachMin)),
+          ];
+        }
 
         // Spawn first-level branches from chosen joints
         for (let ai = 0; ai < attachIndices.length; ai++) {
@@ -5112,7 +6888,11 @@
           const [a, b] = pts[i];
           const dir = new THREE.Vector3().subVectors(b, a).normalize();
           const firstDepthNorm = clamp(i / Math.max(1, pts.length - 1), 0, 1);
-          const lowerClearance = clamp(styleProfile.lowerClearance ?? 0.24, 0, 0.7);
+          const lowerClearance = clamp(
+            styleProfile.lowerClearance ?? 0.24,
+            0,
+            0.7,
+          );
           const apexCompact = clamp(styleProfile.apexCompact ?? 0.55, 0, 0.9);
 
           // root fan of first-level branches from each joint (still capped; no density multiplier)
@@ -5158,9 +6938,32 @@
               b,
               clamp(speciesArch.inwardBlock ?? 0.6, 0.35, 0.9),
             );
-            d0.normalize();
+            if (treeType.value === "juniper" || trunkType === "windswept") {
+              const sweepSign =
+                Math.abs(trainingPull) > 0.01
+                  ? Math.sign(trainingPull)
+                  : asymSign;
+              if (m === 0) {
+                d0.applyAxisAngle(
+                  new THREE.Vector3(0, 1, 0),
+                  sweepSign * (0.42 + 0.62 * (1 - firstDepthNorm)),
+                );
+                d0.y -= 0.08 + 0.24 * (1 - firstDepthNorm);
+              } else if (m === 1) {
+                d0.applyAxisAngle(
+                  new THREE.Vector3(0, 1, 0),
+                  -sweepSign * (0.32 + 0.36 * (1 - firstDepthNorm)),
+                );
+                d0.y += 0.06;
+              }
+            }
+            d0 = constrainBranchVectorForForm(d0, firstDepthNorm, b);
             // Use i as levelIdx anchor (consistent with your existing scheme)
-            const primaryRole = m === 0 ? 1.12 : 0.84;
+            let primaryRole = m === 0 ? 1.12 : 0.84;
+            if (treeType.value === "juniper" || trunkType === "windswept") {
+              if (m === 0) primaryRole = 1.46;
+              else if (m === 1) primaryRole = 1.05;
+            }
             grow(b, d0, i, depthBranches, primaryRole);
           }
         }
@@ -5253,6 +7056,8 @@
           vesselType.value,
           parseFloat(vesselDia.value),
           parseFloat(vesselDepth.value),
+          parseFloat(vesselLip?.value || "0.35"),
+          parseFloat(vesselFoot?.value || "0.35"),
         );
         updateSpinPivotFromVessel();
       }
@@ -5262,10 +7067,60 @@
       }
 
       const SNAPSHOT_STORAGE_KEY = "bonsai.snapshots.v1";
-      const SNAPSHOT_LIMIT = 24;
+      const SNAPSHOT_DB_NAME = "bonsai.gallery.db";
+      const SNAPSHOT_DB_VERSION = 1;
+      const SNAPSHOT_DB_STORE = "kv";
+      const SNAPSHOT_DB_KEY = "snapshots";
+      const SNAPSHOT_RENDER_BATCH = 24;
       let snapshots = [];
+      let snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
       let selectedSnapshotId = null;
       let pendingDeleteSnapshotId = null;
+      let snapshotDbPromise = null;
+
+      function openSnapshotDb() {
+        if (!("indexedDB" in window)) return Promise.resolve(null);
+        if (snapshotDbPromise) return snapshotDbPromise;
+        snapshotDbPromise = new Promise((resolve, reject) => {
+          const req = indexedDB.open(SNAPSHOT_DB_NAME, SNAPSHOT_DB_VERSION);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(SNAPSHOT_DB_STORE)) {
+              db.createObjectStore(SNAPSHOT_DB_STORE, { keyPath: "id" });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () =>
+            reject(req.error || new Error("IndexedDB open failed"));
+        });
+        return snapshotDbPromise;
+      }
+
+      async function dbPutSnapshots(list) {
+        const db = await openSnapshotDb();
+        if (!db) return false;
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(SNAPSHOT_DB_STORE, "readwrite");
+          const store = tx.objectStore(SNAPSHOT_DB_STORE);
+          store.put({ id: SNAPSHOT_DB_KEY, data: list, updatedAt: Date.now() });
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () =>
+            reject(tx.error || new Error("IndexedDB put failed"));
+        });
+      }
+
+      async function dbGetSnapshots() {
+        const db = await openSnapshotDb();
+        if (!db) return null;
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(SNAPSHOT_DB_STORE, "readonly");
+          const store = tx.objectStore(SNAPSHOT_DB_STORE);
+          const req = store.get(SNAPSHOT_DB_KEY);
+          req.onsuccess = () => resolve(req.result?.data ?? null);
+          req.onerror = () =>
+            reject(req.error || new Error("IndexedDB get failed"));
+        });
+      }
 
       function showToast(message, kind = "info", ms) {
         if (!toastStack) return;
@@ -5351,11 +7206,125 @@
         }
       }
 
+      function applyExtremePreset(name) {
+        const preset = String(name || "").trim();
+        if (!preset) return;
+        const setVal = (id, v) => {
+          const el = $(id);
+          if (!el) return;
+          if (el.type === "checkbox") el.checked = !!v;
+          else el.value = String(v);
+        };
+        if (preset === "dramatic-sweep") {
+          setVal("bonsaiStyle", "windswept");
+          setVal("trunkArch", 1.28);
+          setVal("trunkDrop", 0.86);
+          setVal("trunkLean", 0.52);
+          setVal("trunkTwistAmp", 1.15);
+          setVal("trunkBaseWidth", 0.135);
+          setVal("trunkWidthVar", 0.72);
+          setVal("branchStart", 0.02);
+          setVal("branchBias", 0.12);
+          setVal("bDepth", 4);
+          setVal("bMin", 2);
+          setVal("bMax", 4);
+          setVal("drama", 0.88);
+          setVal("asymmetry", 0.82);
+          setVal("branchTwist", 0.84);
+          setVal("upBias", 0.2);
+          setVal("spread", 1.12);
+        } else if (preset === "reverse-cascade") {
+          setVal("bonsaiStyle", "cascade");
+          setVal("trunkArch", 1.42);
+          setVal("trunkDrop", 1.18);
+          setVal("trunkLean", 0.38);
+          setVal("trunkTwistAmp", 0.95);
+          setVal("trunkBaseWidth", 0.148);
+          setVal("trunkWidthVar", 0.66);
+          setVal("branchStart", 0.0);
+          setVal("branchBias", 0.08);
+          setVal("bDepth", 4);
+          setVal("bMin", 2);
+          setVal("bMax", 5);
+          setVal("drama", 0.9);
+          setVal("asymmetry", 0.78);
+          setVal("branchTwist", 0.72);
+          setVal("upBias", 0.08);
+          setVal("spread", 1.08);
+        } else if (preset === "serpentine-drift") {
+          setVal("bonsaiStyle", "slant");
+          setVal("trunkArch", 1.34);
+          setVal("trunkDrop", 0.72);
+          setVal("trunkLean", -0.46);
+          setVal("trunkTwistAmp", 1.28);
+          setVal("trunkBaseWidth", 0.125);
+          setVal("trunkWidthVar", 0.84);
+          setVal("branchStart", 0.03);
+          setVal("branchBias", 0.16);
+          setVal("bDepth", 4);
+          setVal("bMin", 2);
+          setVal("bMax", 4);
+          setVal("drama", 0.94);
+          setVal("asymmetry", 0.86);
+          setVal("branchTwist", 0.92);
+          setVal("upBias", 0.16);
+          setVal("spread", 1.15);
+        } else if (preset === "literati-whip") {
+          setVal("bonsaiStyle", "literati");
+          setVal("trunkArch", 1.5);
+          setVal("trunkDrop", 0.54);
+          setVal("trunkLean", 0.24);
+          setVal("trunkTwistAmp", 1.36);
+          setVal("trunkBaseWidth", 0.09);
+          setVal("trunkWidthVar", 0.5);
+          setVal("branchStart", 0.25);
+          setVal("branchBias", 0.2);
+          setVal("bDepth", 3);
+          setVal("bMin", 1);
+          setVal("bMax", 3);
+          setVal("drama", 0.92);
+          setVal("asymmetry", 0.7);
+          setVal("branchTwist", 0.88);
+          setVal("upBias", 0.32);
+          setVal("spread", 0.92);
+        } else if (preset === "dragon-cascade") {
+          setVal("bonsaiStyle", "cascade");
+          setVal("trunkArch", 1.58);
+          setVal("trunkDrop", 1.34);
+          setVal("trunkLean", -0.62);
+          setVal("trunkTwistAmp", 1.45);
+          setVal("trunkBaseWidth", 0.168);
+          setVal("trunkWidthVar", 0.9);
+          setVal("branchStart", 0.0);
+          setVal("branchBias", 0.04);
+          setVal("bDepth", 5);
+          setVal("bMin", 2);
+          setVal("bMax", 5);
+          setVal("drama", 0.98);
+          setVal("asymmetry", 0.9);
+          setVal("branchTwist", 0.96);
+          setVal("upBias", 0.04);
+          setVal("spread", 1.18);
+          setVal("branchDrop", 0.86);
+          setVal("branchPull", -0.42);
+        }
+        sanitizeTerminalBounds();
+        refreshAllReadouts();
+        regenerate();
+        showToast(`Extreme preset: ${preset.replace(/-/g, " ")}`);
+      }
+
       function randomizeAllProperties() {
         const randomIds = [
           "treeType",
           "levels",
           "curvature",
+          "trunkArch",
+          "trunkDrop",
+          "trunkLean",
+          "trunkTwistAmp",
+          "trunkBaseWidth",
+          "trunkWidthVar",
           "uniformity",
           "spread",
           "upBias",
@@ -5389,6 +7358,25 @@
           "vesselColor",
           "vesselDia",
           "vesselDepth",
+          "vesselOffsetY",
+          "vesselLip",
+          "vesselFoot",
+          "vesselOpacity",
+          "vesselBlur",
+          "mediumType",
+          "mediumColor",
+          "mediumDia",
+          "mediumDepth",
+          "mediumOffsetY",
+          "mediumOpacity",
+          "mediumBlur",
+          "platformType",
+          "platformColor",
+          "platformDia",
+          "platformDepth",
+          "platformOffsetY",
+          "platformOpacity",
+          "platformBlur",
           "bgTex",
           "bgColor",
           "lightPreset",
@@ -5399,9 +7387,10 @@
           "renderMode",
           "emissiveColor",
           "emissiveStrength",
-          "autoSpeed",
         ];
-        randomIds.forEach((id) => randomizeElement($(id)));
+        randomIds.forEach((id) => {
+          randomizeElement($(id));
+        });
         sanitizeTerminalBounds();
         setSeed((Math.random() * 0xffffffff) >>> 0);
         applyBackground();
@@ -5436,6 +7425,7 @@
         return {
           seed: currentSeed,
           autoOn: !!autoOn,
+          autoSpeed: parseFloat(controls.autoRotateSpeed) || 0.8,
           controls: controlsState,
           camera: {
             position: toVec3Array(camera.position),
@@ -5482,23 +7472,43 @@
           camera.updateProjectionMatrix();
           controls.update();
         }
+        if (Number.isFinite(Number(state.autoSpeed))) {
+          setAutoSpeed(Number(state.autoSpeed));
+        }
         setAutoRotate(state.autoOn !== false);
         refreshAllReadouts();
       }
 
-      function saveSnapshotsToStorage() {
+      async function saveSnapshotsToStorage() {
+        try {
+          if (await dbPutSnapshots(snapshots)) return true;
+        } catch (e) {
+          // fall through to localStorage fallback
+        }
         try {
           localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(snapshots));
           return true;
         } catch (e) {
-          // Fallback: keep latest snapshots and drop heavy thumbnails if quota is hit.
+          // Fallback: keep all snapshot state, but drop thumbnails if quota is hit.
           try {
-            const lean = snapshots.map((s, i) =>
-              i < 8 ? s : { ...s, thumb: "" },
-            );
+            const lean = snapshots.map((s) => ({
+              ...s,
+              thumb: "",
+              thumbnail: "",
+            }));
             localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(lean));
+            showToast(
+              "Storage quota reached. Snapshot previews were removed, but states are saved.",
+              "warn",
+              6200,
+            );
             return true;
           } catch (_e) {
+            showToast(
+              "Storage full. Could not save snapshots. Export gallery JSON recommended.",
+              "warn",
+              6200,
+            );
             return false;
           }
         }
@@ -5508,14 +7518,36 @@
         if (snapshotCount) snapshotCount.textContent = String(snapshots.length);
       }
 
-      function loadSnapshotsFromStorage() {
+      async function loadSnapshotsFromStorage() {
+        let fromDb = null;
+        try {
+          fromDb = await dbGetSnapshots();
+        } catch (e) {
+          fromDb = null;
+        }
+        if (Array.isArray(fromDb)) {
+          snapshots = fromDb;
+          snapshots = snapshots.sort(
+            (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+          );
+          snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
+          return;
+        }
         try {
           const raw = localStorage.getItem(SNAPSHOT_STORAGE_KEY);
           const parsed = raw ? JSON.parse(raw) : [];
           snapshots = Array.isArray(parsed) ? parsed : [];
+          snapshots = snapshots.sort(
+            (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+          );
+          // migrate legacy localStorage data into IndexedDB if available
+          if (snapshots.length) {
+            saveSnapshotsToStorage();
+          }
         } catch (e) {
           snapshots = [];
         }
+        snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
       }
 
       function formatSnapshotTime(ts) {
@@ -5547,9 +7579,20 @@
           empty.className = "snapshot-sub";
           empty.textContent = "No snapshots yet.";
           snapshotGallery.appendChild(empty);
+          if (galleryLoadMoreBtn) galleryLoadMoreBtn.hidden = true;
           return;
         }
-        snapshots.forEach((snap) => {
+        const selectedIdx = snapshots.findIndex(
+          (s) => s.id === selectedSnapshotId,
+        );
+        if (selectedIdx >= snapshotRenderCount) {
+          snapshotRenderCount =
+            Math.ceil((selectedIdx + 1) / SNAPSHOT_RENDER_BATCH) *
+            SNAPSHOT_RENDER_BATCH;
+        }
+        const visibleCount = Math.min(snapshots.length, snapshotRenderCount);
+        const visible = snapshots.slice(0, visibleCount);
+        visible.forEach((snap) => {
           const item = document.createElement("div");
           item.className = "gallery-tile";
           if (selectedSnapshotId === snap.id) item.classList.add("is-selected");
@@ -5573,7 +7616,9 @@
           name.textContent = snap.name || "Snapshot";
           const sub = document.createElement("div");
           sub.className = "snapshot-sub";
-          sub.textContent = `${formatSnapshotTime(snap.createdAt)} | seed ${String(snap.state?.seed ?? "-")}`;
+          const hasPreview = !!(snap.thumb || snap.thumbnail);
+          const previewNote = hasPreview ? "" : " | Recall to render preview";
+          sub.textContent = `${formatSnapshotTime(snap.createdAt)} | seed ${String(snap.state?.seed ?? "-")}${previewNote}`;
           meta.appendChild(name);
           meta.appendChild(sub);
 
@@ -5597,6 +7642,10 @@
           item.appendChild(row);
           snapshotGallery.appendChild(item);
         });
+        if (galleryLoadMoreBtn) {
+          galleryLoadMoreBtn.hidden = visibleCount >= snapshots.length;
+          galleryLoadMoreBtn.textContent = `Load More (${snapshots.length - visibleCount} remaining)`;
+        }
       }
 
       function createSnapshot() {
@@ -5611,11 +7660,27 @@
           state: captureControlState(),
         };
         snapshots.unshift(snap);
-        if (snapshots.length > SNAPSHOT_LIMIT)
-          snapshots = snapshots.slice(0, SNAPSHOT_LIMIT);
+        snapshotRenderCount = Math.max(
+          snapshotRenderCount,
+          SNAPSHOT_RENDER_BATCH,
+        );
         saveSnapshotsToStorage();
         renderSnapshotGallery();
         showToast("Snapshot saved");
+      }
+
+      function backfillSnapshotPreview(id) {
+        const idx = snapshots.findIndex((s) => s.id === id);
+        if (idx < 0) return;
+        const snap = snapshots[idx];
+        if (snap.thumb || snap.thumbnail) return;
+        try {
+          renderer.render(scene, camera);
+          snap.thumb = renderer.domElement.toDataURL("image/jpeg", 0.78);
+          saveSnapshotsToStorage();
+        } catch (_e) {
+          // keep snapshot state even if preview capture fails
+        }
       }
 
       function downloadBlob(blob, filename) {
@@ -5749,7 +7814,7 @@
         if (!snapSaveBtn) return;
         const topTab = panelRoot?.getAttribute("data-tab") || "bonsai";
         if (topTab !== "export") {
-          snapSaveBtn.textContent = "Save Snapshot";
+          snapSaveBtn.innerHTML = `<span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span> Snapshot`;
           return;
         }
         const mode = getSelectedExportKind();
@@ -5901,12 +7966,7 @@
       }
 
       async function exportLoopGif() {
-        const {
-          size: outSize,
-          frames,
-          fps,
-          fitMargin,
-        } = GIF_EXPORT_RULES;
+        const { size: outSize, frames, fps, fitMargin } = GIF_EXPORT_RULES;
         const frameDelayMs = Math.max(10, Math.round(1000 / fps));
         const prevRot = ike.rotation.y;
         const prevTarget = controls.target.clone();
@@ -5954,7 +8014,9 @@
               resolve();
             });
             gif.on("abort", () => reject(new Error("GIF render aborted")));
-            gif.on("error", (err) => reject(err || new Error("GIF render failed")));
+            gif.on("error", (err) =>
+              reject(err || new Error("GIF render failed")),
+            );
             gif.render();
           });
           showToast("Exported GIF (square seamless loop)");
@@ -5998,10 +8060,12 @@
           fpsEMA === 0 ? fps : FPS_ALPHA * fps + (1 - FPS_ALPHA) * fpsEMA;
         frameNo++;
         applySpins(dt); // << smooth spin is applied here
+        updateFallingLeaves(dt);
         controls.update();
         renderer.render(scene, camera);
         renderHUD();
-        updatePerfStats();
+        perfUiTick++;
+        if (perfUiTick % 6 === 0) updatePerfStats();
         if (debugToggle && debugToggle.checked) {
           gizmo.visible = true;
           gizmo.position.copy(controls.target);
@@ -6147,6 +8211,36 @@
             branchPullUI.value = String(
               styleProfile.branchPull ?? branchPullUI.value ?? 0,
             );
+          if (trunkArchUI)
+            trunkArchUI.value = String(
+              0.42 + (styleProfile.trunkBend ?? 0.8) * 0.58,
+            );
+          if (trunkDropUI)
+            trunkDropUI.value = String(
+              Math.max(0, (styleProfile.branchDrop ?? 0.3) * 1.2),
+            );
+          if (trunkLeanUI)
+            trunkLeanUI.value = String(
+              Math.max(-1, Math.min(1, (styleProfile.branchPull ?? 0) * 0.9)),
+            );
+          if (trunkTwistAmpUI)
+            trunkTwistAmpUI.value = String(
+              0.2 + (styleProfile.trunkTwist ?? 0.6) * 0.7,
+            );
+          if (trunkBaseWidthUI)
+            trunkBaseWidthUI.value = String(
+              Math.max(
+                0.07,
+                Math.min(
+                  0.34,
+                  0.1 + (1.3 - (styleProfile.trunkTaper ?? 1)) * 0.08,
+                ),
+              ),
+            );
+          if (trunkWidthVarUI)
+            trunkWidthVarUI.value = String(
+              Math.max(0.12, Math.min(0.9, (p.asym ?? 0.35) * 0.9)),
+            );
           if ($("branchDrop_val"))
             $("branchDrop_val").textContent = String(
               Number(branchDropUI?.value || 0).toFixed(2),
@@ -6155,6 +8249,30 @@
             $("branchPull_val").textContent = String(
               Number(branchPullUI?.value || 0).toFixed(2),
             );
+          if ($("trunkArch_val"))
+            $("trunkArch_val").textContent = String(
+              Number(trunkArchUI?.value || 0).toFixed(2),
+            );
+          if ($("trunkDrop_val"))
+            $("trunkDrop_val").textContent = String(
+              Number(trunkDropUI?.value || 0).toFixed(2),
+            );
+          if ($("trunkLean_val"))
+            $("trunkLean_val").textContent = String(
+              Number(trunkLeanUI?.value || 0).toFixed(2),
+            );
+          if ($("trunkTwistAmp_val"))
+            $("trunkTwistAmp_val").textContent = String(
+              Number(trunkTwistAmpUI?.value || 0).toFixed(2),
+            );
+          if ($("trunkBaseWidth_val"))
+            $("trunkBaseWidth_val").textContent = String(
+              Number(trunkBaseWidthUI?.value || 0).toFixed(3),
+            );
+          if ($("trunkWidthVar_val"))
+            $("trunkWidthVar_val").textContent = String(
+              Number(trunkWidthVarUI?.value || 0).toFixed(2),
+            );
         }
       }
 
@@ -6162,6 +8280,12 @@
         treeType,
         levels,
         curvature,
+        trunkArchUI,
+        trunkDropUI,
+        trunkLeanUI,
+        trunkTwistAmpUI,
+        trunkBaseWidthUI,
+        trunkWidthVarUI,
         uniformity,
         spread,
         upBias,
@@ -6193,10 +8317,78 @@
       ].forEach((el) => bindLive(el, debRegenerate));
 
       [wireToggle, renderMode].forEach((el) => bindLive(el, applyRenderStyle));
-      [vesselType, vesselDia, vesselDepth, vesselColor].forEach((el) =>
-        bindLive(el, applyVesselOnly),
-      );
+      if (renderMode) {
+        renderMode.addEventListener("input", updateEmissiveFieldState);
+        renderMode.addEventListener("change", updateEmissiveFieldState);
+      }
+      [
+        vesselType,
+        vesselDia,
+        vesselDepth,
+        vesselLip,
+        vesselFoot,
+        vesselColor,
+        vesselOpacityUI,
+        vesselBlurUI,
+        vesselOffsetYUI,
+        mediumTypeUI,
+        mediumColorUI,
+        mediumDiaUI,
+        mediumDepthUI,
+        mediumOpacityUI,
+        mediumBlurUI,
+        mediumOffsetYUI,
+        platformTypeUI,
+        platformColorUI,
+        platformDiaUI,
+        platformDepthUI,
+        platformOpacityUI,
+        platformBlurUI,
+        platformOffsetYUI,
+      ].forEach((el) => bindLive(el, applyVesselOnly));
       [bgColor, bgTex].forEach((el) => bindLive(el, applyBackground));
+      [
+        fallingLeavesToggle,
+        fallingLeavesAmountUI,
+        fallingLeavesRateUI,
+        fallingLeavesDiameterUI,
+        fallingLeavesSizeVarUI,
+      ].forEach((el) =>
+        bindLive(el, () => {
+          if (fallingLeavesToggle) {
+            localStorage.setItem(
+              "bonsai.fallingLeavesOn",
+              fallingLeavesToggle.checked ? "1" : "0",
+            );
+          }
+          if (fallingLeavesAmountUI) {
+            localStorage.setItem(
+              "bonsai.fallingLeavesAmount",
+              String(fallingLeavesAmountUI.value || "0.35"),
+            );
+          }
+          if (fallingLeavesRateUI) {
+            localStorage.setItem(
+              "bonsai.fallingLeavesRate",
+              String(fallingLeavesRateUI.value || "0.45"),
+            );
+          }
+          if (fallingLeavesDiameterUI) {
+            localStorage.setItem(
+              "bonsai.fallingLeavesDiameter",
+              String(fallingLeavesDiameterUI.value || "1.1"),
+            );
+          }
+          if (fallingLeavesSizeVarUI) {
+            localStorage.setItem(
+              "bonsai.fallingLeavesSizeVar",
+              String(fallingLeavesSizeVarUI.value || "0.4"),
+            );
+          }
+          if (!fallingLeavesToggle?.checked) clearFallingLeaves();
+          refreshFxToggleIcon();
+        }),
+      );
       [keyLightUI, hemiLightUI, exposureUI, bgLightLinkUI].forEach((el) =>
         bindLive(el, applyLightingFromUI),
       );
@@ -6240,16 +8432,72 @@
       );
       $("branchDrop").addEventListener(
         "input",
-        (e) => ($("branchDrop_val").textContent = Number(e.target.value).toFixed(2)),
+        (e) =>
+          ($("branchDrop_val").textContent = Number(e.target.value).toFixed(2)),
       );
       $("branchPull").addEventListener(
         "input",
-        (e) => ($("branchPull_val").textContent = Number(e.target.value).toFixed(2)),
+        (e) =>
+          ($("branchPull_val").textContent = Number(e.target.value).toFixed(2)),
       );
       $("heightScale").addEventListener(
         "input",
         (e) => ($("heightScale_val").textContent = e.target.value),
       );
+      if (trunkArchUI) {
+        trunkArchUI.addEventListener(
+          "input",
+          (e) =>
+            ($("trunkArch_val").textContent = Number(e.target.value).toFixed(
+              2,
+            )),
+        );
+      }
+      if (trunkDropUI) {
+        trunkDropUI.addEventListener(
+          "input",
+          (e) =>
+            ($("trunkDrop_val").textContent = Number(e.target.value).toFixed(
+              2,
+            )),
+        );
+      }
+      if (trunkLeanUI) {
+        trunkLeanUI.addEventListener(
+          "input",
+          (e) =>
+            ($("trunkLean_val").textContent = Number(e.target.value).toFixed(
+              2,
+            )),
+        );
+      }
+      if (trunkTwistAmpUI) {
+        trunkTwistAmpUI.addEventListener(
+          "input",
+          (e) =>
+            ($("trunkTwistAmp_val").textContent = Number(
+              e.target.value,
+            ).toFixed(2)),
+        );
+      }
+      if (trunkBaseWidthUI) {
+        trunkBaseWidthUI.addEventListener(
+          "input",
+          (e) =>
+            ($("trunkBaseWidth_val").textContent = Number(
+              e.target.value,
+            ).toFixed(3)),
+        );
+      }
+      if (trunkWidthVarUI) {
+        trunkWidthVarUI.addEventListener(
+          "input",
+          (e) =>
+            ($("trunkWidthVar_val").textContent = Number(
+              e.target.value,
+            ).toFixed(2)),
+        );
+      }
       $("leafSize").addEventListener(
         "input",
         (e) => ($("leafSize_val").textContent = e.target.value),
@@ -6258,6 +8506,24 @@
         "input",
         (e) => ($("leafVar_val").textContent = e.target.value),
       );
+      if (vesselLip) {
+        vesselLip.addEventListener(
+          "input",
+          (e) =>
+            ($("vesselLip_val").textContent = Number(e.target.value).toFixed(
+              2,
+            )),
+        );
+      }
+      if (vesselFoot) {
+        vesselFoot.addEventListener(
+          "input",
+          (e) =>
+            ($("vesselFoot_val").textContent = Number(e.target.value).toFixed(
+              2,
+            )),
+        );
+      }
       $("bLenVar").addEventListener(
         "input",
         (e) => ($("bLenVar_val").textContent = e.target.value),
@@ -6305,6 +8571,11 @@
       if (randomizeAllBtn) {
         randomizeAllBtn.addEventListener("click", randomizeAllProperties);
       }
+      if (applyExtremePresetBtn) {
+        applyExtremePresetBtn.addEventListener("click", () => {
+          applyExtremePreset(extremeModePresetUI?.value || "");
+        });
+      }
       railTabs.forEach((btn) => {
         btn.addEventListener("click", () => {
           setPanelTab(btn.dataset.tab || "bonsai");
@@ -6318,7 +8589,10 @@
           setBonsaiTab(btn.dataset.bonsaiTab || "plant"),
         );
       });
+      organizePlantSections();
+      initSectionCollapsers();
       initFieldReadouts();
+      updateEmissiveFieldState();
 
       if (snapshotGallery) {
         snapshotGallery.addEventListener("click", (e) => {
@@ -6330,6 +8604,8 @@
             if (idx < 0) return;
             if (action === "recall") {
               applyControlState(snapshots[idx].state);
+              backfillSnapshotPreview(id);
+              renderSnapshotGallery();
               showToast("Snapshot loaded");
               return;
             }
@@ -6351,6 +8627,12 @@
           e.preventDefault();
           const id = tile.dataset.id || null;
           selectedSnapshotId = selectedSnapshotId === id ? null : id;
+          renderSnapshotGallery();
+        });
+      }
+      if (galleryLoadMoreBtn) {
+        galleryLoadMoreBtn.addEventListener("click", () => {
+          snapshotRenderCount += SNAPSHOT_RENDER_BATCH;
           renderSnapshotGallery();
         });
       }
@@ -6398,17 +8680,11 @@
           });
           downloadBlob(blob, `bonsai_snapshots_${Date.now()}.json`);
           showToast("Gallery exported");
-          if (galleryMenu) galleryMenu.hidden = true;
-          if (galleryMenuBtn)
-            galleryMenuBtn.setAttribute("aria-expanded", "false");
         });
       }
       if (galleryImportAllBtn && snapImportFile) {
         galleryImportAllBtn.addEventListener("click", () => {
           snapImportFile.click();
-          if (galleryMenu) galleryMenu.hidden = true;
-          if (galleryMenuBtn)
-            galleryMenuBtn.setAttribute("aria-expanded", "false");
         });
         snapImportFile.addEventListener("change", async (e) => {
           const file = e.target.files && e.target.files[0];
@@ -6428,9 +8704,10 @@
               if (existing.has(snap.id)) return;
               snapshots.push(snap);
             });
-            snapshots = snapshots
-              .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-              .slice(0, SNAPSHOT_LIMIT);
+            snapshots = snapshots.sort(
+              (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+            );
+            snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
             saveSnapshotsToStorage();
             renderSnapshotGallery();
             showToast("Gallery imported");
@@ -6460,42 +8737,22 @@
           if (e.target === confirmModal) closeDeleteConfirm();
         });
       }
-      if (galleryMenuBtn && galleryMenu) {
-        galleryMenuBtn.addEventListener("click", () => {
-          const next = galleryMenu.hidden;
-          galleryMenu.hidden = !next;
-          galleryMenuBtn.setAttribute("aria-expanded", next ? "true" : "false");
-        });
-        document.addEventListener("click", (e) => {
-          if (galleryMenu.hidden) return;
-          const t = e.target;
-          if (galleryMenu.contains(t) || galleryMenuBtn.contains(t)) return;
-          galleryMenu.hidden = true;
-          galleryMenuBtn.setAttribute("aria-expanded", "false");
-        });
-      }
       exportTabButtons.forEach((btn) => {
         btn.addEventListener("click", () =>
           setExportTab(btn.dataset.exportTab || "image"),
         );
       });
       if (exportImageKindUI) {
-        exportImageKindUI.addEventListener(
-          "change",
-          () => {
-            updateExportSettingsVisibility();
-            updatePanelPrimaryAction();
-          },
-        );
+        exportImageKindUI.addEventListener("change", () => {
+          updateExportSettingsVisibility();
+          updatePanelPrimaryAction();
+        });
       }
       if (exportModelKindUI) {
-        exportModelKindUI.addEventListener(
-          "change",
-          () => {
-            updateExportSettingsVisibility();
-            updatePanelPrimaryAction();
-          },
-        );
+        exportModelKindUI.addEventListener("change", () => {
+          updateExportSettingsVisibility();
+          updatePanelPrimaryAction();
+        });
       }
       if (exportSizePresetUI) {
         exportSizePresetUI.addEventListener(
@@ -6509,30 +8766,21 @@
         holdSpin = isDown ? dir : 0;
       }
 
-      // Play/Pause + speed
-      autoBtn.addEventListener("click", () => setAutoRotate(!autoOn));
-      if (autoSpeedUI)
-        autoSpeedUI.addEventListener("input", () => {
-          /* no-op: read live in tick() */
-        });
-      if (autoRotate)
-        autoRotate.addEventListener("change", () =>
-          setAutoRotate(autoRotate.value === "on"),
-        );
-
       if (debugToggle) {
         debugToggle.addEventListener("change", () => {
-          showToast(
-            debugToggle.checked ? "Debug overlay on" : "Debug overlay off",
-          );
+          setDebugOverlayVisible(!!debugToggle.checked);
         });
       }
-      // handy hotkey: backtick toggles HUD
-      window.addEventListener("keydown", (e) => {
-        if (e.key === "`") {
-          if (debugToggle) debugToggle.checked = !debugToggle.checked;
-        }
-      });
+
+      function isTypingContext(target) {
+        const tag = target && target.tagName ? target.tagName.toLowerCase() : "";
+        return (
+          tag === "input" ||
+          tag === "select" ||
+          tag === "textarea" ||
+          !!(target && target.isContentEditable)
+        );
+      }
 
       function frameView() {
         const { center, radius } = getBonsaiSphere();
@@ -6658,15 +8906,20 @@
 
       // Keyboard shortcuts
       window.addEventListener("keydown", (e) => {
-        // ignore when typing in inputs
-        const tag =
-          e.target && e.target.tagName ? e.target.tagName.toLowerCase() : "";
-        const isTyping =
-          tag === "input" ||
-          tag === "select" ||
-          tag === "textarea" ||
-          e.target.isContentEditable;
-        if (isTyping) return;
+        if (isTypingContext(e.target)) return;
+
+        if (e.key === "Escape") {
+          if (helpModal && !helpModal.hidden) {
+            e.preventDefault();
+            closeHelpModal();
+          }
+          return;
+        }
+        if (e.key === "\\") {
+          e.preventDefault();
+          setDebugMasterVisible(!areDebugTogglesAllOn());
+          return;
+        }
 
         if (e.code === "Space") {
           e.preventDefault();
@@ -6681,6 +8934,32 @@
         if (e.key === "f" || e.key === "F") {
           e.preventDefault();
           frameView();
+        } else if (e.key === "o" || e.key === "O") {
+          e.preventDefault();
+          setDebugOverlayVisible(!(debugToggle ? debugToggle.checked : false));
+        } else if (e.key === "p" || e.key === "P") {
+          e.preventDefault();
+          setTipsVisible(!(tipsToggle ? tipsToggle.checked : false));
+          showToast(tipsToggle?.checked ? "Tips overlay on" : "Tips overlay off");
+        } else if (e.key === "t" || e.key === "T") {
+          e.preventDefault();
+          const on = !(toolbarToggle ? toolbarToggle.checked : true);
+          setToolbarVisible(on);
+        } else if (e.key === "c" || e.key === "C") {
+          e.preventDefault();
+          const on = !(cameraPadToggle ? cameraPadToggle.checked : true);
+          setCameraPadVisible(on);
+        } else if (e.key === "s" || e.key === "S") {
+          e.preventDefault();
+          const on = appRoot.classList.contains("panel-hidden");
+          setSidePanelVisible(on);
+        } else if (e.key === "d" || e.key === "D") {
+          e.preventDefault();
+          const on = !(demoModeToggle ? demoModeToggle.checked : false);
+          setDemoMode(on);
+        } else if (e.key === "r" || e.key === "R") {
+          e.preventDefault();
+          randomizeAllProperties();
         } else if (e.key === "w" || e.key === "W") {
           e.preventDefault();
           if (wireToggle) {
@@ -6692,10 +8971,9 @@
         } else if (e.key === "x" || e.key === "X") {
           e.preventDefault();
           tbShot?.click();
-        } else if (e.key === "p" || e.key === "P") {
+        } else if (e.key === "Enter") {
           e.preventDefault();
-          const now = !appRoot.classList.contains("panel-hidden");
-          setPanelHidden(now);
+          createSnapshot();
         } else if (e.key === "[") {
           e.preventDefault();
           onHold(+1, true); // rotate left while held
@@ -6803,7 +9081,8 @@
         const storedTheme =
           localStorage.getItem("bonsai.theme") ||
           rootEl.getAttribute("data-theme") ||
-          (themes[0] || "steel-night");
+          themes[0] ||
+          "steel-night";
         const hasStored = Array.from(themeSelect.options).some(
           (opt) => opt.value === storedTheme,
         );
@@ -6823,6 +9102,7 @@
 
       // Toolbar actions – forward to existing controls
       if (tbShot) tbShot.addEventListener("click", savePNG);
+      if (tbSnapAdd) tbSnapAdd.addEventListener("click", createSnapshot);
 
       // Rotate hold via same handlers you have for the side-panel buttons
       if (tbSpinL) {
@@ -6878,26 +9158,13 @@
         const mobile = window.matchMedia("(max-width: 900px)").matches;
         if (!mobile) {
           canvasToolbar.style.bottom = "12px";
+          canvasToolbar.style.left = "50%";
+          canvasToolbar.style.transform = "translateX(-50%)";
           if (cameraPad) {
-            cameraPad.style.left = "12px";
+            cameraPad.style.right = "12px";
+            cameraPad.style.left = "auto";
             cameraPad.style.bottom = "64px";
           }
-          const hidden = appRoot.classList.contains("panel-hidden");
-          const railW =
-            parseFloat(
-              getComputedStyle(document.documentElement).getPropertyValue(
-                "--rail-w",
-              ),
-            ) || 58;
-          const panelW =
-            parseFloat(
-              getComputedStyle(document.documentElement).getPropertyValue(
-                "--panel-w",
-              ),
-            ) || 380;
-          const left = hidden ? railW + 4 : railW + panelW + 4;
-          canvasToolbar.style.left = `${left}px`;
-          canvasToolbar.style.transform = "none";
           return;
         }
         const root = document.getElementById("app");
@@ -6914,23 +9181,119 @@
         canvasToolbar.style.left = "50%";
         canvasToolbar.style.transform = "translateX(-50%)";
         if (cameraPad) {
-          cameraPad.style.left = "8px";
+          cameraPad.style.left = "auto";
+          cameraPad.style.right = "8px";
           cameraPad.style.bottom = `${Math.max(56, railH + panelH + 64)}px`;
         }
       }
+
+      function setToolbarVisible(on, silent = false) {
+        if (canvasToolbar) canvasToolbar.style.display = on ? "flex" : "none";
+        if (toolbarToggle) toolbarToggle.checked = !!on;
+        requestAnimationFrame(updateCanvasToolbarOffset);
+        if (!silent) showToast(on ? "Toolbar on" : "Toolbar off");
+      }
+
+      function setDebugOverlayVisible(on, silent = false) {
+        if (debugToggle) debugToggle.checked = !!on;
+        renderHUD();
+        if (!silent) showToast(on ? "Debug overlay on" : "Debug overlay off");
+      }
+
+      function setCameraPadVisible(on, silent = false) {
+        if (cameraPad) cameraPad.style.display = on ? "grid" : "none";
+        if (cameraPadToggle) cameraPadToggle.checked = !!on;
+        requestAnimationFrame(updateCanvasToolbarOffset);
+        if (!silent) showToast(on ? "Camera controls on" : "Camera controls off");
+      }
+
+      function setSidePanelVisible(on, silent = false) {
+        setPanelHidden(!on);
+        if (sidePanelToggle) sidePanelToggle.checked = !!on;
+        if (!silent) showToast(on ? "Side panel on" : "Side panel off");
+      }
+
+      function getDemoIntervalMs() {
+        const raw = demoIntervalUI ? parseFloat(demoIntervalUI.value) : 6;
+        const seconds = clamp(Number.isFinite(raw) ? raw : 6, 2, 120);
+        if (demoIntervalUI) demoIntervalUI.value = String(Math.round(seconds));
+        return Math.round(seconds * 1000);
+      }
+
+      function setDemoMode(on, silent = false) {
+        const enabled = !!on;
+        if (demoModeToggle) demoModeToggle.checked = enabled;
+        if (demoTimer) {
+          clearInterval(demoTimer);
+          demoTimer = 0;
+        }
+        if (enabled) {
+          const ms = getDemoIntervalMs();
+          demoTimer = setInterval(() => {
+            randomizeAllProperties();
+          }, ms);
+        }
+        if (!silent) showToast(enabled ? "Demo mode on" : "Demo mode off");
+      }
+
+      function refreshFxToggleIcon() {
+        if (!tbFxToggle) return;
+        const on = !!(fallingLeavesToggle && fallingLeavesToggle.checked);
+        tbFxToggle.title = on ? "Hide Falling FX" : "Show Falling FX";
+        tbFxToggle.innerHTML = `<span class="iconoir ${on ? "iconoir-eye-solid" : "iconoir-eye-closed"}" aria-hidden="true"></span>`;
+        tbFxToggle.classList.toggle("btn-primary", on);
+        tbFxToggle.classList.toggle("btn-ghost", !on);
+        tbFxToggle.classList.toggle("ds-btn-primary", on);
+        tbFxToggle.classList.toggle("ds-btn-ghost", !on);
+      }
+
+      function setFallingFxVisible(on, silent = false) {
+        if (fallingLeavesToggle) {
+          fallingLeavesToggle.checked = !!on;
+          localStorage.setItem("bonsai.fallingLeavesOn", on ? "1" : "0");
+        }
+        if (!on) clearFallingLeaves();
+        refreshFxToggleIcon();
+        if (!silent) showToast(on ? "Falling FX on" : "Falling FX off");
+      }
+
+      function setDebugMasterVisible(on) {
+        const enabled = !!on;
+        setTipsVisible(enabled);
+        setDebugOverlayVisible(enabled, true);
+        setToolbarVisible(enabled, true);
+        setCameraPadVisible(enabled, true);
+        setSidePanelVisible(enabled, true);
+        if (!enabled) setDemoMode(false, true);
+        showToast(enabled ? "Core debug controls on" : "All debug controls off");
+      }
+
+      function areDebugTogglesAllOn() {
+        return !!(
+          tipsToggle?.checked &&
+          debugToggle?.checked &&
+          toolbarToggle?.checked &&
+          cameraPadToggle?.checked &&
+          sidePanelToggle?.checked
+        );
+      }
+      window.addEventListener("beforeunload", () => {
+        if (demoTimer) {
+          clearInterval(demoTimer);
+          demoTimer = 0;
+        }
+        stopTipsCycle();
+      });
 
       function clamp(v, lo, hi) {
         return Math.max(lo, Math.min(hi, v));
       }
 
       function setAutoSpeed(val) {
-        if (!autoSpeedUI) return;
-        const n = clamp(
-          val,
-          parseFloat(autoSpeedUI.min),
-          parseFloat(autoSpeedUI.max),
-        );
-        autoSpeedUI.value = String(n);
+        const min = AUTO_SPEED_MIN;
+        const max = AUTO_SPEED_MAX;
+        const n = clamp(val, min, max);
+        controls.autoRotateSpeed = n;
         // no need to call regenerate; tick() reads the live value
       }
 
@@ -6949,17 +9312,19 @@
         tbAuto.addEventListener("click", () => {
           setAutoRotate(!autoOn);
         });
-        // also keep icon synced if someone uses the side panel control
-        if (autoRotate) {
-          autoRotate.addEventListener("change", refreshTbAutoIcon);
-        }
         // initial glyph
         refreshTbAutoIcon();
+      }
+      if (tbFxToggle) {
+        tbFxToggle.addEventListener("click", () => {
+          const next = !(fallingLeavesToggle && fallingLeavesToggle.checked);
+          setFallingFxVisible(next);
+        });
       }
 
       if (tbSlower) {
         tbSlower.addEventListener("click", () => {
-          const cur = parseFloat(autoSpeedUI.value || "0");
+          const cur = parseFloat(controls.autoRotateSpeed) || 0;
           setAutoSpeed(cur - 0.2);
           setAutoRotate(true);
           refreshTbAutoIcon();
@@ -6967,7 +9332,7 @@
       }
       if (tbFaster) {
         tbFaster.addEventListener("click", () => {
-          const cur = parseFloat(autoSpeedUI.value || "0");
+          const cur = parseFloat(controls.autoRotateSpeed) || 0;
           setAutoSpeed(cur + 0.2);
           setAutoRotate(true);
           refreshTbAutoIcon();
@@ -6975,12 +9340,54 @@
       }
 
       const tipsBar = document.getElementById("tipsBar");
+      function renderTipMessage() {
+        if (!tipsMessage) return;
+        const msg = TIP_MESSAGES[tipIndex % TIP_MESSAGES.length] || "";
+        tipsMessage.textContent = msg;
+      }
+      function renderHelpTipsList() {
+        if (!helpTipsList) return;
+        helpTipsList.innerHTML = "";
+        TIP_MESSAGES.forEach((msg) => {
+          const li = document.createElement("li");
+          li.textContent = String(msg || "").replace(/^Tip:\s*/i, "");
+          helpTipsList.appendChild(li);
+        });
+      }
+      function startTipsCycle() {
+        if (tipsTimer) return;
+        tipsTimer = window.setInterval(() => {
+          tipIndex = (tipIndex + 1) % TIP_MESSAGES.length;
+          renderTipMessage();
+        }, TIP_ROTATION_MS);
+      }
+      function stopTipsCycle() {
+        if (!tipsTimer) return;
+        clearInterval(tipsTimer);
+        tipsTimer = 0;
+      }
+
       function setTipsVisible(on) {
         if (!tipsBar) return;
         const visible = !!on;
         tipsBar.style.display = visible ? "flex" : "none";
         if (tipsToggle) tipsToggle.checked = visible;
         localStorage.setItem("bonsai.tipsVisible", visible ? "1" : "0");
+        if (visible) {
+          renderTipMessage();
+          startTipsCycle();
+        } else {
+          stopTipsCycle();
+        }
+      }
+      function openHelpModal() {
+        if (!helpModal) return;
+        renderHelpTipsList();
+        helpModal.hidden = false;
+      }
+      function closeHelpModal() {
+        if (!helpModal) return;
+        helpModal.hidden = true;
       }
       if (tipsToggle) {
         tipsToggle.addEventListener("change", () => {
@@ -6996,6 +9403,48 @@
           showToast("Tips overlay off");
         });
       }
+      if (helpBtn) {
+        helpBtn.addEventListener("click", openHelpModal);
+      }
+      if (helpCloseBtn) {
+        helpCloseBtn.addEventListener("click", closeHelpModal);
+      }
+      if (helpModal) {
+        helpModal.addEventListener("click", (e) => {
+          if (e.target === helpModal) closeHelpModal();
+        });
+      }
+      if (toolbarToggle) {
+        toolbarToggle.addEventListener("change", () => {
+          setToolbarVisible(!!toolbarToggle.checked);
+        });
+      }
+      if (cameraPadToggle) {
+        cameraPadToggle.addEventListener("change", () => {
+          setCameraPadVisible(!!cameraPadToggle.checked);
+        });
+      }
+      if (sidePanelToggle) {
+        sidePanelToggle.addEventListener("change", () => {
+          setSidePanelVisible(!!sidePanelToggle.checked);
+        });
+      }
+      if (demoModeToggle) {
+        demoModeToggle.addEventListener("change", () => {
+          setDemoMode(!!demoModeToggle.checked);
+        });
+      }
+      if (demoIntervalUI) {
+        const syncDemoInterval = () => {
+          getDemoIntervalMs();
+          if (demoModeToggle && demoModeToggle.checked) {
+            setDemoMode(true, true);
+            showToast("Demo interval updated");
+          }
+        };
+        demoIntervalUI.addEventListener("change", syncDemoInterval);
+        demoIntervalUI.addEventListener("blur", syncDemoInterval);
+      }
 
       // Refit when the panel is toggled (class changes)
       const appRoot = document.getElementById("app");
@@ -7004,6 +9453,7 @@
 
       function setPanelHidden(on) {
         appRoot.classList.toggle("panel-hidden", !!on);
+        if (sidePanelToggle) sidePanelToggle.checked = !on;
         syncRailTabState(!!on);
         if (panelToggle) {
           panelToggle.setAttribute("aria-pressed", on ? "true" : "false");
@@ -7057,7 +9507,7 @@
         });
       }
 
-      function initial() {
+      async function initial() {
         closeDeleteConfirm();
         if (bgLightLinkUI) {
           const storedBgLink = localStorage.getItem("bonsai.bgLightLink");
@@ -7075,11 +9525,64 @@
         } else {
           applyLightingFromUI();
         }
+        if (fallingLeavesToggle) {
+          const storedLeaves = localStorage.getItem("bonsai.fallingLeavesOn");
+          if (storedLeaves !== null) {
+            const s = String(storedLeaves).toLowerCase();
+            fallingLeavesToggle.checked = s === "1" || s === "on" || s === "true";
+          }
+        }
+        if (fallingLeavesAmountUI) {
+          const storedAmt = parseFloat(
+            localStorage.getItem("bonsai.fallingLeavesAmount") || "",
+          );
+          if (Number.isFinite(storedAmt)) {
+            fallingLeavesAmountUI.value = String(
+              Math.max(0, Math.min(1, storedAmt)),
+            );
+          }
+        }
+        if (fallingLeavesRateUI) {
+          const storedRate = parseFloat(
+            localStorage.getItem("bonsai.fallingLeavesRate") || "",
+          );
+          if (Number.isFinite(storedRate)) {
+            fallingLeavesRateUI.value = String(
+              Math.max(0, Math.min(1, storedRate)),
+            );
+          }
+        }
+        if (fallingLeavesDiameterUI) {
+          const storedDia = parseFloat(
+            localStorage.getItem("bonsai.fallingLeavesDiameter") || "",
+          );
+          if (Number.isFinite(storedDia)) {
+            fallingLeavesDiameterUI.value = String(
+              Math.max(0.4, Math.min(2.6, storedDia)),
+            );
+          }
+        }
+        if (fallingLeavesSizeVarUI) {
+          const storedVar = parseFloat(
+            localStorage.getItem("bonsai.fallingLeavesSizeVar") || "",
+          );
+          if (Number.isFinite(storedVar)) {
+            fallingLeavesSizeVarUI.value = String(
+              Math.max(0, Math.min(1, storedVar)),
+            );
+          }
+        }
+        refreshFxToggleIcon();
         applyBackground();
-        loadSnapshotsFromStorage();
+        await loadSnapshotsFromStorage();
         renderSnapshotGallery();
+        renderHelpTipsList();
         const storedTips = localStorage.getItem("bonsai.tipsVisible");
         setTipsVisible(storedTips === null ? true : storedTips === "1");
+        setToolbarVisible(true, true);
+        setCameraPadVisible(true, true);
+        setSidePanelVisible(!appRoot.classList.contains("panel-hidden"), true);
+        setDemoMode(false, true);
         if (qualityModeUI) {
           const storedQ = localStorage.getItem("bonsai.qualityMode");
           if (storedQ) qualityModeUI.value = storedQ;
@@ -7099,9 +9602,8 @@
         syncFormDefaultsFromSpecies();
         setSeed((Math.random() * 0xffffffff) >>> 0);
         regenerate();
-        if (autoSpeedUI) {
-          controls.autoRotateSpeed = parseFloat(autoSpeedUI.value);
-        }
+        syncFallingLeafColor();
+        setAutoSpeed(parseFloat(controls.autoRotateSpeed) || 0.8);
         setAutoRotate(true);
         tick();
         // Defer framing so the first paint happens before the bbox scan
@@ -7115,4 +9617,3 @@
     </script>
   </body>
 </html>
-
