@@ -93,12 +93,42 @@
 
   --ds-accent: #7bd0ff;
   --ds-accent-strong: #3fb7f0;
+  --ds-accent-alt: color-mix(in oklab, var(--ds-accent) 68%, var(--ds-focus) 32%);
+  --ds-accent-alt-strong: color-mix(
+    in oklab,
+    var(--ds-accent-alt) 72%,
+    black 28%
+  );
   --ds-focus: #94f7dd;
 
   --ds-success: #83e9a9;
   --ds-warning: #ffd16f;
   --ds-danger: #ff8198;
   --ds-info: #79c6ff;
+  --ds-validation-success-bg: color-mix(
+    in oklab,
+    var(--ds-success) 14%,
+    var(--ds-bg-raised)
+  );
+  --ds-validation-success-border: color-mix(
+    in oklab,
+    var(--ds-success) 60%,
+    var(--ds-border)
+  );
+  --ds-validation-success-text: var(--ds-success);
+  --ds-validation-danger-bg: color-mix(
+    in oklab,
+    var(--ds-danger) 14%,
+    var(--ds-bg-raised)
+  );
+  --ds-validation-danger-border: color-mix(
+    in oklab,
+    var(--ds-danger) 60%,
+    var(--ds-border)
+  );
+  --ds-validation-danger-text: var(--ds-danger);
+  --ds-skeleton-base: color-mix(in oklab, var(--ds-bg-raised), var(--ds-bg-soft) 36%);
+  --ds-skeleton-shimmer: color-mix(in oklab, var(--ds-accent) 18%, white 82%);
 
   --ds-btn-radius: var(--ds-radius-2);
   --ds-btn-h: var(--ds-control-h);
@@ -129,6 +159,18 @@
   --ds-btn-primary-border: var(--ds-accent-strong);
   --ds-btn-primary-text: var(--ds-text-inverse);
   --ds-btn-primary-bg-hover: color-mix(in oklab, var(--ds-btn-primary-bg), white 10%);
+  --ds-btn-tertiary-bg: color-mix(in oklab, var(--ds-accent-alt) 18%, var(--ds-bg-raised));
+  --ds-btn-tertiary-bg-hover: color-mix(
+    in oklab,
+    var(--ds-btn-tertiary-bg) 82%,
+    var(--ds-accent-alt) 18%
+  );
+  --ds-btn-tertiary-border: color-mix(
+    in oklab,
+    var(--ds-accent-alt-strong) 62%,
+    var(--ds-border) 38%
+  );
+  --ds-btn-tertiary-text: var(--ds-accent-alt);
   --ds-btn-text-quiet: var(--ds-text-muted);
   --ds-btn-text-quiet-hover: var(--ds-text);
   --ds-btn-text-quiet-active: var(--ds-accent);
@@ -143,7 +185,11 @@
   --ds-input-text: var(--ds-text);
   --ds-input-placeholder: var(--ds-text-muted);
   --ds-input-shadow: none;
-  --ds-input-icon-color: var(--ds-input-placeholder);
+  --ds-input-icon-color: color-mix(
+    in oklab,
+    var(--ds-input-text) 76%,
+    transparent
+  );
   --ds-input-icon-color-focus: var(--ds-accent);
   --ds-color-input-radius: var(--ds-btn-radius);
   --ds-color-input-bg: var(--ds-btn-bg);
@@ -170,6 +216,9 @@
   --ds-spin-opacity: 0;
   --ds-spin-opacity-active: 0.9;
   --ds-number-pad-end: calc(var(--ds-space-2) + 8px);
+  --ds-native-color-scheme: dark;
+  --ds-native-icon-filter: invert(1) brightness(1.06);
+  --ds-native-icon-opacity: 0.92;
 
   --ds-chip-bg: color-mix(in oklab, var(--ds-bg-raised), transparent 12%);
   --ds-chip-border: var(--ds-border);
@@ -182,4 +231,5 @@
   --color-text-primary: var(--ds-text);
   --color-text-secondary: var(--ds-text-muted);
   --color-primary: var(--ds-accent);
+  --color-secondary: var(--ds-accent-alt);
 }

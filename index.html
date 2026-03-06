@@ -142,14 +142,13 @@
         align-items: center;
         justify-content: center;
         gap: 0;
-        border: 1px solid
-          color-mix(in oklab, var(--ds-accent-strong) 28%, var(--ds-border));
-        background: color-mix(
-          in oklab,
-          var(--ds-bg-raised) 88%,
-          color-mix(in oklab, var(--ds-accent-strong) 48%, black) 12%
+        border: var(--ds-btn-border, 1px solid var(--ds-border));
+        background: var(
+          --ds-btn-bg,
+          color-mix(in oklab, var(--ds-bg-raised) 92%, var(--ds-bg) 8%)
         );
-        color: color-mix(in oklab, var(--ds-text-muted) 72%, var(--ds-accent));
+        color: var(--ds-btn-fg, var(--ds-text-muted));
+        border-radius: var(--ds-btn-radius, var(--ds-radius-sm));
         font: 700 0.62rem/1 var(--ds-font-mono);
         letter-spacing: var(--ds-label-spacing);
         text-transform: var(--ds-label-transform);
@@ -179,27 +178,20 @@
       }
 
       .side-btn[aria-pressed="true"] {
-        color: var(--ds-text);
-        border-color: color-mix(
-          in oklab,
-          var(--ds-accent-strong) 58%,
-          var(--ds-border-strong)
+        color: var(--ds-btn-primary-fg, var(--ds-text));
+        border-color: color-mix(in oklab, var(--ds-accent) 45%, var(--ds-border));
+        background: var(
+          --ds-btn-primary-bg,
+          color-mix(in oklab, var(--ds-accent-strong) 22%, var(--ds-bg-raised))
         );
-        background: linear-gradient(
-          180deg,
-          color-mix(
-            in oklab,
-            var(--ds-accent-strong) 30%,
-            var(--ds-bg-raised) 70%
-          ),
-          color-mix(
-            in oklab,
-            var(--ds-accent-strong) 20%,
-            var(--ds-bg-elevated)
-          )
-        );
-        box-shadow: inset 0 -1px 0
-          color-mix(in oklab, var(--ds-accent) 49%, transparent);
+      }
+
+      #panelToggleRail {
+        display: none;
+      }
+
+      #mobileRailTail {
+        display: none;
       }
 
       /* -----------------------------------------------------------------------------
@@ -927,8 +919,15 @@
         display: grid;
         gap: 3px;
         padding: 6px;
-        border: 1px solid var(--ds-border-subtle);
-        background: var(--ds-bg-subtle);
+        border: 1px solid
+          var(
+            --ds-border-subtle,
+            color-mix(in oklab, var(--ds-border) 78%, transparent)
+          );
+        background: var(
+          --ds-bg-subtle,
+          color-mix(in oklab, var(--ds-bg-raised) 72%, transparent)
+        );
       }
 
       .perf-stat .k {
@@ -988,6 +987,40 @@
         min-width: 0;
       }
 
+      .res-inputs.dimensions-inline {
+        grid-template-columns: minmax(8.5rem, 11.5rem) auto auto auto;
+        align-items: center;
+      }
+
+      .res-inputs.dimensions-inline .ds-select {
+        max-width: 11.5rem;
+      }
+
+      .res-inputs.dimensions-inline .dim-field {
+        width: 7.6ch;
+        min-width: 7.6ch;
+        text-align: right;
+        padding-inline: 0.35rem;
+        appearance: textfield;
+        -moz-appearance: textfield;
+      }
+
+      .res-inputs.dimensions-inline .dim-field::-webkit-outer-spin-button,
+      .res-inputs.dimensions-inline .dim-field::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .res-inputs.dimensions-inline .dim-sep {
+        color: var(--ds-text-muted);
+        text-align: center;
+      }
+
+      .export-action-row .control-input {
+        display: flex;
+        justify-content: flex-end;
+      }
+
       #exportAlphaRow .control-input {
         display: flex;
         justify-content: flex-end;
@@ -1029,7 +1062,7 @@
       .toast-stack {
         position: fixed;
         right: 12px;
-        bottom: 12px;
+        top: 12px;
         z-index: 80;
         display: grid;
         gap: 8px;
@@ -1510,12 +1543,14 @@
      - Panel (settings) at the bottom (scrollable) */
         #app {
           grid-template-columns: 1fr;
-          grid-template-rows: var(--bo-app-head-h) 1fr;
-          grid-template-areas:
-            "apphead"
-            "stage";
+          grid-template-rows: 1fr;
+          grid-template-areas: "stage";
           gap: 0;
           padding: 0;
+        }
+
+        .app-head {
+          display: none;
         }
 
         /* Stage fills available height */
@@ -1558,16 +1593,14 @@
         /* When the class is present, THEN hide the panel (hamburger toggles this) */
         #app.panel-hidden {
           grid-template-columns: 1fr !important;
-          grid-template-rows: var(--bo-app-head-h) 1fr;
-          grid-template-areas:
-            "apphead"
-            "stage";
+          grid-template-rows: 1fr;
+          grid-template-areas: "stage";
         }
 
         #sidebar {
           position: fixed;
           left: 0;
-          right: 0;
+          right: calc(var(--mobile-rail-h) + 8px);
           bottom: 0;
           z-index: 7;
           height: var(--mobile-rail-h);
@@ -1584,6 +1617,55 @@
           overflow-y: hidden;
           scrollbar-width: none;
           border-radius: 0;
+        }
+
+        #mobileRailTail {
+          display: flex;
+          position: fixed;
+          right: 0;
+          bottom: 0;
+          z-index: 7;
+          width: calc(var(--mobile-rail-h) + 8px);
+          height: var(--mobile-rail-h);
+          align-items: center;
+          justify-content: center;
+          padding: var(--bo-control-gap);
+          box-sizing: border-box;
+          background: linear-gradient(
+            180deg,
+            color-mix(
+              in oklab,
+              var(--bo-shell-surface) 96%,
+              color-mix(in oklab, var(--ds-accent-strong) 48%, black) 4%
+            ),
+            color-mix(
+              in oklab,
+              var(--bo-shell-surface) 92%,
+              color-mix(in oklab, var(--ds-accent-strong) 48%, black) 8%
+            )
+          );
+          border-top: 1px solid
+            color-mix(in oklab, var(--ds-accent-strong) 30%, var(--ds-border));
+          border-left: 1px solid
+            color-mix(in oklab, var(--ds-accent-strong) 26%, var(--ds-border));
+          box-shadow: inset 0 1px 0
+            color-mix(in oklab, var(--ds-accent) 12%, transparent);
+        }
+
+        #panelToggleRail {
+          display: inline-flex;
+          width: calc(var(--mobile-rail-h) - 12px);
+          min-width: calc(var(--mobile-rail-h) - 12px);
+          min-height: calc(var(--mobile-rail-h) - 12px);
+          height: calc(var(--mobile-rail-h) - 12px);
+          padding: 0;
+          border: var(--ds-btn-border, 1px solid var(--ds-border));
+          background: var(
+            --ds-btn-bg,
+            color-mix(in oklab, var(--ds-bg-raised) 92%, var(--ds-bg) 8%)
+          );
+          color: var(--ds-btn-fg, var(--ds-text-muted));
+          border-radius: var(--ds-btn-radius, var(--ds-radius-sm));
         }
         #sidebar::-webkit-scrollbar {
           display: none;
@@ -1615,17 +1697,23 @@
           display: none !important;
         }
 
+        .panel-actions {
+          display: none;
+        }
+
         /* Toolbar: keep centered above footer with our JS bottom-offset */
         #canvasToolbar {
           left: 50%;
           transform: translateX(-50%);
-          width: calc(100% - 12px);
+          width: max-content;
           max-width: calc(100% - 12px);
+          min-width: 0;
           display: flex;
           flex-wrap: nowrap;
-          justify-content: flex-start;
+          justify-content: center;
           overflow-x: auto;
           overflow-y: hidden;
+          touch-action: pan-x;
           scrollbar-width: none;
           -webkit-overflow-scrolling: touch;
           scroll-snap-type: x proximity;
@@ -1856,6 +1944,20 @@
           ></span>
         </button>
       </nav>
+      <div id="mobileRailTail" aria-hidden="false">
+        <button
+          id="panelToggleRail"
+          class="side-btn ds-btn btn-icon ds-btn-icon panel-collapse"
+          aria-pressed="false"
+          title="Collapse panel"
+        >
+          <span
+            class="iconoir iconoir-nav-arrow-down"
+            aria-hidden="true"
+          ></span>
+          <span class="sr-only">Toggle panel</span>
+        </button>
+      </div>
       <aside id="panel" data-tab="bonsai" data-bonsai-tab="plant">
         <div class="panel-head">
           <h2 id="panelTitle" class="panel-title">Bonsai</h2>
@@ -3019,6 +3121,63 @@
             <div class="section" data-tab="export">
               <div id="exportSettings" class="export-settings">
                 <div id="exportPanelImage" class="export-panel">
+                  <div id="exportCropRow" class="control-row">
+                    <div class="control-label">Framing</div>
+                    <div class="control-input">
+                      <select id="exportCropMode" class="ds-select">
+                        <option value="full">Full Canvas</option>
+                        <option value="square">Square</option>
+                        <option value="portrait">Portrait (4:5)</option>
+                        <option value="landscape">Landscape (16:9)</option>
+                      </select>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
+                  <div id="exportDimsRow" class="control-row">
+                    <div class="control-label">Dimensions</div>
+                    <div class="control-input">
+                      <div class="res-inputs dimensions-inline">
+                        <select id="exportSizePreset" class="ds-select">
+                          <option value="current">Current</option>
+                          <option value="1080-square">1080 Square</option>
+                          <option value="1920x1080">1920x1080</option>
+                          <option value="2160-square">2160 Square</option>
+                          <option value="custom">Custom</option>
+                        </select>
+                        <input
+                          class="ds-input dim-field"
+                          type="number"
+                          id="exportWidth"
+                          min="1"
+                          max="9999"
+                          value="1920"
+                        />
+                        <span class="dim-sep">x</span>
+                        <input
+                          class="ds-input dim-field"
+                          type="number"
+                          id="exportHeight"
+                          min="1"
+                          max="9999"
+                          value="1080"
+                        />
+                      </div>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
+                  <div id="exportAlphaRow" class="control-row">
+                    <div class="control-label">Transparent BG</div>
+                    <div class="control-input">
+                      <label
+                        class="ds-switch"
+                        aria-label="Transparent background for PNG export"
+                      >
+                        <input id="exportTransparent" type="checkbox" checked />
+                        <span class="ds-switch-track"></span>
+                      </label>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
                   <div class="control-row">
                     <div class="control-label">Format</div>
                     <div class="control-input">
@@ -3044,64 +3203,15 @@
                     </div>
                     <div class="control-icons"></div>
                   </div>
-                  <div id="exportCropRow" class="control-row">
-                    <div class="control-label">Crop</div>
+                  <div class="control-row export-action-row">
+                    <div class="control-label"></div>
                     <div class="control-input">
-                      <select id="exportCropMode" class="ds-select">
-                        <option value="full">Full Canvas</option>
-                        <option value="square">Square</option>
-                        <option value="portrait">Portrait (4:5)</option>
-                        <option value="landscape">Landscape (16:9)</option>
-                      </select>
-                    </div>
-                    <div class="control-icons"></div>
-                  </div>
-                  <div id="exportSizeRow" class="control-row">
-                    <div class="control-label">Size Preset</div>
-                    <div class="control-input">
-                      <select id="exportSizePreset" class="ds-select">
-                        <option value="current">Current</option>
-                        <option value="1080-square">1080 Square</option>
-                        <option value="1920x1080">1920x1080</option>
-                        <option value="2160-square">2160 Square</option>
-                        <option value="custom">Custom</option>
-                      </select>
-                    </div>
-                    <div class="control-icons"></div>
-                  </div>
-                  <div id="exportDimsRow" class="control-row">
-                    <div class="control-label">Output Size</div>
-                    <div class="control-input">
-                      <div class="res-inputs">
-                        <input
-                          class="ds-input"
-                          type="number"
-                          id="exportWidth"
-                          min="1"
-                          value="1920"
-                        />
-                        <span>x</span>
-                        <input
-                          class="ds-input"
-                          type="number"
-                          id="exportHeight"
-                          min="1"
-                          value="1080"
-                        />
-                      </div>
-                    </div>
-                    <div class="control-icons"></div>
-                  </div>
-                  <div id="exportAlphaRow" class="control-row">
-                    <div class="control-label">Transparent BG</div>
-                    <div class="control-input">
-                      <label
-                        class="ds-switch"
-                        aria-label="Transparent background for PNG export"
+                      <button
+                        id="exportImageBtn"
+                        class="btn ds-btn btn-primary ds-btn-primary"
                       >
-                        <input id="exportTransparent" type="checkbox" checked />
-                        <span class="ds-switch-track"></span>
-                      </label>
+                        Export Image
+                      </button>
                     </div>
                     <div class="control-icons"></div>
                   </div>
@@ -3168,13 +3278,6 @@
             title="Randomize All (R)"
           >
             <span class="iconoir iconoir-dice-three" aria-hidden="true"></span>
-          </button>
-          <button
-            id="tbFxToggle"
-            class="btn ds-btn btn-icon ds-btn-icon"
-            title="Toggle Falling FX"
-          >
-            <span class="iconoir iconoir-eye-solid" aria-hidden="true"></span>
           </button>
           <span class="split" aria-hidden="true"></span>
           <button
@@ -3519,6 +3622,7 @@
 
       // Floating toolbar buttons
       const panelToggle = document.getElementById("panelToggle");
+      const panelToggleRail = document.getElementById("panelToggleRail");
       const tbSnapAdd = document.getElementById("tbSnapAdd");
       const tbShot = document.getElementById("tbShot");
       const tbSpinL = document.getElementById("tbSpinL");
@@ -3526,7 +3630,6 @@
       const tbAuto = document.getElementById("tbAuto");
       const tbFaster = document.getElementById("tbFaster");
       const tbSpinR = document.getElementById("tbSpinR");
-      const tbFxToggle = document.getElementById("tbFxToggle");
       const helpBtn = $("helpBtn");
       const tipsToggle = $("tipsToggle");
       const tipsClose = $("tipsClose");
@@ -3552,10 +3655,10 @@
       const exportSizePresetUI = $("exportSizePreset");
       const exportWidthUI = $("exportWidth");
       const exportHeightUI = $("exportHeight");
+      const exportImageBtn = $("exportImageBtn");
       const exportTransparentUI = $("exportTransparent");
       const exportQualityRow = $("exportQualityRow");
       const exportCropRow = $("exportCropRow");
-      const exportSizeRow = $("exportSizeRow");
       const exportDimsRow = $("exportDimsRow");
       const exportAlphaRow = $("exportAlphaRow");
       const viewFrontBtn = $("viewFront");
@@ -5966,7 +6069,7 @@
           const maxBaseAngleDeg = 45;
           const maxUpperAngleDeg =
             trunkType === "cascade"
-              ? 128
+              ? 138
               : trunkType === "windswept"
                 ? 116
                 : trunkType === "slant"
@@ -6596,7 +6699,11 @@
             ).normalize();
           }
           if (trunkType === "cascade") {
-            return new THREE.Vector3(windSign * 0.28, -0.68, 0).normalize();
+            return new THREE.Vector3(
+              windSign * (0.34 + 0.26 * drama),
+              -0.62 - 0.22 * trainingDrop,
+              windSign * 0.06,
+            ).normalize();
           }
           if (trunkType === "slant") {
             return new THREE.Vector3(asymSign * 0.54, 0.2, 0).normalize();
@@ -6873,12 +6980,19 @@
           0.01,
           0.9,
         );
+        const styleAttachReach =
+          trunkType === "cascade"
+            ? 0.08 + 0.16 * drama + 0.1 * trunkArch + 0.08 * trunkDrop
+            : trunkType === "windswept"
+              ? 0.04 + 0.08 * drama + 0.06 * trunkArch
+              : 0;
+        const attachFloor = clamp(formAttachMin - styleAttachReach, 0.01, 0.9);
         attachIndices = attachIndices.filter(
-          (idx) => idx / Math.max(1, pts.length - 1) >= formAttachMin,
+          (idx) => idx / Math.max(1, pts.length - 1) >= attachFloor,
         );
         if (!attachIndices.length) {
           attachIndices = [
-            Math.max(1, Math.floor((pts.length - 1) * formAttachMin)),
+            Math.max(1, Math.floor((pts.length - 1) * attachFloor)),
           ];
         }
 
@@ -6905,7 +7019,16 @@
           );
           if (firstDepthNorm < lowerClearance) {
             const lowerT = firstDepthNorm / Math.max(0.08, lowerClearance);
-            n0 = Math.max(1, Math.round(n0 * (0.36 + 0.64 * lowerT)));
+            const lowMulBase =
+              trunkType === "cascade"
+                ? 0.62
+                : trunkType === "windswept"
+                  ? 0.52
+                  : 0.36;
+            n0 = Math.max(
+              1,
+              Math.round(n0 * (lowMulBase + (1 - lowMulBase) * lowerT)),
+            );
           }
           if (firstDepthNorm > 0.7) {
             const topT = (firstDepthNorm - 0.7) / 0.3;
@@ -6938,29 +7061,52 @@
               b,
               clamp(speciesArch.inwardBlock ?? 0.6, 0.35, 0.9),
             );
-            if (treeType.value === "juniper" || trunkType === "windswept") {
+            if (
+              treeType.value === "juniper" ||
+              trunkType === "windswept" ||
+              trunkType === "cascade"
+            ) {
               const sweepSign =
                 Math.abs(trainingPull) > 0.01
                   ? Math.sign(trainingPull)
                   : asymSign;
               if (m === 0) {
+                const primarySweep =
+                  trunkType === "cascade"
+                    ? 0.58 + 0.72 * (1 - firstDepthNorm) + 0.35 * drama
+                    : 0.42 + 0.62 * (1 - firstDepthNorm);
                 d0.applyAxisAngle(
                   new THREE.Vector3(0, 1, 0),
-                  sweepSign * (0.42 + 0.62 * (1 - firstDepthNorm)),
+                  sweepSign * primarySweep,
                 );
-                d0.y -= 0.08 + 0.24 * (1 - firstDepthNorm);
+                d0.y -=
+                  trunkType === "cascade"
+                    ? 0.16 +
+                      0.36 * (1 - firstDepthNorm) +
+                      0.24 * trainingDrop
+                    : 0.08 + 0.24 * (1 - firstDepthNorm);
               } else if (m === 1) {
+                const returnSweep =
+                  trunkType === "cascade"
+                    ? 0.42 + 0.46 * (1 - firstDepthNorm)
+                    : 0.32 + 0.36 * (1 - firstDepthNorm);
                 d0.applyAxisAngle(
                   new THREE.Vector3(0, 1, 0),
-                  -sweepSign * (0.32 + 0.36 * (1 - firstDepthNorm)),
+                  -sweepSign * returnSweep,
                 );
-                d0.y += 0.06;
+                d0.y += trunkType === "cascade" ? 0.1 + 0.12 * drama : 0.06;
               }
             }
             d0 = constrainBranchVectorForForm(d0, firstDepthNorm, b);
             // Use i as levelIdx anchor (consistent with your existing scheme)
             let primaryRole = m === 0 ? 1.12 : 0.84;
-            if (treeType.value === "juniper" || trunkType === "windswept") {
+            if (trunkType === "cascade") {
+              if (m === 0) primaryRole = 1.62;
+              else if (m === 1) primaryRole = 1.14;
+            } else if (
+              treeType.value === "juniper" ||
+              trunkType === "windswept"
+            ) {
               if (m === 0) primaryRole = 1.46;
               else if (m === 1) primaryRole = 1.05;
             }
@@ -7400,7 +7546,6 @@
         syncFormDefaultsFromSpecies();
         regenerate();
         refreshAllReadouts();
-        showToast("Randomized bonsai");
       }
 
       function toVec3Array(v) {
@@ -7810,6 +7955,55 @@
         return String(exportImageKindUI?.value || "png");
       }
 
+      function applyPresetToExportDimensions(preset, keepCustom = false) {
+        if (!exportWidthUI || !exportHeightUI) return;
+        const p = String(preset || "current");
+        if (p === "1080-square") {
+          exportWidthUI.value = "1080";
+          exportHeightUI.value = "1080";
+          return;
+        }
+        if (p === "2160-square") {
+          exportWidthUI.value = "2160";
+          exportHeightUI.value = "2160";
+          return;
+        }
+        if (p === "1920x1080") {
+          exportWidthUI.value = "1920";
+          exportHeightUI.value = "1080";
+          return;
+        }
+        if (p === "current" && renderer?.domElement) {
+          const srcW = Math.max(
+            1,
+            renderer.domElement.width || renderer.domElement.clientWidth || 1,
+          );
+          const srcH = Math.max(
+            1,
+            renderer.domElement.height || renderer.domElement.clientHeight || 1,
+          );
+          const crop = getExportCropRect(
+            srcW,
+            srcH,
+            String(exportCropModeUI?.value || "full"),
+          );
+          exportWidthUI.value = String(Math.max(1, crop.sw | 0));
+          exportHeightUI.value = String(Math.max(1, crop.sh | 0));
+          return;
+        }
+        if (!keepCustom && p === "custom") {
+          const w = parseInt(exportWidthUI.value || "0", 10) || 1920;
+          const h = parseInt(exportHeightUI.value || "0", 10) || 1080;
+          exportWidthUI.value = String(Math.max(1, w));
+          exportHeightUI.value = String(Math.max(1, h));
+        }
+      }
+
+      function syncExportDimensionsUI() {
+        if (!exportSizePresetUI) return;
+        applyPresetToExportDimensions(exportSizePresetUI.value);
+      }
+
       function updatePanelPrimaryAction() {
         if (!snapSaveBtn) return;
         const topTab = panelRoot?.getAttribute("data-tab") || "bonsai";
@@ -8043,14 +8237,9 @@
         if (exportSettingsUI) exportSettingsUI.hidden = false;
         if (exportQualityRow) exportQualityRow.hidden = !isLossy;
         if (exportCropRow) exportCropRow.hidden = !isImage;
-        if (exportSizeRow) exportSizeRow.hidden = !isImage;
-        if (exportDimsRow) {
-          const showDims =
-            isImage &&
-            String(exportSizePresetUI?.value || "current") === "custom";
-          exportDimsRow.hidden = !showDims;
-        }
+        if (exportDimsRow) exportDimsRow.hidden = !isImage;
         if (exportAlphaRow) exportAlphaRow.hidden = !isPng;
+        if (exportImageBtn) exportImageBtn.disabled = !isImage;
       }
 
       function tick() {
@@ -8386,7 +8575,6 @@
             );
           }
           if (!fallingLeavesToggle?.checked) clearFallingLeaves();
-          refreshFxToggleIcon();
         }),
       );
       [keyLightUI, hemiLightUI, exposureUI, bgLightLinkUI].forEach((el) =>
@@ -8565,7 +8753,6 @@
           setSeed((Math.random() * 0xffffffff) >>> 0);
           regenerate();
           refreshAllReadouts();
-          showToast("Seed updated");
         });
       }
       if (randomizeAllBtn) {
@@ -8746,6 +8933,7 @@
         exportImageKindUI.addEventListener("change", () => {
           updateExportSettingsVisibility();
           updatePanelPrimaryAction();
+          syncExportDimensionsUI();
         });
       }
       if (exportModelKindUI) {
@@ -8755,10 +8943,37 @@
         });
       }
       if (exportSizePresetUI) {
-        exportSizePresetUI.addEventListener(
-          "change",
-          updateExportSettingsVisibility,
-        );
+        exportSizePresetUI.addEventListener("change", () => {
+          syncExportDimensionsUI();
+          updateExportSettingsVisibility();
+        });
+      }
+      if (exportCropModeUI) {
+        exportCropModeUI.addEventListener("change", () => {
+          if (String(exportSizePresetUI?.value || "current") === "current") {
+            syncExportDimensionsUI();
+          }
+        });
+      }
+      if (exportWidthUI) {
+        exportWidthUI.addEventListener("input", () => {
+          if (exportSizePresetUI && exportSizePresetUI.value !== "custom") {
+            exportSizePresetUI.value = "custom";
+          }
+        });
+      }
+      if (exportHeightUI) {
+        exportHeightUI.addEventListener("input", () => {
+          if (exportSizePresetUI && exportSizePresetUI.value !== "custom") {
+            exportSizePresetUI.value = "custom";
+          }
+        });
+      }
+      if (exportImageBtn) {
+        exportImageBtn.addEventListener("click", () => {
+          const mode = String(exportImageKindUI?.value || "png");
+          exportCurrentView(mode);
+        });
       }
       // Left/Right: smooth while held; also pause auto when you touch them
       function onHold(dir, isDown) {
@@ -9177,13 +9392,26 @@
           panel &&
           getComputedStyle(panel).display !== "none";
         const panelH = panelOpen ? panel.getBoundingClientRect().height : 0;
-        canvasToolbar.style.bottom = `${Math.max(8, railH + panelH + 8)}px`;
-        canvasToolbar.style.left = "50%";
+        const bottomOffset = Math.max(8, railH + panelH + 8);
+        const cameraVisible =
+          !!cameraPad &&
+          getComputedStyle(cameraPad).display !== "none" &&
+          cameraPad.getBoundingClientRect().width > 0;
+        const cameraReserve = cameraVisible
+          ? Math.ceil(cameraPad.getBoundingClientRect().width) + 12
+          : 0;
+        const maxToolbarW = Math.max(180, window.innerWidth - 12 - cameraReserve);
+        canvasToolbar.style.bottom = `${bottomOffset}px`;
+        canvasToolbar.style.left =
+          cameraReserve > 0
+            ? `calc(50% - ${Math.round(cameraReserve / 2)}px)`
+            : "50%";
         canvasToolbar.style.transform = "translateX(-50%)";
+        canvasToolbar.style.maxWidth = `${maxToolbarW}px`;
         if (cameraPad) {
           cameraPad.style.left = "auto";
           cameraPad.style.right = "8px";
-          cameraPad.style.bottom = `${Math.max(56, railH + panelH + 64)}px`;
+          cameraPad.style.bottom = `${bottomOffset}px`;
         }
       }
 
@@ -9234,27 +9462,6 @@
           }, ms);
         }
         if (!silent) showToast(enabled ? "Demo mode on" : "Demo mode off");
-      }
-
-      function refreshFxToggleIcon() {
-        if (!tbFxToggle) return;
-        const on = !!(fallingLeavesToggle && fallingLeavesToggle.checked);
-        tbFxToggle.title = on ? "Hide Falling FX" : "Show Falling FX";
-        tbFxToggle.innerHTML = `<span class="iconoir ${on ? "iconoir-eye-solid" : "iconoir-eye-closed"}" aria-hidden="true"></span>`;
-        tbFxToggle.classList.toggle("btn-primary", on);
-        tbFxToggle.classList.toggle("btn-ghost", !on);
-        tbFxToggle.classList.toggle("ds-btn-primary", on);
-        tbFxToggle.classList.toggle("ds-btn-ghost", !on);
-      }
-
-      function setFallingFxVisible(on, silent = false) {
-        if (fallingLeavesToggle) {
-          fallingLeavesToggle.checked = !!on;
-          localStorage.setItem("bonsai.fallingLeavesOn", on ? "1" : "0");
-        }
-        if (!on) clearFallingLeaves();
-        refreshFxToggleIcon();
-        if (!silent) showToast(on ? "Falling FX on" : "Falling FX off");
       }
 
       function setDebugMasterVisible(on) {
@@ -9314,12 +9521,6 @@
         });
         // initial glyph
         refreshTbAutoIcon();
-      }
-      if (tbFxToggle) {
-        tbFxToggle.addEventListener("click", () => {
-          const next = !(fallingLeavesToggle && fallingLeavesToggle.checked);
-          setFallingFxVisible(next);
-        });
       }
 
       if (tbSlower) {
@@ -9455,18 +9656,24 @@
         appRoot.classList.toggle("panel-hidden", !!on);
         if (sidePanelToggle) sidePanelToggle.checked = !on;
         syncRailTabState(!!on);
-        if (panelToggle) {
-          panelToggle.setAttribute("aria-pressed", on ? "true" : "false");
-          updatePanelToggleIcon();
-        }
+        [panelToggle, panelToggleRail].forEach((btn) => {
+          if (!btn) return;
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        updatePanelToggleIcon();
         // persist preference
         localStorage.setItem("bonsai.panelHidden", on ? "1" : "0");
         requestAnimationFrame(updateCanvasToolbarOffset);
         refitSoon();
       }
 
+      function applyToggleIcon(btn, icon, title) {
+        if (!btn) return;
+        btn.title = title;
+        btn.innerHTML = `<span class="iconoir ${icon}" aria-hidden="true"></span><span class="sr-only">Toggle panel</span>`;
+      }
+
       function updatePanelToggleIcon() {
-        if (!panelToggle) return;
         const hidden = appRoot.classList.contains("panel-hidden");
         const mobile = window.matchMedia("(max-width: 900px)").matches;
         let icon = "iconoir-nav-arrow-left";
@@ -9478,8 +9685,8 @@
           icon = hidden ? "iconoir-nav-arrow-right" : "iconoir-nav-arrow-left";
           title = hidden ? "Open panel (right)" : "Collapse panel (left)";
         }
-        panelToggle.title = title;
-        panelToggle.innerHTML = `<span class="iconoir ${icon}" aria-hidden="true"></span><span class="sr-only">Toggle panel</span>`;
+        applyToggleIcon(panelToggle, icon, title);
+        applyToggleIcon(panelToggleRail, icon, title);
       }
 
       // initial: prefer stored, else hide automatically on small screens
@@ -9502,6 +9709,12 @@
 
       if (panelToggle) {
         panelToggle.addEventListener("click", () => {
+          const now = !appRoot.classList.contains("panel-hidden");
+          setPanelHidden(now);
+        });
+      }
+      if (panelToggleRail) {
+        panelToggleRail.addEventListener("click", () => {
           const now = !appRoot.classList.contains("panel-hidden");
           setPanelHidden(now);
         });
@@ -9572,7 +9785,6 @@
             );
           }
         }
-        refreshFxToggleIcon();
         applyBackground();
         await loadSnapshotsFromStorage();
         renderSnapshotGallery();
@@ -9580,7 +9792,7 @@
         const storedTips = localStorage.getItem("bonsai.tipsVisible");
         setTipsVisible(storedTips === null ? true : storedTips === "1");
         setToolbarVisible(true, true);
-        setCameraPadVisible(true, true);
+        setCameraPadVisible(window.innerWidth > 900, true);
         setSidePanelVisible(!appRoot.classList.contains("panel-hidden"), true);
         setDemoMode(false, true);
         if (qualityModeUI) {
@@ -9598,6 +9810,7 @@
           localStorage.getItem("bonsai.bonsaiTab") || "plant";
         setBonsaiTab(storedBonsaiTab);
         setExportTab("image");
+        syncExportDimensionsUI();
         syncSectionDividers();
         syncFormDefaultsFromSpecies();
         setSeed((Math.random() * 0xffffffff) >>> 0);
