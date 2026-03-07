@@ -51,6 +51,10 @@
   --ds-layout-col-left: 320px;
   --ds-layout-col-right: 360px;
   --ds-layout-breakpoint-md: 900px;
+  --ds-shell-gap: var(--ds-space-3);
+  --ds-shell-pad: var(--ds-space-3);
+  --ds-shell-border: var(--ds-border-w) var(--ds-border-style) var(--ds-card-border);
+  --ds-shell-shadow: var(--ds-card-shadow);
   --ds-size-tab-h: 34px;
   --ds-size-rail-btn-h: 36px;
   --ds-size-control-hud: 42px;
@@ -67,6 +71,10 @@
   --ds-card-pad: var(--ds-space-4);
   --ds-label-transform: uppercase;
   --ds-label-spacing: 0.06em;
+  --ds-field-label-w: 124px;
+  --ds-field-action-w: calc(var(--ds-control-h-sm) + 8px);
+  --ds-field-row-gap: var(--ds-space-2);
+  --ds-section-head-h: var(--ds-control-h-sm);
 
   --ds-bg: #0f141c;
   --ds-bg-elevated: #141b26;
@@ -159,6 +167,14 @@
   --ds-btn-primary-border: var(--ds-accent-strong);
   --ds-btn-primary-text: var(--ds-text-inverse);
   --ds-btn-primary-bg-hover: color-mix(in oklab, var(--ds-btn-primary-bg), white 10%);
+  --ds-tab-active-fg: var(--ds-accent);
+  --ds-tab-active-bg: color-mix(
+    in oklab,
+    var(--ds-accent) 18%,
+    var(--ds-btn-bg)
+  );
+  --ds-tab-active-border: var(--ds-accent);
+  --ds-tab-active-icon: var(--ds-tab-active-fg);
   --ds-btn-tertiary-bg: color-mix(in oklab, var(--ds-accent-alt) 18%, var(--ds-bg-raised));
   --ds-btn-tertiary-bg-hover: color-mix(
     in oklab,
@@ -174,6 +190,27 @@
   --ds-btn-text-quiet: var(--ds-text-muted);
   --ds-btn-text-quiet-hover: var(--ds-text);
   --ds-btn-text-quiet-active: var(--ds-accent);
+  --ds-icon-action-size: var(--ds-btn-icon-size-sm);
+  --ds-icon-action-radius: var(--ds-radius-1);
+  --ds-icon-action-fg: var(--ds-btn-text-quiet);
+  --ds-icon-action-fg-hover: var(--ds-btn-text-quiet-hover);
+  --ds-icon-action-fg-active: var(--ds-btn-text-quiet-active);
+  --ds-icon-action-hover-bg: color-mix(
+    in oklab,
+    var(--ds-accent) 12%,
+    transparent
+  );
+  --ds-icon-action-active-bg: color-mix(
+    in oklab,
+    var(--ds-accent) 18%,
+    transparent
+  );
+  --ds-icon-action-border: transparent;
+  --ds-icon-action-border-hover: color-mix(
+    in oklab,
+    var(--ds-accent) 32%,
+    var(--ds-border)
+  );
 
   --ds-card-bg: var(--ds-bg-elevated);
   --ds-card-border: var(--ds-border);
@@ -223,6 +260,9 @@
   --ds-chip-bg: color-mix(in oklab, var(--ds-bg-raised), transparent 12%);
   --ds-chip-border: var(--ds-border);
   --ds-chip-text: var(--ds-text);
+  --ds-toast-inset-x: var(--ds-space-3);
+  --ds-toast-inset-y: var(--ds-space-3);
+  --ds-toast-gap: var(--ds-space-2);
 
   --color-bg: var(--ds-bg);
   --color-surface: var(--ds-bg-elevated);

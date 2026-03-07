@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="app-version" content="0.7.3" />
+    <meta name="app-version" content="0.8.0" />
     <title>POLYGON BONSAI / Ikebana Style</title>
     <link
       rel="stylesheet"
@@ -19,20 +19,21 @@
         --panel-w: 420px;
         --rail-w: 58px;
         --mobile-rail-h: 52px;
-        --bo-shell-gap: 10px;
-        --bo-shell-pad: 10px;
+        --bo-shell-gap: var(--ds-shell-gap, 10px);
+        --bo-shell-pad: var(--ds-shell-pad, 10px);
         --bo-breakpoint-md: 900px;
         --bo-panel-head-h: 42px;
         --bo-app-head-h: 52px;
-        --bo-tab-h: 34px;
+        --bo-tab-h: var(--ds-size-tab-h, 34px);
         --bo-rail-btn-h: 42px;
         --bo-rail-btn-h-mobile: 36px;
         --bo-control-gap: 6px;
         --bo-control-gap-lg: 8px;
         --bo-panel-pad-x: 12px;
         --bo-panel-pad-y: 8px;
-        --bo-field-label-w: 124px;
+        --bo-field-label-w: var(--ds-field-label-w, 124px);
         --bo-field-value-w: 56px;
+        --bo-field-action-w: var(--ds-field-action-w, calc(var(--ds-control-h-sm) + 6px));
         --bo-cam-cell: 36px;
         --bo-cam-gap: 6px;
         --bo-shell-radius: var(--ds-radius-3);
@@ -41,12 +42,12 @@
           var(--ds-bg-elevated) 94%,
           transparent
         );
-        --bo-shell-border: var(--ds-border-w) var(--ds-border-style)
-          color-mix(in oklab, var(--ds-accent-strong) 26%, var(--ds-border));
-        --bo-shell-shadow: var(
-          --ds-card-shadow,
-          0 12px 26px color-mix(in oklab, var(--ds-bg) 55%, transparent)
+        --bo-shell-border: var(
+          --ds-shell-border,
+          var(--ds-border-w) var(--ds-border-style)
+            color-mix(in oklab, var(--ds-accent-strong) 26%, var(--ds-border))
         );
+        --bo-shell-shadow: var(--ds-shell-shadow, var(--ds-card-shadow));
 
         --hud-border: var(--ds-border-w) var(--ds-border-style)
           color-mix(in oklab, var(--ds-accent) 45%, var(--ds-border));
@@ -85,7 +86,7 @@
         margin: 0;
         background: var(--ds-bg);
         color: var(--ds-text);
-        font-family: var(--ds-font-mono);
+        font-family: var(--ds-font-sans);
       }
 
       #app {
@@ -108,25 +109,16 @@
         grid-area: rail;
         display: flex;
         flex-direction: column;
-        align-items: stretch;
-        gap: var(--bo-control-gap);
-        padding: var(--ds-space-2) var(--ds-space-2);
-        background: linear-gradient(
-          180deg,
-          color-mix(
-            in oklab,
-            var(--bo-shell-surface) 96%,
-            color-mix(in oklab, var(--ds-accent-strong) 48%, black) 4%
-          ),
-          color-mix(
-            in oklab,
-            var(--bo-shell-surface) 92%,
-            color-mix(in oklab, var(--ds-accent-strong) 48%, black) 8%
-          )
-        );
+        justify-content: flex-start;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 6px;
+        background: color-mix(in oklab, var(--bo-shell-surface) 86%, transparent);
         border: var(--bo-shell-border);
         box-shadow: var(--bo-shell-shadow);
         border-radius: var(--bo-shell-radius);
+        overflow-y: auto;
+        overflow-x: hidden;
       }
 
       .side-fill {
@@ -134,56 +126,40 @@
       }
 
       .side-btn {
-        width: 100%;
-        min-height: var(--bo-rail-btn-h);
-        height: var(--bo-rail-btn-h);
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
-        border: var(--ds-btn-border, 1px solid var(--ds-border));
-        background: var(
-          --ds-btn-bg,
-          color-mix(in oklab, var(--ds-bg-raised) 92%, var(--ds-bg) 8%)
-        );
-        color: var(--ds-btn-fg, var(--ds-text-muted));
-        border-radius: var(--ds-btn-radius, var(--ds-radius-sm));
-        font: 700 0.62rem/1 var(--ds-font-mono);
-        letter-spacing: var(--ds-label-spacing);
-        text-transform: var(--ds-label-transform);
-        cursor: pointer;
-        transition:
-          background var(--t-fast) var(--e-out),
-          border-color var(--t-fast) var(--e-out),
-          color var(--t-fast) var(--e-out);
+        width: 32px;
+        min-width: 32px;
+        height: 32px;
+        min-height: 32px;
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+        line-height: 1;
+        font-weight: 700;
       }
 
       .side-btn .side-icon {
         font-size: 16px;
         line-height: 1;
+        display: inline-block;
+        vertical-align: middle;
       }
 
       .side-divider {
-        width: 100%;
+        width: 24px;
         height: 1px;
         margin: 2px 0;
-        background: color-mix(
-          in oklab,
-          var(--ds-accent-strong) 32%,
-          var(--ds-border)
-        );
-        opacity: 0.65;
+        background: color-mix(in oklab, var(--ds-border) 80%, transparent);
         flex: 0 0 auto;
       }
 
       .side-btn[aria-pressed="true"] {
-        color: var(--ds-btn-primary-fg, var(--ds-text));
-        border-color: color-mix(in oklab, var(--ds-accent) 45%, var(--ds-border));
-        background: var(
-          --ds-btn-primary-bg,
-          color-mix(in oklab, var(--ds-accent-strong) 22%, var(--ds-bg-raised))
-        );
+        border-color: var(--ds-accent);
+        background: color-mix(in oklab, var(--ds-accent) 16%, var(--ds-btn-bg));
+        color: var(--ds-accent);
+      }
+
+      .side-btn[aria-pressed="true"] .side-icon {
+        color: var(--ds-accent);
       }
 
       #panelToggleRail {
@@ -218,8 +194,8 @@
         grid-template-columns: 1fr auto;
         align-items: center;
         gap: var(--bo-control-gap-lg);
-        min-height: var(--bo-app-head-h);
-        padding: var(--ds-space-3) var(--ds-space-3);
+        min-height: calc(var(--ds-btn-icon-size-sm) + (var(--ds-space-2) * 2));
+        padding: var(--ds-space-2) var(--ds-space-3);
         border: var(--bo-shell-border);
         background: linear-gradient(
           180deg,
@@ -241,7 +217,7 @@
       .app-title {
         margin: 0;
         color: color-mix(in oklab, var(--ds-text) 85%, var(--ds-accent));
-        font: 700 0.78rem/1 var(--ds-font-mono);
+        font: 700 0.78rem/1 var(--ds-font-sans);
         letter-spacing: 0.09em;
         text-transform: var(--ds-label-transform);
       }
@@ -258,6 +234,7 @@
       .panel-collapse {
         width: var(--ds-btn-icon-size-sm);
         min-width: var(--ds-btn-icon-size-sm);
+        height: var(--ds-btn-icon-size-sm);
         min-height: var(--ds-btn-icon-size-sm);
       }
 
@@ -300,7 +277,7 @@
       .panel-title {
         margin: 0;
         color: var(--ds-text);
-        font: 700 0.74rem/1 var(--ds-font-mono);
+        font: 700 0.74rem/1 var(--ds-font-sans);
         letter-spacing: var(--ds-label-spacing);
         text-transform: var(--ds-label-transform);
       }
@@ -346,7 +323,7 @@
         border-bottom: 2px solid transparent;
         background: transparent;
         color: var(--ds-text-muted);
-        font: 600 0.66rem/1 var(--ds-font-mono);
+        font: 600 0.66rem/1 var(--ds-font-sans);
         letter-spacing: 0.08em;
         text-transform: var(--ds-label-transform);
         padding: 0.5rem 0.2rem;
@@ -366,13 +343,9 @@
       }
 
       .bonsai-tab[aria-pressed="true"] {
-        color: var(--ds-text);
-        border-bottom-color: var(--ds-accent);
-        background: color-mix(
-          in oklab,
-          color-mix(in oklab, var(--ds-accent-strong) 82%, black) 12%,
-          var(--ds-bg-raised)
-        );
+        color: var(--ds-tab-active-fg, var(--ds-btn-primary-text, var(--ds-text)));
+        border-bottom-color: var(--ds-tab-active-border, var(--ds-btn-primary-border, var(--ds-accent)));
+        background: var(--ds-tab-active-bg, var(--ds-btn-primary-bg, color-mix(in oklab, var(--ds-accent) 18%, var(--ds-btn-bg))));
       }
 
       #panel .section[data-tab] {
@@ -413,20 +386,49 @@
         letter-spacing: 0.03em;
         opacity: 0.92;
         font-weight: 600;
-      }
-      .section-toggle {
-        width: 100%;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        border: 0;
-        background: transparent;
-        color: inherit;
-        padding: 0;
-        margin: 0;
+        gap: 8px;
+      }
+
+      .section-title {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         cursor: pointer;
-        font: inherit;
+      }
+
+      .section-head-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+      }
+
+      .section-toggle {
+        color: var(--ds-text-muted);
+        cursor: pointer;
+      }
+
+      .section-toggle:hover,
+      .section-toggle:focus-visible {
+        color: var(--ds-icon-action-fg-hover);
+      }
+
+      .section-vis-toggle {
+        color: var(--ds-text-muted);
+        cursor: pointer;
+      }
+
+      .section-vis-toggle[aria-pressed="false"] {
+        color: var(--ds-danger);
+      }
+
+      .section-vis-toggle:hover,
+      .section-vis-toggle:focus-visible {
+        color: var(--ds-icon-action-fg-hover);
       }
 
       .section-toggle .section-chevron {
@@ -466,6 +468,12 @@
         grid-template-columns: minmax(var(--bo-field-label-w), auto) 1fr auto;
         gap: var(--bo-control-gap) var(--bo-control-gap-lg);
         align-items: center;
+        position: relative;
+        min-height: var(--ds-control-h-sm);
+      }
+
+      .form .field:not(.seed-row) {
+        padding-right: var(--bo-field-action-w);
       }
 
       .form .field.field-inline {
@@ -477,6 +485,55 @@
       .form .field > label:not(.ds-switch) {
         grid-column: 1;
         margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .random-lock-btn {
+        appearance: none;
+        color: var(--ds-text-muted);
+        cursor: pointer;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        opacity: 1;
+        transform: translateY(-50%);
+        pointer-events: auto;
+        transition:
+          opacity var(--ds-dur-fast) var(--ds-ease-standard),
+          color var(--ds-dur-fast) var(--ds-ease-standard),
+          background var(--ds-dur-fast) var(--ds-ease-standard);
+      }
+
+      /* Keep row anchoring stable across ds-icon-action pressed/active states. */
+      .random-lock-btn:is(
+          :hover,
+          :focus-visible,
+          :active,
+          [aria-pressed="true"],
+          .is-active
+        ) {
+        transform: translateY(-50%);
+      }
+
+      .random-lock-btn.is-faint {
+        color: var(--ds-icon-action-fg);
+        opacity: 0.24;
+        background: transparent;
+      }
+
+      .random-lock-btn.is-locked {
+        color: var(--ds-icon-action-fg-active);
+        opacity: 1;
+        background: transparent;
+      }
+
+      .random-lock-btn.is-preview {
+        color: var(--ds-icon-action-fg-hover);
+        opacity: 1;
+        background: var(--ds-icon-action-hover-bg);
       }
 
       .form .field > input,
@@ -556,15 +613,15 @@
       }
 
       .form .field.seed-row .seed-seg input {
-        min-height: var(--ds-size-tab-h);
+        min-height: var(--ds-control-h);
         min-width: 0;
       }
 
       .form .field.seed-row .seed-seg .btn {
-        min-width: var(--ds-control-h-sm);
-        width: var(--ds-control-h-sm);
-        height: var(--ds-size-tab-h);
-        min-height: var(--ds-size-tab-h);
+        min-width: var(--ds-control-h);
+        width: var(--ds-control-h);
+        height: var(--ds-control-h);
+        min-height: var(--ds-control-h);
         display: grid;
         place-items: center;
         padding: 0;
@@ -622,10 +679,10 @@
       }
 
       .form .field.seed-row .seed-seg > .btn {
-        width: var(--ds-control-h-sm);
-        min-width: var(--ds-control-h-sm);
-        max-width: var(--ds-control-h-sm);
-        flex: 0 0 var(--ds-control-h-sm);
+        width: var(--ds-control-h);
+        min-width: var(--ds-control-h);
+        max-width: var(--ds-control-h);
+        flex: 0 0 var(--ds-control-h);
       }
 
       /* Debug demo row keeps interval + switch aligned on one line */
@@ -649,9 +706,13 @@
       .btn-icon {
         width: var(--ds-btn-icon-size);
         height: var(--ds-btn-icon-size);
+        min-width: var(--ds-btn-icon-size);
+        min-height: var(--ds-btn-icon-size);
         padding: 0;
+        margin: 0;
         display: grid;
         place-items: center;
+        box-sizing: border-box;
       }
 
       .iconoir {
@@ -709,7 +770,7 @@
       .snapshot-count {
         margin-left: 6px;
         color: var(--ds-text-muted);
-        font: 600 0.62rem/1 var(--ds-font-mono);
+        font: 600 0.62rem/1 var(--ds-font-sans);
         letter-spacing: 0.02em;
         text-transform: none;
       }
@@ -788,7 +849,7 @@
 
       .snapshot-name {
         color: var(--ds-text);
-        font: 700 0.64rem/1.2 var(--ds-font-mono);
+        font: 700 0.64rem/1.2 var(--ds-font-sans);
         text-transform: uppercase;
         letter-spacing: 0.04em;
         white-space: nowrap;
@@ -859,7 +920,7 @@
         border-bottom: 2px solid transparent;
         background: transparent;
         color: var(--ds-text-muted);
-        font: 600 0.66rem/1 var(--ds-font-mono);
+        font: 600 0.66rem/1 var(--ds-font-sans);
         letter-spacing: 0.08em;
         text-transform: var(--ds-label-transform);
         padding: 0.5rem 0.2rem;
@@ -879,19 +940,18 @@
       }
 
       .export-tab[aria-pressed="true"] {
-        color: var(--ds-text);
-        border-bottom-color: var(--ds-accent);
-        background: color-mix(
-          in oklab,
-          color-mix(in oklab, var(--ds-accent-strong) 82%, black) 12%,
-          var(--ds-bg-raised)
-        );
+        color: var(--ds-tab-active-fg, var(--ds-btn-primary-text, var(--ds-text)));
+        border-bottom-color: var(--ds-tab-active-border, var(--ds-btn-primary-border, var(--ds-accent)));
+        background: var(--ds-tab-active-bg, var(--ds-btn-primary-bg, color-mix(in oklab, var(--ds-accent) 18%, var(--ds-btn-bg))));
       }
 
       .bonsai-tab .tab-icon,
       .export-tab .tab-icon {
         font-size: 14px;
         line-height: 1;
+        color: currentColor !important;
+        -webkit-text-fill-color: currentColor;
+        opacity: 1;
       }
 
       .export-panel {
@@ -932,24 +992,26 @@
 
       .perf-stat .k {
         color: var(--ds-text-muted);
-        font: 600 0.64rem/1 var(--ds-font-mono);
+        font: 600 0.64rem/1 var(--ds-font-sans);
         text-transform: var(--ds-label-transform);
         letter-spacing: 0.06em;
       }
 
       .perf-stat .v {
         color: var(--ds-text);
-        font: 600 0.78rem/1.2 var(--ds-font-mono);
+        font: 600 0.78rem/1.2 var(--ds-font-sans);
       }
 
       .control-row {
         display: grid;
         grid-template-columns:
-          minmax(110px, var(--bo-field-label-w)) minmax(0, 1fr)
-          auto;
+          minmax(110px, var(--ds-field-label-w, var(--bo-field-label-w)))
+          minmax(0, 1fr)
+          minmax(var(--ds-field-action-w, var(--bo-field-action-w)), auto);
         align-items: center;
-        gap: var(--bo-control-gap);
+        gap: var(--ds-field-row-gap, var(--bo-control-gap));
         min-height: var(--ds-control-h-sm);
+        min-width: 0;
       }
 
       .control-label {
@@ -964,7 +1026,8 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        min-width: 0;
+        min-width: var(--ds-field-action-w, var(--bo-field-action-w));
+        width: auto;
       }
 
       .control-input > .ds-switch {
@@ -1021,6 +1084,13 @@
         justify-content: flex-end;
       }
 
+      .export-action-row {
+        margin-top: 4px;
+        padding-top: 8px;
+        border-top: 1px solid
+          color-mix(in oklab, var(--ds-accent-strong) 24%, var(--ds-border));
+      }
+
       #exportAlphaRow .control-input {
         display: flex;
         justify-content: flex-end;
@@ -1038,16 +1108,25 @@
       }
 
       .emissive-row {
-        display: grid;
-        grid-template-columns: var(--ds-control-h) minmax(0, 1fr);
+        display: flex;
         align-items: center;
         gap: var(--bo-control-gap);
         width: 100%;
       }
 
+      .form .field.no-val > .emissive-row {
+        grid-column: 2 / 4;
+      }
+
       .emissive-row input[type="color"] {
         width: var(--ds-control-h);
         min-width: var(--ds-control-h);
+        flex: 0 0 var(--ds-control-h);
+      }
+
+      .emissive-row input[type="range"] {
+        flex: 1 1 auto;
+        min-width: 0;
       }
 
       #emissiveField.is-disabled {
@@ -1061,11 +1140,11 @@
 
       .toast-stack {
         position: fixed;
-        right: 12px;
-        top: 12px;
-        z-index: 80;
+        right: var(--ds-toast-inset-x, 12px);
+        top: var(--ds-toast-inset-y, 12px);
+        z-index: var(--ds-z-toast);
         display: grid;
-        gap: 8px;
+        gap: var(--ds-toast-gap, 8px);
         pointer-events: none;
       }
 
@@ -1082,7 +1161,7 @@
         );
         box-shadow: var(--glow-outer);
         color: var(--ds-text);
-        font: 600 0.67rem/1.3 var(--ds-font-mono);
+        font: 600 0.67rem/1.3 var(--ds-font-sans);
         letter-spacing: 0.02em;
       }
 
@@ -1124,7 +1203,7 @@
 
       .confirm-card h3 {
         margin: 0 0 6px;
-        font: 700 0.8rem/1.2 var(--ds-font-mono);
+        font: 700 0.8rem/1.2 var(--ds-font-sans);
         letter-spacing: 0.06em;
         text-transform: uppercase;
       }
@@ -1262,7 +1341,7 @@
 
       .help-section h4 {
         margin: 0 0 6px;
-        font: 700 0.72rem/1.2 var(--ds-font-mono);
+        font: 700 0.72rem/1.2 var(--ds-font-sans);
         letter-spacing: 0.05em;
         text-transform: uppercase;
         color: color-mix(in oklab, var(--ds-text) 84%, var(--ds-accent));
@@ -1319,7 +1398,7 @@
         height: var(--bo-cam-cell);
         min-height: var(--bo-cam-cell);
         padding: 0;
-        font: 700 0.58rem/1 var(--ds-font-mono);
+        font: 700 0.58rem/1 var(--ds-font-sans);
         letter-spacing: 0.02em;
       }
 
@@ -1360,7 +1439,7 @@
         border: var(--hud-border);
         background: var(--hud-bg);
         box-shadow: var(--glow-outer), var(--glow-inner);
-        font: 12px/1.35 var(--ds-font-mono);
+        font: 12px/1.35 var(--ds-font-sans);
         color: var(--hud-text);
         letter-spacing: 0.2px;
         backdrop-filter: blur(var(--blur));
@@ -1542,6 +1621,10 @@
      - Stage (canvas) next
      - Panel (settings) at the bottom (scrollable) */
         #app {
+          --bo-mobile-panel-h: clamp(220px, 38vh, 360px);
+          --bo-mobile-stage-inset: calc(
+            var(--mobile-rail-h) + var(--bo-mobile-panel-h) + 8px
+          );
           grid-template-columns: 1fr;
           grid-template-rows: 1fr;
           grid-template-areas: "stage";
@@ -1555,8 +1638,8 @@
 
         /* Stage fills available height */
         #stageWrap {
-          min-height: 56vh;
-          /* canvas still tall enough on phones */
+          min-height: 100%;
+          height: 100%;
           position: relative;
           z-index: 1;
           /* lower than #panel */
@@ -1568,9 +1651,19 @@
         /* Renderer canvas should never bleed over into the panel area */
         #stage {
           position: absolute;
-          inset: 0;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: var(--bo-mobile-stage-inset);
           z-index: var(--z-stage);
           /* already set, keep it within its row's stacking context */
+        }
+
+        #bgOverlay {
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: var(--bo-mobile-stage-inset);
         }
 
         /* Panel is visible by default, scrollable within its own area */
@@ -1582,7 +1675,8 @@
           z-index: 6;
           display: flex;
           flex-direction: column;
-          max-height: min(50vh, calc(100vh - var(--mobile-rail-h) - 24px));
+          height: var(--bo-mobile-panel-h);
+          max-height: var(--bo-mobile-panel-h);
           overflow: hidden;
           border-top: 1px solid var(--ds-border);
           box-shadow: none;
@@ -1592,6 +1686,7 @@
 
         /* When the class is present, THEN hide the panel (hamburger toggles this) */
         #app.panel-hidden {
+          --bo-mobile-stage-inset: calc(var(--mobile-rail-h) + 8px);
           grid-template-columns: 1fr !important;
           grid-template-rows: 1fr;
           grid-template-areas: "stage";
@@ -1664,8 +1759,8 @@
             --ds-btn-bg,
             color-mix(in oklab, var(--ds-bg-raised) 92%, var(--ds-bg) 8%)
           );
-          color: var(--ds-btn-fg, var(--ds-text-muted));
-          border-radius: var(--ds-btn-radius, var(--ds-radius-sm));
+          color: var(--ds-btn-text, var(--ds-text-muted));
+          border-radius: var(--ds-btn-radius, var(--ds-radius-2));
         }
         #sidebar::-webkit-scrollbar {
           display: none;
@@ -1822,8 +1917,8 @@
       }
 
       @media (max-width: 900px) and (orientation: portrait) {
-        #panel {
-          max-height: min(38vh, calc(100vh - var(--mobile-rail-h) - 56px));
+        #app {
+          --bo-mobile-panel-h: clamp(220px, 38vh, 340px);
         }
       }
     </style>
@@ -1970,7 +2065,7 @@
               aria-pressed="true"
             >
               <span
-                class="iconoir iconoir-tree tab-icon"
+                class="iconoir iconoir-leaf tab-icon"
                 aria-hidden="true"
               ></span>
               <span>Plant</span>
@@ -1981,7 +2076,7 @@
               aria-pressed="false"
             >
               <span
-                class="iconoir iconoir-home-alt tab-icon"
+                class="iconoir iconoir-cylinder tab-icon"
                 aria-hidden="true"
               ></span>
               <span>Vessel</span>
@@ -2400,7 +2495,13 @@
                 </div>
               </div>
             </div>
-            <div id="trunkSection" class="section" data-tab="bonsai" data-bonsai="plant">
+            <div
+              id="trunkSection"
+              class="section"
+              data-tab="bonsai"
+              data-bonsai="plant"
+              data-plant-part="trunk"
+            >
               <h2>TRUNK</h2>
               <div id="trunkForm" class="form"></div>
             </div>
@@ -2409,6 +2510,7 @@
               class="section"
               data-tab="bonsai"
               data-bonsai="plant"
+              data-plant-part="leaves"
             >
               <h2>LEAVES</h2>
               <div class="form">
@@ -2569,6 +2671,7 @@
               class="section"
               data-tab="bonsai"
               data-bonsai="plant"
+              data-plant-part="branches"
             >
               <h2>BRANCHES</h2>
               <div class="form">
@@ -2680,7 +2783,12 @@
               </div>
             </div>
 
-            <div class="section" data-tab="bonsai" data-bonsai="vessel">
+            <div
+              class="section"
+              data-tab="bonsai"
+              data-bonsai="vessel"
+              data-vessel-part="vessel"
+            >
               <h2>VESSEL</h2>
               <div class="form">
                 <div class="field field-inline">
@@ -2780,7 +2888,12 @@
               </div>
             </div>
 
-            <div class="section" data-tab="bonsai" data-bonsai="vessel">
+            <div
+              class="section"
+              data-tab="bonsai"
+              data-bonsai="vessel"
+              data-vessel-part="medium"
+            >
               <h2>MEDIUM</h2>
               <div class="form">
                 <div class="field field-inline">
@@ -2854,7 +2967,12 @@
               </div>
             </div>
 
-            <div class="section" data-tab="bonsai" data-bonsai="vessel">
+            <div
+              class="section"
+              data-tab="bonsai"
+              data-bonsai="vessel"
+              data-vessel-part="platform"
+            >
               <h2>PLATFORM</h2>
               <div class="form">
                 <div class="field field-inline">
@@ -2987,6 +3105,17 @@
                     <option value="balanced">Balanced</option>
                     <option value="mobile">Mobile</option>
                   </select>
+                </div>
+                <div class="field no-val">
+                  <label>Spin Speed</label>
+                  <input
+                    id="autoSpeed"
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="0.05"
+                    value="0.8"
+                  />
                 </div>
                 <div class="field no-label no-val no-readout">
                   <div class="perf-stats" aria-label="Generation stats">
@@ -3228,6 +3357,18 @@
                     </div>
                     <div class="control-icons"></div>
                   </div>
+                  <div class="control-row export-action-row">
+                    <div class="control-label"></div>
+                    <div class="control-input">
+                      <button
+                        id="exportModelBtn"
+                        class="btn ds-btn btn-primary ds-btn-primary"
+                      >
+                        Export Model
+                      </button>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
                 </div>
 
                 <div id="exportPanelGif" class="export-panel" hidden>
@@ -3235,6 +3376,18 @@
                     Fixed rules: square frame, auto-fit bonsai, and one full
                     360-degree rotation for seamless looping.
                   </p>
+                  <div class="control-row export-action-row">
+                    <div class="control-label"></div>
+                    <div class="control-input">
+                      <button
+                        id="exportGifBtn"
+                        class="btn ds-btn btn-primary ds-btn-primary"
+                      >
+                        Export GIF
+                      </button>
+                    </div>
+                    <div class="control-icons"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3274,10 +3427,11 @@
         <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
           <button
             id="randomizeAll"
-            class="btn ds-btn btn-icon ds-btn-icon"
+            class="btn ds-btn ds-btn-primary"
             title="Randomize All (R)"
           >
             <span class="iconoir iconoir-dice-three" aria-hidden="true"></span>
+            <span>Random</span>
           </button>
           <span class="split" aria-hidden="true"></span>
           <button
@@ -3291,25 +3445,11 @@
             ></span>
           </button>
           <button
-            id="tbSlower"
-            class="btn ds-btn btn-icon ds-btn-icon"
-            title="Slower"
-          >
-            <span class="iconoir iconoir-ruler-minus" aria-hidden="true"></span>
-          </button>
-          <button
             id="tbAuto"
             class="btn ds-btn btn-icon ds-btn-icon"
             title="Play/Pause (Space)"
           >
             <span class="iconoir iconoir-play" aria-hidden="true"></span>
-          </button>
-          <button
-            id="tbFaster"
-            class="btn ds-btn btn-icon ds-btn-icon"
-            title="Faster"
-          >
-            <span class="iconoir iconoir-ruler-plus" aria-hidden="true"></span>
           </button>
           <button
             id="tbSpinR"
@@ -3572,6 +3712,7 @@
       const asymmetryUI = $("asymmetry");
       const branchTwistUI = $("branchTwist");
       const qualityModeUI = $("qualityMode");
+      const autoSpeedUI = $("autoSpeed");
       const statFpsUI = $("statFps");
       const statRegenMsUI = $("statRegenMs");
       const statSegmentsUI = $("statSegments");
@@ -3626,9 +3767,7 @@
       const tbSnapAdd = document.getElementById("tbSnapAdd");
       const tbShot = document.getElementById("tbShot");
       const tbSpinL = document.getElementById("tbSpinL");
-      const tbSlower = document.getElementById("tbSlower");
       const tbAuto = document.getElementById("tbAuto");
-      const tbFaster = document.getElementById("tbFaster");
       const tbSpinR = document.getElementById("tbSpinR");
       const helpBtn = $("helpBtn");
       const tipsToggle = $("tipsToggle");
@@ -3656,6 +3795,8 @@
       const exportWidthUI = $("exportWidth");
       const exportHeightUI = $("exportHeight");
       const exportImageBtn = $("exportImageBtn");
+      const exportModelBtn = $("exportModelBtn");
+      const exportGifBtn = $("exportGifBtn");
       const exportTransparentUI = $("exportTransparent");
       const exportQualityRow = $("exportQualityRow");
       const exportCropRow = $("exportCropRow");
@@ -3755,6 +3896,8 @@
       root.add(ike);
       let vesselGroup = null,
         treeGroup = null,
+        trunkMeshGroup = null,
+        branchMeshGroup = null,
         sketchOverlay = null;
       const fallingLeavesGroup = new THREE.Group();
       scene.add(fallingLeavesGroup);
@@ -4071,8 +4214,8 @@
         if (!speciesSection || !trunkForm) return;
         const host = speciesSection.parentElement;
         if (host && trunkSection && branchesSection && leavesSection) {
-          host.insertBefore(trunkSection, branchesSection);
-          host.insertBefore(branchesSection, leavesSection);
+          host.insertBefore(leavesSection, branchesSection);
+          host.insertBefore(branchesSection, trunkSection);
         }
         const moveFieldByControlId = (id) => {
           const el = $(id);
@@ -4120,29 +4263,261 @@
         localStorage.setItem(sectionStorageKey(section), collapsed ? "1" : "0");
       }
 
+      const VESSEL_PART_VISIBILITY_STORAGE_KEY = "bonsai.vesselPartVisibility.v1";
+      const PLANT_PART_VISIBILITY_STORAGE_KEY = "bonsai.plantPartVisibility.v1";
+      const plantPartVisibility = {
+        leaves: true,
+        branches: true,
+        trunk: true,
+      };
+
+      function isPlantPartVisible(part) {
+        return !!plantPartVisibility[part];
+      }
+
+      function updatePlantPartToggleButton(part) {
+        const section = panelRoot?.querySelector(
+          `.section[data-plant-part="${part}"]`,
+        );
+        if (!section) return;
+        const btn = section.querySelector(":scope > h2 .section-vis-toggle");
+        if (!btn) return;
+        const visible = isPlantPartVisible(part);
+        btn.setAttribute("aria-pressed", visible ? "true" : "false");
+        btn.title = visible ? "Hide section output" : "Show section output";
+        btn.innerHTML = visible
+          ? '<span class="iconoir iconoir-eye" aria-hidden="true"></span>'
+          : '<span class="iconoir iconoir-eye-closed" aria-hidden="true"></span>';
+      }
+
+      function syncAllPlantPartToggleButtons() {
+        ["leaves", "branches", "trunk"].forEach(updatePlantPartToggleButton);
+      }
+
+      function savePlantPartVisibilityState() {
+        try {
+          localStorage.setItem(
+            PLANT_PART_VISIBILITY_STORAGE_KEY,
+            JSON.stringify({
+              leaves: isPlantPartVisible("leaves"),
+              branches: isPlantPartVisible("branches"),
+              trunk: isPlantPartVisible("trunk"),
+            }),
+          );
+        } catch {}
+      }
+
+      function setPlantPartVisible(part, on, persist = true) {
+        if (!["leaves", "branches", "trunk"].includes(part)) return;
+        plantPartVisibility[part] = !!on;
+        applyRenderStyle();
+        updatePlantPartToggleButton(part);
+        if (persist) savePlantPartVisibilityState();
+      }
+
+      function restorePlantPartVisibilityState() {
+        try {
+          const raw = localStorage.getItem(PLANT_PART_VISIBILITY_STORAGE_KEY);
+          if (!raw) {
+            syncAllPlantPartToggleButtons();
+            return;
+          }
+          const parsed = JSON.parse(raw);
+          ["leaves", "branches", "trunk"].forEach((part) => {
+            if (typeof parsed?.[part] !== "boolean") return;
+            plantPartVisibility[part] = !!parsed[part];
+          });
+        } catch {}
+        syncAllPlantPartToggleButtons();
+      }
+
+      function getVesselPartControl(part) {
+        if (part === "vessel") return vesselType;
+        if (part === "medium") return mediumTypeUI;
+        if (part === "platform") return platformTypeUI;
+        return null;
+      }
+
+      function getDefaultVesselPartType(part) {
+        if (part === "vessel") return "glass-cylinder";
+        if (part === "medium") return "moss";
+        if (part === "platform") return "disc";
+        return "none";
+      }
+
+      function getFirstVisibleOptionValue(selectEl) {
+        if (!selectEl || !selectEl.options) return "none";
+        for (let i = 0; i < selectEl.options.length; i++) {
+          const value = String(selectEl.options[i].value || "");
+          if (value && value !== "none") return value;
+        }
+        return "none";
+      }
+
+      function isVesselPartVisible(part) {
+        const control = getVesselPartControl(part);
+        return String(control?.value || "none") !== "none";
+      }
+
+      function updateVesselPartToggleButton(part) {
+        const section = panelRoot?.querySelector(
+          `.section[data-vessel-part="${part}"]`,
+        );
+        if (!section) return;
+        const btn = section.querySelector(":scope > h2 .section-vis-toggle");
+        if (!btn) return;
+        const visible = isVesselPartVisible(part);
+        btn.setAttribute("aria-pressed", visible ? "true" : "false");
+        btn.title = visible ? "Hide section output" : "Show section output";
+        btn.innerHTML = visible
+          ? '<span class="iconoir iconoir-eye" aria-hidden="true"></span>'
+          : '<span class="iconoir iconoir-eye-closed" aria-hidden="true"></span>';
+      }
+
+      function syncAllVesselPartToggleButtons() {
+        ["vessel", "medium", "platform"].forEach(updateVesselPartToggleButton);
+      }
+
+      function saveVesselPartVisibilityState() {
+        try {
+          localStorage.setItem(
+            VESSEL_PART_VISIBILITY_STORAGE_KEY,
+            JSON.stringify({
+              vessel: isVesselPartVisible("vessel"),
+              medium: isVesselPartVisible("medium"),
+              platform: isVesselPartVisible("platform"),
+            }),
+          );
+        } catch {}
+      }
+
+      function onVesselPartTypeChanged(part) {
+        const control = getVesselPartControl(part);
+        if (!control) return;
+        const value = String(control.value || "none");
+        if (value !== "none") control.dataset.lastVisibleValue = value;
+        updateVesselPartToggleButton(part);
+        saveVesselPartVisibilityState();
+      }
+
+      function setVesselPartVisible(part, on, persist = true) {
+        const control = getVesselPartControl(part);
+        if (!control) return;
+        const visible = !!on;
+        const current = String(control.value || "none");
+        if (!visible) {
+          if (current !== "none") control.dataset.lastVisibleValue = current;
+          control.value = "none";
+        } else if (current === "none") {
+          const candidate =
+            String(control.dataset.lastVisibleValue || "").trim() ||
+            getDefaultVesselPartType(part) ||
+            getFirstVisibleOptionValue(control);
+          const exists = Array.from(control.options || []).some(
+            (opt) => String(opt.value) === candidate,
+          );
+          control.value = exists ? candidate : getFirstVisibleOptionValue(control);
+        }
+        applyVesselOnly();
+        refreshAllReadouts();
+        updateVesselPartToggleButton(part);
+        if (persist) saveVesselPartVisibilityState();
+      }
+
+      function restoreVesselPartVisibilityState() {
+        try {
+          const raw = localStorage.getItem(VESSEL_PART_VISIBILITY_STORAGE_KEY);
+          if (!raw) {
+            syncAllVesselPartToggleButtons();
+            return;
+          }
+          const parsed = JSON.parse(raw);
+          ["vessel", "medium", "platform"].forEach((part) => {
+            if (typeof parsed?.[part] !== "boolean") return;
+            setVesselPartVisible(part, !!parsed[part], false);
+          });
+        } catch {}
+        syncAllVesselPartToggleButtons();
+      }
+
       function initSectionCollapsers() {
         if (!panelRoot) return;
         const sections = panelRoot.querySelectorAll(".panel-scroll .section[data-tab]");
         sections.forEach((section) => {
           const h2 = section.querySelector(":scope > h2");
           if (!h2) return;
-          let btn = h2.querySelector(":scope > .section-toggle");
-          if (!btn) {
-            const title = h2.textContent.trim();
+          let titleEl = h2.querySelector(":scope > .section-title");
+          let actionsEl = h2.querySelector(":scope > .section-head-actions");
+          let btn = h2.querySelector(":scope > .section-head-actions .section-toggle");
+          const title = titleEl
+            ? titleEl.textContent.trim()
+            : h2.textContent.trim();
+          if (!titleEl) {
             h2.textContent = "";
+            titleEl = document.createElement("span");
+            titleEl.className = "section-title";
+            titleEl.textContent = title;
+            h2.appendChild(titleEl);
+          }
+          if (!actionsEl) {
+            actionsEl = document.createElement("div");
+            actionsEl.className = "section-head-actions";
+            h2.appendChild(actionsEl);
+          }
+          if (!btn) {
             btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "section-toggle";
-            btn.innerHTML = `<span>${title}</span><span class="iconoir iconoir-nav-arrow-down section-chevron" aria-hidden="true"></span>`;
+            btn.className = "section-toggle ds-icon-action";
+            btn.innerHTML =
+              '<span class="iconoir iconoir-nav-arrow-down section-chevron" aria-hidden="true"></span>';
+            btn.setAttribute("aria-label", `Collapse ${title}`);
             btn.setAttribute("aria-expanded", "true");
-            h2.appendChild(btn);
+            actionsEl.appendChild(btn);
             btn.addEventListener("click", () => {
               setSectionCollapsed(section, !section.classList.contains("is-collapsed"));
             });
           }
+          if (!h2.dataset.rowCollapseBound) {
+            h2.addEventListener("click", (e) => {
+              if (
+                e.target.closest(
+                  ".section-head-actions, .section-toggle, .section-vis-toggle",
+                )
+              ) {
+                return;
+              }
+              setSectionCollapsed(section, !section.classList.contains("is-collapsed"));
+            });
+            h2.dataset.rowCollapseBound = "1";
+          }
+          const vesselPart = String(section.getAttribute("data-vessel-part") || "");
+          const plantPart = String(section.getAttribute("data-plant-part") || "");
+          if (vesselPart || plantPart) {
+            let visBtn = actionsEl.querySelector(":scope > .section-vis-toggle");
+            if (!visBtn) {
+              visBtn = document.createElement("button");
+              visBtn.type = "button";
+              visBtn.className = "section-vis-toggle ds-icon-action";
+              visBtn.setAttribute("aria-label", `Toggle ${title} visibility`);
+              visBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (vesselPart) {
+                  setVesselPartVisible(vesselPart, !isVesselPartVisible(vesselPart));
+                  return;
+                }
+                setPlantPartVisible(plantPart, !isPlantPartVisible(plantPart));
+              });
+              actionsEl.insertBefore(visBtn, btn);
+            }
+            if (vesselPart) updateVesselPartToggleButton(vesselPart);
+            else updatePlantPartToggleButton(plantPart);
+          }
           const stored = localStorage.getItem(sectionStorageKey(section));
           setSectionCollapsed(section, stored === "1");
         });
+        restoreVesselPartVisibilityState();
+        restorePlantPartVisibilityState();
       }
 
       function syncSectionDividers() {
@@ -5423,6 +5798,7 @@
         };
 
         if (treeGroup) {
+          treeGroup.visible = true;
           treeGroup.traverse((o) => {
             if (o.isMesh) {
               const kind = o.userData.kind || "branch";
@@ -5431,6 +5807,7 @@
           });
         }
         if (vesselGroup) {
+          vesselGroup.visible = true;
           vesselGroup.traverse((o) => {
             if (!o.isMesh) return;
             // Sketchy also covers vessel; keep the vessel's base color/material family.
@@ -5453,6 +5830,18 @@
               o.material = wm;
             }
           });
+        }
+        if (trunkMeshGroup) {
+          trunkMeshGroup.visible = isPlantPartVisible("trunk");
+        }
+        if (branchMeshGroup) {
+          branchMeshGroup.visible = isPlantPartVisible("branches");
+        }
+        if (leafIMesh) {
+          leafIMesh.visible = isPlantPartVisible("leaves");
+        }
+        if (petalIMesh) {
+          petalIMesh.visible = isPlantPartVisible("leaves");
         }
 
         const clearSketchOverlays = () => {
@@ -5765,6 +6154,8 @@
             if (o.material) disposeOwnedMaterial(o.material);
           });
           treeGroup = null;
+          trunkMeshGroup = null;
+          branchMeshGroup = null;
         }
         if (vesselGroup) {
           ike.remove(vesselGroup);
@@ -5914,9 +6305,11 @@
 
         const r = seeded(currentSeed);
 
-        // Trunk
-        const trunkGroup = new THREE.Group();
-        treeGroup.add(trunkGroup);
+        // Trunk + branches (split groups for per-section visibility toggles)
+        trunkMeshGroup = new THREE.Group();
+        branchMeshGroup = new THREE.Group();
+        treeGroup.add(trunkMeshGroup);
+        treeGroup.add(branchMeshGroup);
         lastBranchSegments = 0;
         function addSegment(a, b, thickness) {
           const dir = new THREE.Vector3().subVectors(b, a);
@@ -5930,7 +6323,7 @@
           quat.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
           mesh.quaternion.copy(quat);
           mesh.position.copy(a.clone().addScaledVector(dir, len / 2));
-          trunkGroup.add(mesh);
+          trunkMeshGroup.add(mesh);
           lastBranchSegments++;
         }
 
@@ -6832,7 +7225,7 @@
           q.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
           seg.quaternion.copy(q);
           seg.position.copy(origin.clone().addScaledVector(dir, L / 2));
-          trunkGroup.add(seg);
+          branchMeshGroup.add(seg);
           lastBranchSegments++;
 
           if (depthLeft <= 1) {
@@ -7309,6 +7702,179 @@
         if (confirmModal) confirmModal.hidden = false;
       }
 
+      const RANDOMIZABLE_CONTROL_IDS = [
+        "treeType",
+        "levels",
+        "curvature",
+        "trunkArch",
+        "trunkDrop",
+        "trunkLean",
+        "trunkTwistAmp",
+        "trunkBaseWidth",
+        "trunkWidthVar",
+        "uniformity",
+        "spread",
+        "upBias",
+        "bonsaiStyle",
+        "drama",
+        "asymmetry",
+        "branchTwist",
+        "leafType",
+        "leafColor",
+        "plumage",
+        "bMin",
+        "bMax",
+        "density",
+        "leafSpread",
+        "leafSize",
+        "leafVar",
+        "maxLeaves",
+        "lowerBias",
+        "minPerTerminal",
+        "maxPerTerminal",
+        "branchColor",
+        "bDepth",
+        "bLen",
+        "branchStart",
+        "branchBias",
+        "branchDrop",
+        "branchPull",
+        "bLenVar",
+        "bFall",
+        "vesselType",
+        "vesselColor",
+        "vesselDia",
+        "vesselDepth",
+        "vesselOffsetY",
+        "vesselLip",
+        "vesselFoot",
+        "vesselOpacity",
+        "vesselBlur",
+        "mediumType",
+        "mediumColor",
+        "mediumDia",
+        "mediumDepth",
+        "mediumOffsetY",
+        "mediumOpacity",
+        "mediumBlur",
+        "platformType",
+        "platformColor",
+        "platformDia",
+        "platformDepth",
+        "platformOffsetY",
+        "platformOpacity",
+        "platformBlur",
+        "bgTex",
+        "bgColor",
+        "lightPreset",
+        "keyLight",
+        "hemiLight",
+        "exposure",
+        "wireToggle",
+        "renderMode",
+        "emissiveColor",
+        "emissiveStrength",
+      ];
+      const RANDOM_LOCK_STORAGE_KEY = "bonsai.randomLocks.v1";
+      let randomLockedIds = new Set();
+
+      function loadRandomLocks() {
+        try {
+          const raw = localStorage.getItem(RANDOM_LOCK_STORAGE_KEY);
+          const parsed = raw ? JSON.parse(raw) : [];
+          randomLockedIds = new Set(
+            Array.isArray(parsed)
+              ? parsed.filter((id) => RANDOMIZABLE_CONTROL_IDS.includes(id))
+              : [],
+          );
+        } catch {
+          randomLockedIds = new Set();
+        }
+      }
+
+      function saveRandomLocks() {
+        try {
+          localStorage.setItem(
+            RANDOM_LOCK_STORAGE_KEY,
+            JSON.stringify(Array.from(randomLockedIds)),
+          );
+        } catch {}
+      }
+
+      function isRandomLocked(id) {
+        return randomLockedIds.has(id);
+      }
+
+      function updateRandomLockButton(btn, locked, preview = false) {
+        if (!btn) return;
+        btn.classList.toggle("is-locked", !!locked);
+        btn.classList.toggle("is-preview", !!preview);
+        btn.classList.toggle("is-faint", !locked && !preview);
+        btn.setAttribute("aria-pressed", locked ? "true" : "false");
+        btn.title = locked ? "Unlock randomization" : "Lock randomization";
+        let icon = "iconoir-lock";
+        if (locked && preview) icon = "iconoir-lock-slash";
+        btn.innerHTML = `<span class="iconoir ${icon}"></span>`;
+      }
+
+      function setRandomLock(id, locked) {
+        if (!id || !RANDOMIZABLE_CONTROL_IDS.includes(id)) return;
+        if (locked) randomLockedIds.add(id);
+        else randomLockedIds.delete(id);
+        saveRandomLocks();
+        const btn = document.querySelector(`.random-lock-btn[data-lock-id="${id}"]`);
+        updateRandomLockButton(btn, locked);
+      }
+
+      function ensureRandomLockButtons() {
+        RANDOMIZABLE_CONTROL_IDS.forEach((id) => {
+          const control = $(id);
+          if (!control) return;
+          const field = control.closest(".field");
+          if (!field || field.classList.contains("seed-row")) return;
+          field.classList.add("has-lock");
+          let btn = field.querySelector(`.random-lock-btn[data-lock-id="${id}"]`);
+          if (!btn) {
+            btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "random-lock-btn ds-icon-action";
+            btn.dataset.lockId = id;
+            btn.setAttribute("aria-label", `Lock ${id} from randomization`);
+            btn.addEventListener("mouseenter", () => {
+              updateRandomLockButton(btn, isRandomLocked(id), true);
+            });
+            btn.addEventListener("mouseleave", () => {
+              updateRandomLockButton(btn, isRandomLocked(id), false);
+            });
+            btn.addEventListener("focus", () => {
+              updateRandomLockButton(btn, isRandomLocked(id), true);
+            });
+            btn.addEventListener("blur", () => {
+              updateRandomLockButton(btn, isRandomLocked(id), false);
+            });
+            btn.addEventListener("pointerdown", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setRandomLock(id, !isRandomLocked(id));
+              updateRandomLockButton(btn, isRandomLocked(id), true);
+            });
+            btn.addEventListener("click", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            btn.addEventListener("keydown", (e) => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+              e.preventDefault();
+              e.stopPropagation();
+              setRandomLock(id, !isRandomLocked(id));
+              updateRandomLockButton(btn, isRandomLocked(id), true);
+            });
+            field.appendChild(btn);
+          }
+          updateRandomLockButton(btn, isRandomLocked(id));
+        });
+      }
+
       function randomHexColor() {
         const n = Math.floor(Math.random() * 0xffffff);
         return `#${n.toString(16).padStart(6, "0")}`;
@@ -7461,80 +8027,8 @@
       }
 
       function randomizeAllProperties() {
-        const randomIds = [
-          "treeType",
-          "levels",
-          "curvature",
-          "trunkArch",
-          "trunkDrop",
-          "trunkLean",
-          "trunkTwistAmp",
-          "trunkBaseWidth",
-          "trunkWidthVar",
-          "uniformity",
-          "spread",
-          "upBias",
-          "bonsaiStyle",
-          "drama",
-          "asymmetry",
-          "branchTwist",
-          "leafType",
-          "leafColor",
-          "plumage",
-          "bMin",
-          "bMax",
-          "density",
-          "leafSpread",
-          "leafSize",
-          "leafVar",
-          "maxLeaves",
-          "lowerBias",
-          "minPerTerminal",
-          "maxPerTerminal",
-          "branchColor",
-          "bDepth",
-          "bLen",
-          "branchStart",
-          "branchBias",
-          "branchDrop",
-          "branchPull",
-          "bLenVar",
-          "bFall",
-          "vesselType",
-          "vesselColor",
-          "vesselDia",
-          "vesselDepth",
-          "vesselOffsetY",
-          "vesselLip",
-          "vesselFoot",
-          "vesselOpacity",
-          "vesselBlur",
-          "mediumType",
-          "mediumColor",
-          "mediumDia",
-          "mediumDepth",
-          "mediumOffsetY",
-          "mediumOpacity",
-          "mediumBlur",
-          "platformType",
-          "platformColor",
-          "platformDia",
-          "platformDepth",
-          "platformOffsetY",
-          "platformOpacity",
-          "platformBlur",
-          "bgTex",
-          "bgColor",
-          "lightPreset",
-          "keyLight",
-          "hemiLight",
-          "exposure",
-          "wireToggle",
-          "renderMode",
-          "emissiveColor",
-          "emissiveStrength",
-        ];
-        randomIds.forEach((id) => {
+        RANDOMIZABLE_CONTROL_IDS.forEach((id) => {
+          if (isRandomLocked(id)) return;
           randomizeElement($(id));
         });
         sanitizeTerminalBounds();
@@ -8006,16 +8500,7 @@
 
       function updatePanelPrimaryAction() {
         if (!snapSaveBtn) return;
-        const topTab = panelRoot?.getAttribute("data-tab") || "bonsai";
-        if (topTab !== "export") {
-          snapSaveBtn.innerHTML = `<span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span> Snapshot`;
-          return;
-        }
-        const mode = getSelectedExportKind();
-        if (mode === "glb") snapSaveBtn.textContent = "Export GLB";
-        else if (mode === "scene-json") snapSaveBtn.textContent = "Export JSON";
-        else if (mode === "gif") snapSaveBtn.textContent = "Export GIF";
-        else snapSaveBtn.textContent = `Export ${String(mode).toUpperCase()}`;
+        snapSaveBtn.innerHTML = `<span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span> Snapshot`;
       }
 
       function setExportTab(tab) {
@@ -8240,6 +8725,8 @@
         if (exportDimsRow) exportDimsRow.hidden = !isImage;
         if (exportAlphaRow) exportAlphaRow.hidden = !isPng;
         if (exportImageBtn) exportImageBtn.disabled = !isImage;
+        if (exportModelBtn) exportModelBtn.disabled = !kind.startsWith("gl") && kind !== "scene-json";
+        if (exportGifBtn) exportGifBtn.disabled = kind !== "gif";
       }
 
       function tick() {
@@ -8535,6 +9022,15 @@
         platformBlurUI,
         platformOffsetYUI,
       ].forEach((el) => bindLive(el, applyVesselOnly));
+      [
+        ["vessel", vesselType],
+        ["medium", mediumTypeUI],
+        ["platform", platformTypeUI],
+      ].forEach(([part, el]) => {
+        if (!el) return;
+        el.addEventListener("input", () => onVesselPartTypeChanged(part));
+        el.addEventListener("change", () => onVesselPartTypeChanged(part));
+      });
       [bgColor, bgTex].forEach((el) => bindLive(el, applyBackground));
       [
         fallingLeavesToggle,
@@ -8743,9 +9239,19 @@
           regenerate();
         });
       }
+      if (autoSpeedUI) {
+        autoSpeedUI.addEventListener("input", () => {
+          const v = parseFloat(autoSpeedUI.value);
+          if (!Number.isFinite(v)) return;
+          setAutoSpeed(v);
+          localStorage.setItem("bonsai.autoSpeed", String(v));
+          setAutoRotate(true);
+        });
+      }
       if (treeType) {
         treeType.addEventListener("change", () => {
           syncFormDefaultsFromSpecies();
+          ensureRandomLockButtons();
         });
       }
       if (newSeedBtn) {
@@ -8777,6 +9283,8 @@
         );
       });
       organizePlantSections();
+      loadRandomLocks();
+      ensureRandomLockButtons();
       initSectionCollapsers();
       initFieldReadouts();
       updateEmissiveFieldState();
@@ -8847,11 +9355,6 @@
       }
       if (snapSaveBtn) {
         snapSaveBtn.addEventListener("click", () => {
-          const topTab = panelRoot?.getAttribute("data-tab") || "bonsai";
-          if (topTab === "export") {
-            exportCurrentView(getSelectedExportKind());
-            return;
-          }
           createSnapshot();
         });
       }
@@ -8973,6 +9476,17 @@
         exportImageBtn.addEventListener("click", () => {
           const mode = String(exportImageKindUI?.value || "png");
           exportCurrentView(mode);
+        });
+      }
+      if (exportModelBtn) {
+        exportModelBtn.addEventListener("click", () => {
+          const mode = String(exportModelKindUI?.value || "glb");
+          exportCurrentView(mode);
+        });
+      }
+      if (exportGifBtn) {
+        exportGifBtn.addEventListener("click", () => {
+          exportCurrentView("gif");
         });
       }
       // Left/Right: smooth while held; also pause auto when you touch them
@@ -9378,7 +9892,7 @@
           if (cameraPad) {
             cameraPad.style.right = "12px";
             cameraPad.style.left = "auto";
-            cameraPad.style.bottom = "64px";
+            cameraPad.style.bottom = "12px";
           }
           return;
         }
@@ -9501,6 +10015,7 @@
         const max = AUTO_SPEED_MAX;
         const n = clamp(val, min, max);
         controls.autoRotateSpeed = n;
+        if (autoSpeedUI) autoSpeedUI.value = String(n);
         // no need to call regenerate; tick() reads the live value
       }
 
@@ -9521,23 +10036,6 @@
         });
         // initial glyph
         refreshTbAutoIcon();
-      }
-
-      if (tbSlower) {
-        tbSlower.addEventListener("click", () => {
-          const cur = parseFloat(controls.autoRotateSpeed) || 0;
-          setAutoSpeed(cur - 0.2);
-          setAutoRotate(true);
-          refreshTbAutoIcon();
-        });
-      }
-      if (tbFaster) {
-        tbFaster.addEventListener("click", () => {
-          const cur = parseFloat(controls.autoRotateSpeed) || 0;
-          setAutoSpeed(cur + 0.2);
-          setAutoRotate(true);
-          refreshTbAutoIcon();
-        });
       }
 
       const tipsBar = document.getElementById("tipsBar");
@@ -9816,6 +10314,12 @@
         setSeed((Math.random() * 0xffffffff) >>> 0);
         regenerate();
         syncFallingLeafColor();
+        const storedAutoSpeed = parseFloat(
+          localStorage.getItem("bonsai.autoSpeed") || "",
+        );
+        if (Number.isFinite(storedAutoSpeed)) {
+          setAutoSpeed(storedAutoSpeed);
+        }
         setAutoSpeed(parseFloat(controls.autoRotateSpeed) || 0.8);
         setAutoRotate(true);
         tick();
