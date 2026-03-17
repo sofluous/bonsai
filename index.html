@@ -214,12 +214,101 @@
         border-radius: var(--bo-shell-radius);
       }
 
+      .app-head-main {
+        display: flex;
+        align-items: center;
+        gap: var(--ds-space-2);
+        min-width: 0;
+      }
+
       .app-title {
         margin: 0;
         color: color-mix(in oklab, var(--ds-text) 85%, var(--ds-accent));
         font: 700 0.78rem/1 var(--ds-font-sans);
         letter-spacing: 0.09em;
         text-transform: var(--ds-label-transform);
+      }
+
+      .module-switch {
+        position: relative;
+        display: flex;
+        align-items: center;
+        z-index: 24;
+      }
+
+      .module-switch-btn {
+        width: var(--ds-btn-icon-size-sm);
+        min-width: var(--ds-btn-icon-size-sm);
+        height: var(--ds-btn-icon-size-sm);
+        min-height: var(--ds-btn-icon-size-sm);
+      }
+
+      .module-switch-btn[aria-expanded="true"] {
+        border-color: color-mix(
+          in oklab,
+          var(--ds-accent-strong) 55%,
+          var(--ds-border)
+        );
+        box-shadow: var(--glow-inner), var(--focus-ring);
+      }
+
+      .module-switch-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        display: none;
+        min-width: 220px;
+        padding: 8px;
+        border: var(--bo-shell-border);
+        border-radius: var(--ds-radius-2);
+        background: color-mix(
+          in oklab,
+          var(--bo-shell-surface) 94%,
+          color-mix(in oklab, var(--ds-accent-strong) 22%, black) 6%
+        );
+        box-shadow: var(--bo-shell-shadow), var(--glow-inner);
+        backdrop-filter: blur(var(--blur));
+        z-index: 25;
+      }
+
+      .module-switch[data-open="true"] .module-switch-menu {
+        display: grid;
+        gap: 6px;
+      }
+
+      .module-switch-label {
+        margin: 0 0 2px;
+        font: 700 0.66rem/1.2 var(--ds-font-sans);
+        letter-spacing: 0.08em;
+        text-transform: var(--ds-label-transform);
+        color: color-mix(in oklab, var(--ds-text-dim) 88%, var(--ds-accent));
+      }
+
+      .module-option {
+        display: grid;
+        gap: 2px;
+        width: 100%;
+        padding: 10px 12px;
+        text-align: left;
+      }
+
+      .module-option-name {
+        font: 700 0.8rem/1.1 var(--ds-font-sans);
+        color: var(--ds-text);
+      }
+
+      .module-option-meta {
+        font: 500 0.66rem/1.2 var(--ds-font-sans);
+        color: var(--ds-text-dim);
+      }
+
+      .module-option[aria-current="true"] {
+        border-color: color-mix(in oklab, var(--ds-accent) 52%, var(--ds-border));
+      }
+
+      .module-option[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
 
       #app.panel-hidden .app-head {
@@ -1936,7 +2025,35 @@
   <body>
     <div id="app">
       <div class="app-head">
-        <h1 class="app-title">POLYGON BONSAI</h1>
+        <div class="app-head-main">
+          <h1 class="app-title">POLYGON BONSAI</h1>
+          <div class="module-switch" id="moduleSwitch" data-open="false">
+            <button
+              id="moduleSwitchBtn"
+              class="btn ds-btn btn-icon ds-btn-icon module-switch-btn"
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="moduleSwitchMenu"
+              title="Switch module"
+            >
+              <span
+                class="iconoir iconoir-nav-arrow-down"
+                aria-hidden="true"
+              ></span>
+              <span class="sr-only">Switch module</span>
+            </button>
+            <div
+              id="moduleSwitchMenu"
+              class="module-switch-menu"
+              role="menu"
+              aria-label="Module switcher"
+            >
+              <p class="module-switch-label">Modules</p>
+              <div id="moduleSwitchOptions"></div>
+            </div>
+          </div>
+        </div>
         <button
           id="panelToggle"
           class="btn ds-btn btn-icon ds-btn-icon panel-collapse"
@@ -3461,14 +3578,6 @@
               aria-hidden="true"
             ></span>
           </button>
-          <span class="split" aria-hidden="true"></span>
-          <button
-            id="tbShot"
-            class="btn ds-btn btn-icon ds-btn-icon"
-            title="Screenshot (X)"
-          >
-            <span class="iconoir iconoir-screenshot" aria-hidden="true"></span>
-          </button>
           <button
             id="tbSnapAdd"
             class="btn ds-btn btn-icon ds-btn-icon"
@@ -3576,7 +3685,6 @@
           <ul>
             <li><span class="kbd">Space</span> play/pause rotation</li>
             <li><span class="kbd">F</span> frame bonsai</li>
-            <li><span class="kbd">X</span> screenshot</li>
             <li><span class="kbd">R</span> randomize all properties</li>
             <li><span class="kbd">Enter</span> save snapshot</li>
             <li><span class="kbd">[</span>/<span class="kbd">]</span> hold manual spin</li>
@@ -3634,6 +3742,25 @@
     <script type="module">
       import * as THREE from "three";
       import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+      import { createBonsaiHubAdapter } from "./js/bonsaiHubAdapter.js";
+      import { createBonsaiHubShell } from "./js/bonsaiHubShell.js";
+      import {
+        buildModuleManifestMap,
+        getModuleManifest,
+      } from "./js/moduleManifestRegistry.js";
+      import {
+        ACTIVE_MODULE_STORAGE_KEY,
+        DEFAULT_MODULE_CODE,
+        MODULE_REGISTRY,
+        getModuleEntry,
+      } from "./js/moduleRegistry.js";
+      import {
+        summarizeModuleReadiness,
+        validateModuleManifestMap,
+      } from "./js/moduleReadiness.js";
+      import { createModuleSwitcher } from "./js/moduleSwitcher.js";
+      import { createSharedControlResolver } from "./js/sharedControlResolver.js";
+      import { createSharedControlService } from "./js/sharedControlService.js";
       // --- UI refs ---
       const $ = (id) => document.getElementById(id);
       const cssVar = (name, fallback = "") =>
@@ -3764,8 +3891,11 @@
       // Floating toolbar buttons
       const panelToggle = document.getElementById("panelToggle");
       const panelToggleRail = document.getElementById("panelToggleRail");
+      const moduleSwitch = document.getElementById("moduleSwitch");
+      const moduleSwitchBtn = document.getElementById("moduleSwitchBtn");
+      const moduleSwitchMenu = document.getElementById("moduleSwitchMenu");
+      const moduleSwitchOptions = document.getElementById("moduleSwitchOptions");
       const tbSnapAdd = document.getElementById("tbSnapAdd");
-      const tbShot = document.getElementById("tbShot");
       const tbSpinL = document.getElementById("tbSpinL");
       const tbAuto = document.getElementById("tbAuto");
       const tbSpinR = document.getElementById("tbSpinR");
@@ -3941,7 +4071,6 @@
         "Tip: use [F] to frame the bonsai in view.",
         "Tip: press [R] to randomize all bonsai properties.",
         "Tip: press [Enter] to save a snapshot instantly.",
-        "Tip: press [X] to capture a screenshot.",
         "Tip: press [P] to toggle this tips overlay.",
         "Tip: press [D] to run demo auto-random mode.",
         "Tip: debug quick toggles: [O] overlay, [T] toolbar, [C] camera, [S] panel.",
@@ -3969,7 +4098,10 @@
         const instT = String(
           (leafInstanceCount | 0) + (petalInstanceCount | 0),
         );
-        const qT = String(qualityModeUI ? qualityModeUI.value : "auto");
+        const qT = String(
+          sharedControlService?.readValue("qualityTier") ||
+            (qualityModeUI ? qualityModeUI.value : "auto"),
+        );
         const snap = `${fpsT}|${regenT}|${segT}|${termT}|${instT}|${qT}`;
         if (snap === lastPerfSnapshot) return;
         lastPerfSnapshot = snap;
@@ -4214,8 +4346,12 @@
         if (!speciesSection || !trunkForm) return;
         const host = speciesSection.parentElement;
         if (host && trunkSection && branchesSection && leavesSection) {
-          host.insertBefore(leavesSection, branchesSection);
+          host.appendChild(leavesSection);
+          host.appendChild(branchesSection);
+          host.appendChild(trunkSection);
+          host.insertBefore(trunkSection, leavesSection);
           host.insertBefore(branchesSection, trunkSection);
+          host.insertBefore(leavesSection, branchesSection);
         }
         const moveFieldByControlId = (id) => {
           const el = $(id);
@@ -4586,7 +4722,12 @@
 
       // Debounced resize that can refit after layout shifts (e.g., panel show/hide, orientation changes)
       const onResize = debounce(() => {
-        if (qualityModeUI && qualityModeUI.value === "auto")
+        if (
+          qualityModeUI &&
+          String(
+            sharedControlService?.readValue("qualityTier") || qualityModeUI.value,
+          ) === "auto"
+        )
           applyQualityProfile("auto");
         onResizeCore();
         updateCanvasToolbarOffset();
@@ -7601,10 +7742,6 @@
         updateSpinPivotFromVessel();
       }
 
-      function savePNG() {
-        exportCurrentView("png");
-      }
-
       const SNAPSHOT_STORAGE_KEY = "bonsai.snapshots.v1";
       const SNAPSHOT_DB_NAME = "bonsai.gallery.db";
       const SNAPSHOT_DB_VERSION = 1;
@@ -8052,73 +8189,114 @@
         if ([x, y, z].every(Number.isFinite)) target.set(x, y, z);
       }
 
-      function captureControlState() {
-        const controlsState = {};
-        document
-          .querySelectorAll("#panel input[id], #panel select[id]")
-          .forEach((el) => {
-            if (el.type === "file") return;
-            controlsState[el.id] =
-              el.type === "checkbox" ? !!el.checked : el.value;
-          });
-        return {
-          seed: currentSeed,
-          autoOn: !!autoOn,
-          autoSpeed: parseFloat(controls.autoRotateSpeed) || 0.8,
-          controls: controlsState,
-          camera: {
-            position: toVec3Array(camera.position),
-            target: toVec3Array(controls.target),
-          },
-        };
+      const {
+        bonsaiHubAdapter,
+        captureControlState,
+        applyControlState,
+        normalizeSnapshotRecord,
+      } = createBonsaiHubAdapter({
+        $,
+        qualityModeUI,
+        camera,
+        controls,
+        applyBackground,
+        applyLightingFromUI,
+        applyVesselOnly,
+        applyRenderStyle,
+        regenerate,
+        refreshAllReadouts,
+        sanitizeTerminalBounds,
+        setSeed,
+        setAutoSpeed,
+        setAutoRotate,
+        toVec3Array,
+        applyVec3,
+        getCurrentSeed: () => currentSeed,
+        getAutoOn: () => autoOn,
+      });
+      window.bonsaiHubAdapter = bonsaiHubAdapter;
+      const bonsaiHubShell = createBonsaiHubShell({
+        adapter: bonsaiHubAdapter,
+        mode: DEFAULT_MODULE_CODE,
+        moduleCode: DEFAULT_MODULE_CODE,
+      });
+      window.bonsaiHubShell = bonsaiHubShell;
+      const moduleManifestContext = {
+        adapter: bonsaiHubAdapter,
+        hubShell: bonsaiHubShell,
+      };
+      const sharedControlResolver = createSharedControlResolver({
+        $,
+        getManifest: () => window.bonsaiActiveModuleManifest || null,
+      });
+      const sharedControlService = createSharedControlService({
+        resolver: sharedControlResolver,
+        getSharedState: () => bonsaiHubShell.getSharedState(),
+        applySharedPatch: (patch, reason) =>
+          bonsaiHubShell.applySharedPatch(patch, reason),
+      });
+      moduleManifestContext.sharedControlResolver = sharedControlResolver;
+      moduleManifestContext.sharedControlService = sharedControlService;
+      const moduleManifestMap = buildModuleManifestMap(moduleManifestContext);
+      const moduleReadinessReport = validateModuleManifestMap(moduleManifestMap);
+      window.bonsaiModuleManifestMap = moduleManifestMap;
+      window.bonsaiModuleReadinessReport = moduleReadinessReport;
+      window.bonsaiModuleReadinessSummary =
+        summarizeModuleReadiness(moduleReadinessReport);
+      window.bonsaiActiveModuleManifest = getModuleManifest(
+        DEFAULT_MODULE_CODE,
+        moduleManifestContext,
+      );
+      window.bonsaiSharedControlDefinitions =
+        window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() || [];
+      window.bonsaiSharedControlGroups =
+        window.bonsaiActiveModuleManifest?.getSharedControlGroups?.() || [];
+      window.bonsaiSharedControlResolver = sharedControlResolver;
+      window.bonsaiSharedControlService = sharedControlService;
+      window.validateBonsaiModuleReadiness = () =>
+        validateModuleManifestMap(window.bonsaiModuleManifestMap || {});
+      const moduleSwitcher = createModuleSwitcher({
+        moduleSwitch,
+        moduleSwitchBtn,
+        moduleSwitchMenu,
+        moduleSwitchOptions,
+        defaultModuleCode: DEFAULT_MODULE_CODE,
+        activeModuleStorageKey: ACTIVE_MODULE_STORAGE_KEY,
+        moduleRegistry: MODULE_REGISTRY,
+        getCurrentModuleCode: () =>
+          bonsaiHubShell?.getState?.().mode || DEFAULT_MODULE_CODE,
+        getModuleManifest: (moduleCode) =>
+          moduleManifestMap?.[moduleCode] ||
+          getModuleManifest(moduleCode, moduleManifestContext),
+        onActivateModule: () => {
+          window.bonsaiActiveModuleManifest =
+            moduleManifestMap?.[DEFAULT_MODULE_CODE] ||
+            getModuleManifest(DEFAULT_MODULE_CODE, moduleManifestContext);
+          window.bonsaiSharedControlDefinitions =
+            window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() || [];
+          window.bonsaiSharedControlGroups =
+            window.bonsaiActiveModuleManifest?.getSharedControlGroups?.() || [];
+          window.bonsaiSharedControlResolver = sharedControlResolver;
+          window.bonsaiSharedControlService = sharedControlService;
+          setPanelTab("bonsai");
+          setBonsaiTab(panelRoot?.getAttribute("data-bonsai-tab") || "plant");
+        },
+        onUnavailableModule: () => {},
+        showToast,
+      });
+
+      function syncHubSharedState(reason = "sync-shared") {
+        bonsaiHubShell.refreshSharedState(reason);
       }
 
-      function applyControlState(state) {
-        if (!state || typeof state !== "object") return;
-        const c =
-          state.controls && typeof state.controls === "object"
-            ? state.controls
-            : {};
-        Object.entries(c).forEach(([id, value]) => {
-          const el = $(id);
-          if (!el) return;
-          if (el.type === "checkbox") {
-            const s = String(value).toLowerCase();
-            el.checked =
-              value === true ||
-              value === 1 ||
-              s === "1" ||
-              s === "true" ||
-              s === "on";
-          } else {
-            el.value = String(value);
-          }
-        });
-        sanitizeTerminalBounds();
-        setSeed(
-          Number.isFinite(Number(state.seed))
-            ? Number(state.seed)
-            : currentSeed,
-        );
-        applyBackground();
-        applyLightingFromUI();
-        applyVesselOnly();
-        applyRenderStyle();
-        regenerate();
-        if (state.camera) {
-          applyVec3(camera.position, state.camera.position);
-          applyVec3(controls.target, state.camera.target);
-          camera.updateProjectionMatrix();
-          controls.update();
-        }
-        if (Number.isFinite(Number(state.autoSpeed))) {
-          setAutoSpeed(Number(state.autoSpeed));
-        }
-        setAutoRotate(state.autoOn !== false);
-        refreshAllReadouts();
+      function syncHubState(reason = "sync-state") {
+        bonsaiHubShell.refreshState(reason);
       }
 
       async function saveSnapshotsToStorage() {
+        snapshots = snapshots
+          .map((snap) => normalizeSnapshotRecord(snap))
+          .filter(Boolean);
         try {
           if (await dbPutSnapshots(snapshots)) return true;
         } catch (e) {
@@ -8165,7 +8343,7 @@
           fromDb = null;
         }
         if (Array.isArray(fromDb)) {
-          snapshots = fromDb;
+          snapshots = fromDb.map((snap) => normalizeSnapshotRecord(snap)).filter(Boolean);
           snapshots = snapshots.sort(
             (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
           );
@@ -8175,7 +8353,9 @@
         try {
           const raw = localStorage.getItem(SNAPSHOT_STORAGE_KEY);
           const parsed = raw ? JSON.parse(raw) : [];
-          snapshots = Array.isArray(parsed) ? parsed : [];
+          snapshots = Array.isArray(parsed)
+            ? parsed.map((snap) => normalizeSnapshotRecord(snap)).filter(Boolean)
+            : [];
           snapshots = snapshots.sort(
             (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
           );
@@ -8298,7 +8478,7 @@
           thumb,
           state: captureControlState(),
         };
-        snapshots.unshift(snap);
+        snapshots.unshift(normalizeSnapshotRecord(snap));
         snapshotRenderCount = Math.max(
           snapshotRenderCount,
           SNAPSHOT_RENDER_BATCH,
@@ -9031,7 +9211,15 @@
         el.addEventListener("input", () => onVesselPartTypeChanged(part));
         el.addEventListener("change", () => onVesselPartTypeChanged(part));
       });
-      [bgColor, bgTex].forEach((el) => bindLive(el, applyBackground));
+      [bgColor, bgTex].forEach((el) =>
+        bindLive(el, () => {
+          applyBackground();
+          sharedControlService.syncValues(
+            ["backgroundPreset", "backgroundColor"],
+            { reason: "background-control" },
+          );
+        }),
+      );
       [
         fallingLeavesToggle,
         fallingLeavesAmountUI,
@@ -9074,12 +9262,18 @@
         }),
       );
       [keyLightUI, hemiLightUI, exposureUI, bgLightLinkUI].forEach((el) =>
-        bindLive(el, applyLightingFromUI),
+        bindLive(el, () => {
+          applyLightingFromUI();
+          syncHubSharedState("lighting-control");
+        }),
       );
       if (lightPresetUI) {
-        lightPresetUI.addEventListener("change", () =>
-          applyLightingPreset(lightPresetUI.value),
-        );
+        lightPresetUI.addEventListener("change", () => {
+          applyLightingPreset(lightPresetUI.value);
+          sharedControlService.syncValue("lightingPreset", {
+            reason: "lighting-preset",
+          });
+        });
       }
       if (applyLightPresetBtn) {
         applyLightPresetBtn.addEventListener("click", () =>
@@ -9095,6 +9289,7 @@
           showToast(
             bgLightLinkUI.checked ? "BG light link on" : "BG light link off",
           );
+          syncHubSharedState("bg-light-link");
         });
       }
       emissiveStrengthUI.addEventListener("input", applyRenderStyle);
@@ -9237,6 +9432,9 @@
           applyQualityProfile(qualityModeUI.value);
           sanitizeTerminalBounds();
           regenerate();
+          sharedControlService.syncValue("qualityTier", {
+            reason: "quality-mode-input",
+          });
         });
       }
       if (autoSpeedUI) {
@@ -9246,6 +9444,15 @@
           setAutoSpeed(v);
           localStorage.setItem("bonsai.autoSpeed", String(v));
           setAutoRotate(true);
+          bonsaiHubShell.applySharedPatch(
+            {
+              camera: {
+                autoRotateSpeed: v,
+                autoRotateOn: true,
+              },
+            },
+            "auto-speed-input",
+          );
         });
       }
       if (treeType) {
@@ -9259,6 +9466,7 @@
           setSeed((Math.random() * 0xffffffff) >>> 0);
           regenerate();
           refreshAllReadouts();
+          bonsaiHubShell.setSharedValue("seed", currentSeed, "seed-randomize");
         });
       }
       if (randomizeAllBtn) {
@@ -9299,6 +9507,7 @@
             if (idx < 0) return;
             if (action === "recall") {
               applyControlState(snapshots[idx].state);
+              syncHubState("snapshot-recall");
               backfillSnapshotPreview(id);
               renderSnapshotGallery();
               showToast("Snapshot loaded");
@@ -9390,9 +9599,11 @@
             if (!incoming.length) return;
             const existing = new Set(snapshots.map((s) => s.id));
             incoming.forEach((snap) => {
-              if (!snap || !snap.id || !snap.state) return;
-              if (existing.has(snap.id)) return;
-              snapshots.push(snap);
+              const normalized = normalizeSnapshotRecord(snap);
+              if (!normalized || !normalized.id || !normalized.state) return;
+              if (existing.has(normalized.id)) return;
+              snapshots.push(normalized);
+              existing.add(normalized.id);
             });
             snapshots = snapshots.sort(
               (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
@@ -9437,18 +9648,21 @@
           updateExportSettingsVisibility();
           updatePanelPrimaryAction();
           syncExportDimensionsUI();
+          syncHubSharedState("export-image-kind");
         });
       }
       if (exportModelKindUI) {
         exportModelKindUI.addEventListener("change", () => {
           updateExportSettingsVisibility();
           updatePanelPrimaryAction();
+          syncHubSharedState("export-model-kind");
         });
       }
       if (exportSizePresetUI) {
         exportSizePresetUI.addEventListener("change", () => {
           syncExportDimensionsUI();
           updateExportSettingsVisibility();
+          syncHubSharedState("export-size-preset");
         });
       }
       if (exportCropModeUI) {
@@ -9456,6 +9670,7 @@
           if (String(exportSizePresetUI?.value || "current") === "current") {
             syncExportDimensionsUI();
           }
+          syncHubSharedState("export-crop-mode");
         });
       }
       if (exportWidthUI) {
@@ -9463,6 +9678,7 @@
           if (exportSizePresetUI && exportSizePresetUI.value !== "custom") {
             exportSizePresetUI.value = "custom";
           }
+          syncHubSharedState("export-width");
         });
       }
       if (exportHeightUI) {
@@ -9470,6 +9686,12 @@
           if (exportSizePresetUI && exportSizePresetUI.value !== "custom") {
             exportSizePresetUI.value = "custom";
           }
+          syncHubSharedState("export-height");
+        });
+      }
+      if (exportTransparentUI) {
+        exportTransparentUI.addEventListener("change", () => {
+          syncHubSharedState("export-transparent");
         });
       }
       if (exportImageBtn) {
@@ -9697,9 +9919,6 @@
             refreshAllReadouts();
             showToast(wireToggle.checked ? "Wireframe on" : "Wireframe off");
           }
-        } else if (e.key === "x" || e.key === "X") {
-          e.preventDefault();
-          tbShot?.click();
         } else if (e.key === "Enter") {
           e.preventDefault();
           createSnapshot();
@@ -9830,7 +10049,6 @@
       })();
 
       // Toolbar actions – forward to existing controls
-      if (tbShot) tbShot.addEventListener("click", savePNG);
       if (tbSnapAdd) tbSnapAdd.addEventListener("click", createSnapshot);
 
       // Rotate hold via same handlers you have for the side-panel buttons
@@ -10217,9 +10435,29 @@
           setPanelHidden(now);
         });
       }
+      moduleSwitcher.bindEvents();
 
       async function initial() {
         closeDeleteConfirm();
+        const storedModule =
+          localStorage.getItem(ACTIVE_MODULE_STORAGE_KEY) || DEFAULT_MODULE_CODE;
+        moduleSwitcher.initialize();
+        window.bonsaiActiveModuleManifest =
+          moduleManifestMap?.[DEFAULT_MODULE_CODE] ||
+          getModuleManifest(DEFAULT_MODULE_CODE, moduleManifestContext);
+        window.bonsaiSharedControlDefinitions =
+          window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() || [];
+        window.bonsaiSharedControlGroups =
+          window.bonsaiActiveModuleManifest?.getSharedControlGroups?.() || [];
+        window.bonsaiSharedControlResolver = sharedControlResolver;
+        window.bonsaiSharedControlService = sharedControlService;
+        if (storedModule && storedModule !== DEFAULT_MODULE_CODE) {
+          const storedEntry = getModuleEntry(storedModule);
+          showToast(
+            `${storedEntry?.label || storedModule} module is not available yet`,
+          );
+          localStorage.setItem(ACTIVE_MODULE_STORAGE_KEY, DEFAULT_MODULE_CODE);
+        }
         if (bgLightLinkUI) {
           const storedBgLink = localStorage.getItem("bonsai.bgLightLink");
           if (storedBgLink !== null) {
@@ -10233,6 +10471,9 @@
             lightPresetUI.value = storedLight;
           }
           applyLightingPreset(lightPresetUI.value || "balanced");
+          sharedControlService.syncValue("lightingPreset", {
+            reason: "initial-lighting-preset",
+          });
         } else {
           applyLightingFromUI();
         }
@@ -10284,6 +10525,9 @@
           }
         }
         applyBackground();
+        sharedControlService.syncValues(["backgroundPreset", "backgroundColor"], {
+          reason: "initial-background-state",
+        });
         await loadSnapshotsFromStorage();
         renderSnapshotGallery();
         renderHelpTipsList();
@@ -10297,6 +10541,9 @@
           const storedQ = localStorage.getItem("bonsai.qualityMode");
           if (storedQ) qualityModeUI.value = storedQ;
           applyQualityProfile(qualityModeUI.value || "auto");
+          sharedControlService.syncValue("qualityTier", {
+            reason: "initial-quality-mode",
+          });
         } else {
           applyQualityProfile("auto");
         }
@@ -10304,6 +10551,7 @@
         const storedTopTab =
           localStorage.getItem("bonsai.panelTab") || "bonsai";
         setPanelTab(storedTopTab);
+        syncHubState("initial-load");
         const storedBonsaiTab =
           localStorage.getItem("bonsai.bonsaiTab") || "plant";
         setBonsaiTab(storedBonsaiTab);

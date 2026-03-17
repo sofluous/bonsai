@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sakana Koi Prototype</title>
+    <style>
+      :root {
+        --bg: #0f1316;
+        --panel: rgba(18, 24, 28, 0.86);
+        --panel-border: rgba(255, 255, 255, 0.1);
+        --text: #edf3f1;
+        --muted: #97a7a2;
+        --accent: #ff8455;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        background:
+          radial-gradient(circle at top, rgba(255, 132, 85, 0.08), transparent 38%),
+          linear-gradient(180deg, #151a1f 0%, var(--bg) 100%);
+        color: var(--text);
+        font: 500 14px/1.4 "Segoe UI", sans-serif;
+      }
+
+      aside {
+        height: 100vh;
+        min-height: 0;
+        overflow-y: auto;
+        border-right: 1px solid var(--panel-border);
+        background: var(--panel);
+        backdrop-filter: blur(18px);
+        padding: 20px;
+        display: grid;
+        gap: 14px;
+        align-content: start;
+      }
+
+      main {
+        position: relative;
+        min-width: 0;
+        min-height: 0;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      #viewport {
+        width: 100%;
+        height: 100vh;
+        display: block;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1.05rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .section {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--panel-border);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .section-title {
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .row {
+        display: grid;
+        gap: 6px;
+      }
+
+      label {
+        font-size: 0.76rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      input,
+      select,
+      button {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--panel-border);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        padding: 10px 12px;
+      }
+
+      button {
+        cursor: pointer;
+        background: linear-gradient(180deg, rgba(255, 132, 85, 0.2), rgba(255, 132, 85, 0.1));
+      }
+
+      .stats {
+        position: absolute;
+        left: 16px;
+        bottom: 16px;
+        display: grid;
+        gap: 6px;
+        padding: 12px 14px;
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        background: rgba(10, 12, 16, 0.72);
+        backdrop-filter: blur(12px);
+      }
+
+      .debug-panel {
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        width: min(360px, calc(100% - 32px));
+        max-height: calc(100vh - 32px);
+        overflow: auto;
+        display: grid;
+        gap: 8px;
+        padding: 12px 14px;
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        background: rgba(10, 12, 16, 0.78);
+        backdrop-filter: blur(12px);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .debug-title {
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .debug-line {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        gap: 8px;
+      }
+
+      .debug-key {
+        color: var(--muted);
+      }
+
+      .debug-stations {
+        display: grid;
+        gap: 4px;
+      }
+
+      @media (max-width: 900px) {
+        body {
+          height: auto;
+          min-height: 100vh;
+          overflow: auto;
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr;
+        }
+
+        aside {
+          height: auto;
+          max-height: none;
+          overflow: visible;
+          border-right: 0;
+          border-bottom: 1px solid var(--panel-border);
+        }
+
+        main {
+          height: auto;
+          overflow: visible;
+        }
+
+        #viewport {
+          height: 60vh;
+        }
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <aside>
+      <div>
+        <h1>Sakana Koi Prototype</h1>
+        <div class="muted">Abstract closed-part koi prototype for silhouette and proportion tuning.</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Session</div>
+        <div class="row">
+          <label for="preset">Preset</label>
+          <select id="preset"></select>
+        </div>
+        <div class="row">
+          <label for="seed">Seed</label>
+          <input id="seed" type="number" value="1" min="1" step="1" />
+        </div>
+        <div class="row">
+          <label for="regenerate">Actions</label>
+          <button id="regenerate" type="button">Regenerate</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Body</div>
+        <div class="row">
+          <label for="bodyLength">Body Length</label>
+          <input id="bodyLength" type="range" min="0.7" max="1.45" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="bodyDepth">Body Depth</label>
+          <input id="bodyDepth" type="range" min="0.45" max="2.2" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="bodyWidth">Body Width</label>
+          <input id="bodyWidth" type="range" min="0.4" max="1.15" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="headSize">Head Size</label>
+          <input id="headSize" type="range" min="0.55" max="1.2" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="shoulderWidth">Shoulder Width</label>
+          <input id="shoulderWidth" type="range" min="0.6" max="1.6" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="bodyMidDepth">Body Mid Depth</label>
+          <input id="bodyMidDepth" type="range" min="0.5" max="1.8" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="tailWidth">Tail Width</label>
+          <input id="tailWidth" type="range" min="0.45" max="1.35" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="tailLength">Tail Length</label>
+          <input id="tailLength" type="range" min="0.7" max="1.45" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="tailRootWidth">Tail Root Width</label>
+          <input id="tailRootWidth" type="range" min="0.5" max="1.6" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="snoutLength">Snout Length</label>
+          <input id="snoutLength" type="range" min="0.4" max="1.6" step="0.01" />
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Head And Mouth</div>
+        <div class="row">
+          <label for="mouthOpen">Mouth Open</label>
+          <input id="mouthOpen" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="mouthHeight">Mouth Height</label>
+          <input id="mouthHeight" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="mouthWidth">Mouth Width</label>
+          <input id="mouthWidth" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="mouthExtrusion">Mouth Extrusion</label>
+          <input id="mouthExtrusion" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="mouthInset">Mouth Inset</label>
+          <input id="mouthInset" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="lipLength">Lip Length</label>
+          <input id="lipLength" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="lipTaper">Lip Taper</label>
+          <input id="lipTaper" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="snoutTaper">Snout Taper</label>
+          <input id="snoutTaper" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="headRoundness">Head Roundness</label>
+          <input id="headRoundness" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="headTopInset">Head Top Inset</label>
+          <input id="headTopInset" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="jawInset">Jaw Inset</label>
+          <input id="jawInset" type="range" min="0" max="1" step="0.01" />
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Fins And Tail</div>
+        <div class="row">
+          <label for="finSpread">Fin Spread</label>
+          <input id="finSpread" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="pectoralRoundness">Pectoral Roundness</label>
+          <input id="pectoralRoundness" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="dorsalRoundness">Dorsal Roundness</label>
+          <input id="dorsalRoundness" type="range" min="0" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="tailFork">Tail Fork</label>
+          <input id="tailFork" type="range" min="0" max="1" step="0.01" />
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Pose</div>
+        <div class="row">
+          <label for="bodyCurve">Body Curve</label>
+          <input id="bodyCurve" type="range" min="-1" max="1" step="0.01" />
+        </div>
+        <div class="row">
+          <label for="tailCurl">Tail Curl</label>
+          <input id="tailCurl" type="range" min="-1" max="1" step="0.01" />
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Surface</div>
+        <div class="row">
+          <label for="pattern">Pattern</label>
+          <select id="pattern"></select>
+        </div>
+        <div class="row">
+          <label for="patternCoverage">Pattern Coverage</label>
+          <input id="patternCoverage" type="range" min="0.05" max="0.95" step="0.01" />
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <canvas id="viewport"></canvas>
+      <div class="stats">
+        <div id="statPreset">Preset: -</div>
+        <div id="statSignature">Signature: -</div>
+        <div id="statMesh">Mesh: -</div>
+        <div id="statPattern">Pattern: -</div>
+      </div>
+      <div class="debug-panel">
+        <div class="debug-title">Debug</div>
+        <div id="debugSummary"></div>
+        <div class="debug-title">Sections</div>
+        <div id="debugStations" class="debug-stations"></div>
+      </div>
+    </main>
+
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+      import {
+        getDefaultSakanaConfig,
+        listSakanaPresets,
+        sanitizeSakanaConfig,
+      } from "../js/modules/sakana/config/index.js";
+      import {
+        buildAbstractKoiSections,
+        createSakanaAbstractKoiGenerator,
+      } from "../js/modules/sakana/generator/sakanaAbstractKoiGenerator.js";
+
+      const presetUI = document.getElementById("preset");
+      const seedUI = document.getElementById("seed");
+      const patternUI = document.getElementById("pattern");
+      const bodyLengthUI = document.getElementById("bodyLength");
+      const bodyDepthUI = document.getElementById("bodyDepth");
+      const bodyWidthUI = document.getElementById("bodyWidth");
+      const headSizeUI = document.getElementById("headSize");
+      const shoulderWidthUI = document.getElementById("shoulderWidth");
+      const bodyCurveUI = document.getElementById("bodyCurve");
+      const bodyMidDepthUI = document.getElementById("bodyMidDepth");
+      const tailWidthUI = document.getElementById("tailWidth");
+      const tailLengthUI = document.getElementById("tailLength");
+      const tailRootWidthUI = document.getElementById("tailRootWidth");
+      const tailCurlUI = document.getElementById("tailCurl");
+      const finSpreadUI = document.getElementById("finSpread");
+      const pectoralRoundnessUI = document.getElementById("pectoralRoundness");
+      const dorsalRoundnessUI = document.getElementById("dorsalRoundness");
+      const tailForkUI = document.getElementById("tailFork");
+      const mouthOpenUI = document.getElementById("mouthOpen");
+      const mouthHeightUI = document.getElementById("mouthHeight");
+      const mouthWidthUI = document.getElementById("mouthWidth");
+      const mouthExtrusionUI = document.getElementById("mouthExtrusion");
+      const mouthInsetUI = document.getElementById("mouthInset");
+      const lipLengthUI = document.getElementById("lipLength");
+      const lipTaperUI = document.getElementById("lipTaper");
+      const snoutTaperUI = document.getElementById("snoutTaper");
+      const snoutLengthUI = document.getElementById("snoutLength");
+      const headRoundnessUI = document.getElementById("headRoundness");
+      const headTopInsetUI = document.getElementById("headTopInset");
+      const jawInsetUI = document.getElementById("jawInset");
+      const patternCoverageUI = document.getElementById("patternCoverage");
+      const regenerateBtn = document.getElementById("regenerate");
+      const statPreset = document.getElementById("statPreset");
+      const statSignature = document.getElementById("statSignature");
+      const statMesh = document.getElementById("statMesh");
+      const statPattern = document.getElementById("statPattern");
+      const debugSummary = document.getElementById("debugSummary");
+      const debugStations = document.getElementById("debugStations");
+      const canvas = document.getElementById("viewport");
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(canvas.clientWidth || window.innerWidth, canvas.clientHeight || window.innerHeight, false);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#0f1316");
+
+      const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 100);
+      camera.position.set(-0.4, 3.4, 4.2);
+
+      const controls = new OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.target.set(0.35, 0.05, 0);
+
+      const hemi = new THREE.HemisphereLight(0xf6f8fb, 0x24313a, 1.15);
+      const dir = new THREE.DirectionalLight(0xfff2e8, 1.2);
+      dir.position.set(4, 5, 3);
+      scene.add(hemi, dir);
+
+      const floor = new THREE.Mesh(
+        new THREE.CircleGeometry(3.8, 48),
+        new THREE.MeshBasicMaterial({
+          color: "#142026",
+          transparent: true,
+          opacity: 0.45,
+        }),
+      );
+      floor.rotation.x = -Math.PI * 0.5;
+      floor.position.y = -1.2;
+      scene.add(floor);
+
+      const fishGroup = new THREE.Group();
+      fishGroup.rotation.y = -0.12;
+      fishGroup.rotation.z = -0.02;
+      scene.add(fishGroup);
+
+      const generator = createSakanaAbstractKoiGenerator();
+      const presetCatalog = listSakanaPresets();
+      const defaultConfig = getDefaultSakanaConfig();
+      let activeMeshes = [];
+
+      function applyPresetOptions() {
+        presetUI.innerHTML = presetCatalog
+          .map((preset) => `<option value="${preset.code}">${preset.label}</option>`)
+          .join("");
+        patternUI.innerHTML = ["solid", "spots", "patches"]
+          .map((value) => `<option value="${value}">${value}</option>`)
+          .join("");
+      }
+
+      function patchPreset(config, presetCode) {
+        const preset = presetCatalog.find((entry) => entry.code === presetCode);
+        if (!preset) return config;
+        return {
+          ...config,
+          body: { ...config.body, ...(preset.patch?.body || {}) },
+          fins: { ...config.fins, ...(preset.patch?.fins || {}) },
+          pose: { ...config.pose, ...(preset.patch?.pose || {}) },
+          surface: { ...config.surface, ...(preset.patch?.surface || {}) },
+          identity: {
+            ...config.identity,
+            presetCode,
+          },
+        };
+      }
+
+      function buildConfigFromUi() {
+        const base = patchPreset(getDefaultSakanaConfig(), presetUI.value || defaultConfig.identity.presetCode);
+        base.body.bodyLength = Number(bodyLengthUI.value);
+        base.body.bodyDepth = Number(bodyDepthUI.value);
+        base.body.bodyWidth = Number(bodyWidthUI.value);
+        base.body.headSize = Number(headSizeUI.value);
+        base.body.shoulderWidth = Number(shoulderWidthUI.value);
+        base.pose.bodyCurve = Number(bodyCurveUI.value);
+        base.body.bodyMidDepth = Number(bodyMidDepthUI.value);
+        base.body.tailWidth = Number(tailWidthUI.value);
+        base.body.tailLength = Number(tailLengthUI.value);
+        base.body.tailRootWidth = Number(tailRootWidthUI.value);
+        base.pose.tailCurl = Number(tailCurlUI.value);
+        base.fins.finSpread = Number(finSpreadUI.value);
+        base.fins.pectoralRoundness = Number(pectoralRoundnessUI.value);
+        base.fins.dorsalRoundness = Number(dorsalRoundnessUI.value);
+        base.fins.tailFork = Number(tailForkUI.value);
+        base.pose.mouthOpen = Number(mouthOpenUI.value);
+        base.pose.mouthHeight = Number(mouthHeightUI.value);
+        base.pose.mouthWidth = Number(mouthWidthUI.value);
+        base.pose.mouthExtrusion = Number(mouthExtrusionUI.value);
+        base.pose.mouthInset = Number(mouthInsetUI.value);
+        base.pose.lipLength = Number(lipLengthUI.value);
+        base.pose.lipTaper = Number(lipTaperUI.value);
+        base.pose.snoutTaper = Number(snoutTaperUI.value);
+        base.body.snoutLength = Number(snoutLengthUI.value);
+        base.pose.headRoundness = Number(headRoundnessUI.value);
+        base.pose.headTopInset = Number(headTopInsetUI.value);
+        base.pose.jawInset = Number(jawInsetUI.value);
+        base.surface.patternCoverage = Number(patternCoverageUI.value);
+        base.surface.patternType = patternUI.value || base.surface.patternType;
+        base.identity.presetCode = presetUI.value || base.identity.presetCode;
+        return sanitizeSakanaConfig(base).config;
+      }
+
+      function buildMaterial(result) {
+        return new THREE.MeshStandardMaterial({
+          color: "#ffffff",
+          roughness: 0.82,
+          metalness: 0.02,
+          flatShading: true,
+          vertexColors: true,
+          side: THREE.DoubleSide,
+          depthWrite: true,
+          depthTest: true,
+        });
+      }
+
+      function updateStats(result) {
+        statPreset.textContent = `Preset: ${result.config.identity.presetCode}`;
+        statSignature.textContent = `Signature: ${result.metadata.signature}`;
+        statMesh.textContent =
+          `Mesh: ${result.metadata.vertexCount} verts | ${result.metadata.triangleCount} tris | ${result.metadata.partCount || 1} parts`;
+        statPattern.textContent =
+          `Pattern: ${result.materials.patternType} | coverage ${result.materials.patternCoverage.toFixed(2)}`;
+      }
+
+      function buildGuideRing(section) {
+        const halfWidth = section.width;
+        const halfHeight = section.height;
+        return [
+          new THREE.Vector3(section.x, section.y + halfHeight * 0.56, section.z),
+          new THREE.Vector3(section.x, section.y + halfHeight * 0.18, section.z + halfWidth),
+          new THREE.Vector3(section.x + section.lengthBias, section.y - halfHeight * 0.04, section.z + halfWidth * 0.84),
+          new THREE.Vector3(section.x + section.lengthBias * 1.04, section.y - halfHeight * 0.38, section.z),
+          new THREE.Vector3(section.x + section.lengthBias, section.y - halfHeight * 0.04, section.z - halfWidth * 0.84),
+          new THREE.Vector3(section.x, section.y + halfHeight * 0.18, section.z - halfWidth),
+          new THREE.Vector3(section.x, section.y + halfHeight * 0.56, section.z),
+        ];
+      }
+
+      function renderGuides(stations) {
+        fishGroup.children
+          .filter((child) => child.userData?.guide)
+          .forEach((child) => {
+            fishGroup.remove(child);
+            child.geometry?.dispose?.();
+            child.material?.dispose?.();
+          });
+
+        const guideMaterial = new THREE.LineBasicMaterial({
+          color: "#ff9d76",
+          transparent: true,
+          opacity: 0.42,
+        });
+
+        stations.forEach((station) => {
+          const geometry = new THREE.BufferGeometry().setFromPoints(buildGuideRing(station));
+          const line = new THREE.Line(geometry, guideMaterial);
+          line.userData.guide = true;
+          fishGroup.add(line);
+        });
+
+        const spinePoints = stations.map((station) => new THREE.Vector3(
+          station.x + station.lengthBias * 0.5,
+          station.y + station.height * 0.08,
+          station.z,
+        ));
+        const spineGeometry = new THREE.BufferGeometry().setFromPoints(spinePoints);
+        const spine = new THREE.Line(
+          spineGeometry,
+          new THREE.LineBasicMaterial({
+            color: "#8ce1c8",
+            transparent: true,
+            opacity: 0.5,
+          }),
+        );
+        spine.userData.guide = true;
+        fishGroup.add(spine);
+      }
+
+      function renderDebug(config) {
+        const stations = buildAbstractKoiSections(config);
+        const stationLines = stations.map((station) => {
+          const height = (station.height * 2).toFixed(3);
+          return `
+            <div class="debug-line">
+              <div class="debug-key">${station.id}</div>
+              <div>x ${station.x.toFixed(3)} | z ${station.z.toFixed(3)} | w ${station.width.toFixed(3)} | h ${height}</div>
+            </div>
+          `;
+        }).join("");
+
+        const headFace = stations.find((station) => station.id === "head_mid");
+        const shoulder = stations.find((station) => station.id === "shoulder");
+        const bodyMid = stations.find((station) => station.id === "body_mid");
+        const tailA = stations.find((station) => station.id === "tail_base");
+        const tailB = stations.find((station) => station.id === "tail_tip");
+
+        debugSummary.innerHTML = [
+          `<div class="debug-line"><div class="debug-key">Body depth</div><div>head ${ (headFace.height * 2).toFixed(3) } | shoulder ${ (shoulder.height * 2).toFixed(3) } | mid ${ (bodyMid.height * 2).toFixed(3) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Body size</div><div>length ${ config.body.bodyLength.toFixed(2) } | depth ${ config.body.bodyDepth.toFixed(2) } | width ${ config.body.bodyWidth.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Cage</div><div>shoulder ${ config.body.shoulderWidth.toFixed(2) } | mid ${ config.body.bodyMidDepth.toFixed(2) } | snout ${ config.body.snoutLength.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Tail taper</div><div>a ${ (tailA.width).toFixed(3) } / ${ (tailA.height * 2).toFixed(3) } | b ${ (tailB.width).toFixed(3) } / ${ (tailB.height * 2).toFixed(3) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Tail size</div><div>width ${ config.body.tailWidth.toFixed(2) } | root ${ config.body.tailRootWidth.toFixed(2) } | length ${ config.body.tailLength.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Controls</div><div>curve ${ config.pose.bodyCurve.toFixed(2) } | curl ${ config.pose.tailCurl.toFixed(2) } | spread ${ config.fins.finSpread.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Shape</div><div>mouth ${ config.pose.mouthOpen.toFixed(2) } | pectoral ${ config.fins.pectoralRoundness.toFixed(2) } | dorsal ${ config.fins.dorsalRoundness.toFixed(2) } | fork ${ config.fins.tailFork.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Head</div><div>height ${ config.pose.mouthHeight.toFixed(2) } | width ${ config.pose.mouthWidth.toFixed(2) } | extrude ${ config.pose.mouthExtrusion.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Lip</div><div>inset ${ config.pose.mouthInset.toFixed(2) } | length ${ config.pose.lipLength.toFixed(2) } | taper ${ config.pose.lipTaper.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Snout</div><div>snout ${ config.pose.snoutTaper.toFixed(2) } | length ${ config.body.snoutLength.toFixed(2) }</div></div>`,
+          `<div class="debug-line"><div class="debug-key">Head Form</div><div>round ${ config.pose.headRoundness.toFixed(2) } | top ${ config.pose.headTopInset.toFixed(2) } | jaw ${ config.pose.jawInset.toFixed(2) }</div></div>`,
+        ].join("");
+        debugStations.innerHTML = stationLines;
+        renderGuides(stations);
+      }
+
+      function renderFish() {
+        const config = buildConfigFromUi();
+        const seed = Number(seedUI.value || 1);
+        const result = generator.generate(seed, config);
+
+        activeMeshes.forEach((mesh) => {
+          fishGroup.remove(mesh);
+          mesh.geometry.dispose();
+          mesh.material.dispose();
+        });
+        activeMeshes = [];
+
+        result.parts.forEach((part) => {
+          const geometry = new THREE.BufferGeometry();
+          geometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(part.mesh.positions, 3),
+          );
+          geometry.setAttribute(
+            "color",
+            new THREE.Float32BufferAttribute(part.mesh.colors, 3),
+          );
+          geometry.setIndex(part.mesh.indices);
+          geometry.computeVertexNormals();
+
+          const mesh = new THREE.Mesh(geometry, buildMaterial(result));
+          fishGroup.add(mesh);
+          activeMeshes.push(mesh);
+        });
+
+        updateStats(result);
+        renderDebug(config);
+      }
+
+      function resize() {
+        const width = canvas.clientWidth || window.innerWidth;
+        const height = canvas.clientHeight || window.innerHeight;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / Math.max(1, height);
+        camera.updateProjectionMatrix();
+      }
+
+      function applyDefaults() {
+        presetUI.value = defaultConfig.identity.presetCode;
+        patternUI.value = defaultConfig.surface.patternType;
+        bodyLengthUI.value = String(defaultConfig.body.bodyLength);
+        bodyDepthUI.value = String(defaultConfig.body.bodyDepth);
+        bodyWidthUI.value = String(defaultConfig.body.bodyWidth);
+        headSizeUI.value = String(defaultConfig.body.headSize);
+        shoulderWidthUI.value = String(defaultConfig.body.shoulderWidth);
+        bodyCurveUI.value = String(defaultConfig.pose.bodyCurve);
+        bodyMidDepthUI.value = String(defaultConfig.body.bodyMidDepth);
+        tailWidthUI.value = String(defaultConfig.body.tailWidth);
+        tailLengthUI.value = String(defaultConfig.body.tailLength);
+        tailRootWidthUI.value = String(defaultConfig.body.tailRootWidth);
+        tailCurlUI.value = String(defaultConfig.pose.tailCurl);
+        finSpreadUI.value = String(defaultConfig.fins.finSpread);
+        pectoralRoundnessUI.value = String(defaultConfig.fins.pectoralRoundness);
+        dorsalRoundnessUI.value = String(defaultConfig.fins.dorsalRoundness);
+        tailForkUI.value = String(defaultConfig.fins.tailFork);
+        mouthOpenUI.value = String(defaultConfig.pose.mouthOpen);
+        mouthHeightUI.value = String(defaultConfig.pose.mouthHeight);
+        mouthWidthUI.value = String(defaultConfig.pose.mouthWidth);
+        mouthExtrusionUI.value = String(defaultConfig.pose.mouthExtrusion);
+        mouthInsetUI.value = String(defaultConfig.pose.mouthInset);
+        lipLengthUI.value = String(defaultConfig.pose.lipLength);
+        lipTaperUI.value = String(defaultConfig.pose.lipTaper);
+        snoutTaperUI.value = String(defaultConfig.pose.snoutTaper);
+        snoutLengthUI.value = String(defaultConfig.body.snoutLength);
+        headRoundnessUI.value = String(defaultConfig.pose.headRoundness);
+        headTopInsetUI.value = String(defaultConfig.pose.headTopInset);
+        jawInsetUI.value = String(defaultConfig.pose.jawInset);
+        patternCoverageUI.value = String(defaultConfig.surface.patternCoverage);
+      }
+
+      function loop() {
+        requestAnimationFrame(loop);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      applyPresetOptions();
+      applyDefaults();
+      renderFish();
+      resize();
+      loop();
+
+      [presetUI, patternUI, bodyLengthUI, bodyDepthUI, bodyWidthUI, headSizeUI, shoulderWidthUI, bodyCurveUI, bodyMidDepthUI, tailWidthUI, tailLengthUI, tailRootWidthUI, tailCurlUI, finSpreadUI, pectoralRoundnessUI, dorsalRoundnessUI, tailForkUI, mouthOpenUI, mouthHeightUI, mouthWidthUI, mouthExtrusionUI, mouthInsetUI, lipLengthUI, lipTaperUI, snoutTaperUI, snoutLengthUI, headRoundnessUI, headTopInsetUI, jawInsetUI, patternCoverageUI]
+        .forEach((el) => el.addEventListener("input", renderFish));
+      regenerateBtn.addEventListener("click", renderFish);
+      seedUI.addEventListener("change", renderFish);
+      window.addEventListener("resize", resize);
+    </script>
+  </body>
+</html>
