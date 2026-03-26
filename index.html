@@ -9,7 +9,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/iconoir@7.10.1/css/iconoir.css"
     />
-    <link rel="stylesheet" href="./theme.css" />
+    <link rel="stylesheet" href="./_DesignSystem/theme.css" />
     <style>
       /* -----------------------------------------------------------------------------
    1) DESIGN TOKENS + BONSAI LAYOUT TOKENS
@@ -33,7 +33,10 @@
         --bo-panel-pad-y: 8px;
         --bo-field-label-w: var(--ds-field-label-w, 124px);
         --bo-field-value-w: 56px;
-        --bo-field-action-w: var(--ds-field-action-w, calc(var(--ds-control-h-sm) + 6px));
+        --bo-field-action-w: var(
+          --ds-field-action-w,
+          calc(var(--ds-control-h-sm) + 6px)
+        );
         --bo-cam-cell: 36px;
         --bo-cam-gap: 6px;
         --bo-shell-radius: var(--ds-radius-3);
@@ -113,7 +116,11 @@
         align-items: center;
         gap: 6px;
         padding: 8px 6px;
-        background: color-mix(in oklab, var(--bo-shell-surface) 86%, transparent);
+        background: color-mix(
+          in oklab,
+          var(--bo-shell-surface) 86%,
+          transparent
+        );
         border: var(--bo-shell-border);
         box-shadow: var(--bo-shell-shadow);
         border-radius: var(--bo-shell-radius);
@@ -303,7 +310,11 @@
       }
 
       .module-option[aria-current="true"] {
-        border-color: color-mix(in oklab, var(--ds-accent) 52%, var(--ds-border));
+        border-color: color-mix(
+          in oklab,
+          var(--ds-accent) 52%,
+          var(--ds-border)
+        );
       }
 
       .module-option[disabled] {
@@ -432,9 +443,21 @@
       }
 
       .bonsai-tab[aria-pressed="true"] {
-        color: var(--ds-tab-active-fg, var(--ds-btn-primary-text, var(--ds-text)));
-        border-bottom-color: var(--ds-tab-active-border, var(--ds-btn-primary-border, var(--ds-accent)));
-        background: var(--ds-tab-active-bg, var(--ds-btn-primary-bg, color-mix(in oklab, var(--ds-accent) 18%, var(--ds-btn-bg))));
+        color: var(
+          --ds-tab-active-fg,
+          var(--ds-btn-primary-text, var(--ds-text))
+        );
+        border-bottom-color: var(
+          --ds-tab-active-border,
+          var(--ds-btn-primary-border, var(--ds-accent))
+        );
+        background: var(
+          --ds-tab-active-bg,
+          var(
+            --ds-btn-primary-bg,
+            color-mix(in oklab, var(--ds-accent) 18%, var(--ds-btn-bg))
+          )
+        );
       }
 
       #panel .section[data-tab] {
@@ -598,12 +621,12 @@
 
       /* Keep row anchoring stable across ds-icon-action pressed/active states. */
       .random-lock-btn:is(
-          :hover,
-          :focus-visible,
-          :active,
-          [aria-pressed="true"],
-          .is-active
-        ) {
+        :hover,
+        :focus-visible,
+        :active,
+        [aria-pressed="true"],
+        .is-active
+      ) {
         transform: translateY(-50%);
       }
 
@@ -1029,9 +1052,21 @@
       }
 
       .export-tab[aria-pressed="true"] {
-        color: var(--ds-tab-active-fg, var(--ds-btn-primary-text, var(--ds-text)));
-        border-bottom-color: var(--ds-tab-active-border, var(--ds-btn-primary-border, var(--ds-accent)));
-        background: var(--ds-tab-active-bg, var(--ds-btn-primary-bg, color-mix(in oklab, var(--ds-accent) 18%, var(--ds-btn-bg))));
+        color: var(
+          --ds-tab-active-fg,
+          var(--ds-btn-primary-text, var(--ds-text))
+        );
+        border-bottom-color: var(
+          --ds-tab-active-border,
+          var(--ds-btn-primary-border, var(--ds-accent))
+        );
+        background: var(
+          --ds-tab-active-bg,
+          var(
+            --ds-btn-primary-bg,
+            color-mix(in oklab, var(--ds-accent) 18%, var(--ds-btn-bg))
+          )
+        );
       }
 
       .bonsai-tab .tab-icon,
@@ -3315,7 +3350,10 @@
                     aria-label="Demo interval seconds"
                     title="Demo interval (seconds)"
                   />
-                  <label class="ds-switch" aria-label="Demo mode auto-randomize">
+                  <label
+                    class="ds-switch"
+                    aria-label="Demo mode auto-randomize"
+                  >
                     <input id="demoModeToggle" type="checkbox" />
                     <span class="ds-switch-track"></span>
                   </label>
@@ -3511,7 +3549,10 @@
           </div>
           <div class="panel-actions">
             <button id="snapSave" class="btn ds-btn btn-primary ds-btn-primary">
-              <span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span>
+              <span
+                class="iconoir iconoir-media-image-plus"
+                aria-hidden="true"
+              ></span>
               Snapshot
             </button>
           </div>
@@ -3583,7 +3624,10 @@
             class="btn ds-btn btn-icon ds-btn-icon"
             title="Snapshot (Enter)"
           >
-            <span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span>
+            <span
+              class="iconoir iconoir-media-image-plus"
+              aria-hidden="true"
+            ></span>
           </button>
         </div>
         <div class="hud-camera" aria-label="Camera view controls">
@@ -3600,10 +3644,7 @@
           </div>
           <div class="camera-gizmo">
             <button class="btn ds-btn g-front" id="viewFront" title="Front">
-              <span
-                class="iconoir iconoir-view-grid"
-                aria-hidden="true"
-              ></span>
+              <span class="iconoir iconoir-view-grid" aria-hidden="true"></span>
             </button>
             <button class="btn ds-btn g-top" id="viewTop" title="Top">
               <span
@@ -3669,7 +3710,10 @@
           <h4>Overview</h4>
           <ul>
             <li>Generate and refine stylized bonsai models in real-time.</li>
-            <li>Use Bonsai, Scene, Render, Gallery, Export, and Settings tabs to control the app.</li>
+            <li>
+              Use Bonsai, Scene, Render, Gallery, Export, and Settings tabs to
+              control the app.
+            </li>
           </ul>
         </div>
         <div class="help-section">
@@ -3687,9 +3731,16 @@
             <li><span class="kbd">F</span> frame bonsai</li>
             <li><span class="kbd">R</span> randomize all properties</li>
             <li><span class="kbd">Enter</span> save snapshot</li>
-            <li><span class="kbd">[</span>/<span class="kbd">]</span> hold manual spin</li>
+            <li>
+              <span class="kbd">[</span>/<span class="kbd">]</span> hold manual
+              spin
+            </li>
             <li><span class="kbd">P</span> tips overlay</li>
-            <li><span class="kbd">O</span>, <span class="kbd">T</span>, <span class="kbd">C</span>, <span class="kbd">S</span>, <span class="kbd">D</span> debug toggles</li>
+            <li>
+              <span class="kbd">O</span>, <span class="kbd">T</span>,
+              <span class="kbd">C</span>, <span class="kbd">S</span>,
+              <span class="kbd">D</span> debug toggles
+            </li>
             <li><span class="kbd">\</span> debug master toggle</li>
             <li><span class="kbd">Esc</span> close Help modal</li>
           </ul>
@@ -3894,7 +3945,9 @@
       const moduleSwitch = document.getElementById("moduleSwitch");
       const moduleSwitchBtn = document.getElementById("moduleSwitchBtn");
       const moduleSwitchMenu = document.getElementById("moduleSwitchMenu");
-      const moduleSwitchOptions = document.getElementById("moduleSwitchOptions");
+      const moduleSwitchOptions = document.getElementById(
+        "moduleSwitchOptions",
+      );
       const tbSnapAdd = document.getElementById("tbSnapAdd");
       const tbSpinL = document.getElementById("tbSpinL");
       const tbAuto = document.getElementById("tbAuto");
@@ -4382,7 +4435,8 @@
       function sectionStorageKey(section) {
         const top = section.getAttribute("data-tab") || "panel";
         const sub = section.getAttribute("data-bonsai") || "all";
-        const raw = section.querySelector(":scope > h2")?.textContent || "section";
+        const raw =
+          section.querySelector(":scope > h2")?.textContent || "section";
         const name = raw
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
@@ -4395,11 +4449,13 @@
         const collapsed = !!on;
         section.classList.toggle("is-collapsed", collapsed);
         const btn = section.querySelector(":scope > h2 .section-toggle");
-        if (btn) btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        if (btn)
+          btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
         localStorage.setItem(sectionStorageKey(section), collapsed ? "1" : "0");
       }
 
-      const VESSEL_PART_VISIBILITY_STORAGE_KEY = "bonsai.vesselPartVisibility.v1";
+      const VESSEL_PART_VISIBILITY_STORAGE_KEY =
+        "bonsai.vesselPartVisibility.v1";
       const PLANT_PART_VISIBILITY_STORAGE_KEY = "bonsai.plantPartVisibility.v1";
       const plantPartVisibility = {
         leaves: true,
@@ -4552,7 +4608,9 @@
           const exists = Array.from(control.options || []).some(
             (opt) => String(opt.value) === candidate,
           );
-          control.value = exists ? candidate : getFirstVisibleOptionValue(control);
+          control.value = exists
+            ? candidate
+            : getFirstVisibleOptionValue(control);
         }
         applyVesselOnly();
         refreshAllReadouts();
@@ -4578,13 +4636,17 @@
 
       function initSectionCollapsers() {
         if (!panelRoot) return;
-        const sections = panelRoot.querySelectorAll(".panel-scroll .section[data-tab]");
+        const sections = panelRoot.querySelectorAll(
+          ".panel-scroll .section[data-tab]",
+        );
         sections.forEach((section) => {
           const h2 = section.querySelector(":scope > h2");
           if (!h2) return;
           let titleEl = h2.querySelector(":scope > .section-title");
           let actionsEl = h2.querySelector(":scope > .section-head-actions");
-          let btn = h2.querySelector(":scope > .section-head-actions .section-toggle");
+          let btn = h2.querySelector(
+            ":scope > .section-head-actions .section-toggle",
+          );
           const title = titleEl
             ? titleEl.textContent.trim()
             : h2.textContent.trim();
@@ -4610,7 +4672,10 @@
             btn.setAttribute("aria-expanded", "true");
             actionsEl.appendChild(btn);
             btn.addEventListener("click", () => {
-              setSectionCollapsed(section, !section.classList.contains("is-collapsed"));
+              setSectionCollapsed(
+                section,
+                !section.classList.contains("is-collapsed"),
+              );
             });
           }
           if (!h2.dataset.rowCollapseBound) {
@@ -4622,14 +4687,23 @@
               ) {
                 return;
               }
-              setSectionCollapsed(section, !section.classList.contains("is-collapsed"));
+              setSectionCollapsed(
+                section,
+                !section.classList.contains("is-collapsed"),
+              );
             });
             h2.dataset.rowCollapseBound = "1";
           }
-          const vesselPart = String(section.getAttribute("data-vessel-part") || "");
-          const plantPart = String(section.getAttribute("data-plant-part") || "");
+          const vesselPart = String(
+            section.getAttribute("data-vessel-part") || "",
+          );
+          const plantPart = String(
+            section.getAttribute("data-plant-part") || "",
+          );
           if (vesselPart || plantPart) {
-            let visBtn = actionsEl.querySelector(":scope > .section-vis-toggle");
+            let visBtn = actionsEl.querySelector(
+              ":scope > .section-vis-toggle",
+            );
             if (!visBtn) {
               visBtn = document.createElement("button");
               visBtn.type = "button";
@@ -4639,7 +4713,10 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (vesselPart) {
-                  setVesselPartVisible(vesselPart, !isVesselPartVisible(vesselPart));
+                  setVesselPartVisible(
+                    vesselPart,
+                    !isVesselPartVisible(vesselPart),
+                  );
                   return;
                 }
                 setPlantPartVisible(plantPart, !isPlantPartVisible(plantPart));
@@ -4725,7 +4802,8 @@
         if (
           qualityModeUI &&
           String(
-            sharedControlService?.readValue("qualityTier") || qualityModeUI.value,
+            sharedControlService?.readValue("qualityTier") ||
+              qualityModeUI.value,
           ) === "auto"
         )
           applyQualityProfile("auto");
@@ -5565,7 +5643,12 @@
             side: DS,
           });
           const ropeA = new THREE.Mesh(
-            new THREE.TorusGeometry(Math.max(0.24, safeDia * 0.3), 0.012, 8, 28),
+            new THREE.TorusGeometry(
+              Math.max(0.24, safeDia * 0.3),
+              0.012,
+              8,
+              28,
+            ),
             ropeMat,
           );
           ropeA.rotation.x = Math.PI / 2;
@@ -5582,7 +5665,9 @@
         );
         const mediumDepth = Math.max(
           0.02,
-          parseFloat(mediumDepthUI?.value || String(Math.max(0.1, safeDepth * 0.2))),
+          parseFloat(
+            mediumDepthUI?.value || String(Math.max(0.1, safeDepth * 0.2)),
+          ),
         );
         const mediumOpacity = Math.max(
           0,
@@ -5615,41 +5700,66 @@
           let mediumMesh = null;
           if (mediumType === "water" || mediumType === "gel") {
             mediumMesh = new THREE.Mesh(
-              new THREE.CylinderGeometry(mediumDia * 0.92, mediumDia * 0.92, mediumDepth, 28),
+              new THREE.CylinderGeometry(
+                mediumDia * 0.92,
+                mediumDia * 0.92,
+                mediumDepth,
+                28,
+              ),
               mediumMat,
             );
           } else if (mediumType === "moss") {
             mediumMesh = new THREE.Mesh(
-              new THREE.SphereGeometry(Math.max(0.18, mediumDia * 0.42), 20, 14),
+              new THREE.SphereGeometry(
+                Math.max(0.18, mediumDia * 0.42),
+                20,
+                14,
+              ),
               mediumMat,
             );
             mediumMesh.scale.y = 0.55;
           } else if (mediumType === "sand") {
             mediumMesh = new THREE.Mesh(
-              new THREE.CylinderGeometry(mediumDia * 0.95, mediumDia * 1.02, Math.max(0.04, mediumDepth * 0.55), 24),
+              new THREE.CylinderGeometry(
+                mediumDia * 0.95,
+                mediumDia * 1.02,
+                Math.max(0.04, mediumDepth * 0.55),
+                24,
+              ),
               mediumMat,
             );
           } else if (mediumType === "rock") {
             mediumMesh = new THREE.Mesh(
-              new THREE.DodecahedronGeometry(Math.max(0.22, mediumDia * 0.3), 1),
+              new THREE.DodecahedronGeometry(
+                Math.max(0.22, mediumDia * 0.3),
+                1,
+              ),
               mediumMat,
             );
             mediumMesh.scale.set(1.26, 0.9 + footMul * 0.3, 1.14);
           } else if (mediumType === "kokedama") {
             mediumMesh = new THREE.Mesh(
-              new THREE.SphereGeometry(Math.max(0.24, mediumDia * 0.38), 24, 18),
+              new THREE.SphereGeometry(
+                Math.max(0.24, mediumDia * 0.38),
+                24,
+                18,
+              ),
               mediumMat,
             );
             mediumMesh.scale.y = 0.94;
           }
           if (mediumMesh) {
-            mediumMesh.position.y = -Math.max(0.06, safeDepth * 0.24) + mediumOffsetY;
+            mediumMesh.position.y =
+              -Math.max(0.06, safeDepth * 0.24) + mediumOffsetY;
             g.add(mediumMesh);
           }
         }
 
         const platformType = String(platformTypeUI?.value || "none");
-        const platformDia = Math.max(0.2, parseFloat(platformDiaUI?.value || "1.35"));
+        const platformDia = Math.max(
+          0.2,
+          parseFloat(platformDiaUI?.value || "1.35"),
+        );
         const platformDepth = Math.max(
           0.02,
           parseFloat(platformDepthUI?.value || "0.16"),
@@ -5662,8 +5772,11 @@
           0,
           Math.min(1, parseFloat(platformBlurUI?.value || "0.12")),
         );
-        const platformOffsetY = parseFloat(platformOffsetYUI?.value || "0") || 0;
-        const platformColor = new THREE.Color(platformColorUI?.value || "#858b94");
+        const platformOffsetY =
+          parseFloat(platformOffsetYUI?.value || "0") || 0;
+        const platformColor = new THREE.Color(
+          platformColorUI?.value || "#858b94",
+        );
         if (platformType !== "none") {
           const platformMat = new THREE.MeshStandardMaterial({
             color: platformColor,
@@ -5676,17 +5789,31 @@
           let plat = null;
           if (platformType === "disc") {
             plat = new THREE.Mesh(
-              new THREE.CylinderGeometry(platformDia, platformDia * 1.03, platformDepth, 26),
+              new THREE.CylinderGeometry(
+                platformDia,
+                platformDia * 1.03,
+                platformDepth,
+                26,
+              ),
               platformMat,
             );
           } else if (platformType === "tray") {
             plat = new THREE.Mesh(
-              new THREE.BoxGeometry(platformDia * 1.5, platformDepth, platformDia),
+              new THREE.BoxGeometry(
+                platformDia * 1.5,
+                platformDepth,
+                platformDia,
+              ),
               platformMat,
             );
           } else if (platformType === "slab") {
             plat = new THREE.Mesh(
-              new THREE.CylinderGeometry(platformDia * 1.1, platformDia * 1.15, platformDepth * 1.2, 8),
+              new THREE.CylinderGeometry(
+                platformDia * 1.1,
+                platformDia * 1.15,
+                platformDepth * 1.2,
+                8,
+              ),
               platformMat,
             );
           }
@@ -5746,8 +5873,16 @@
         );
         const spanX = Math.max(0.6, (bounds.max.x - bounds.min.x) * diaMul);
         const spanZ = Math.max(0.6, (bounds.max.z - bounds.min.z) * diaMul);
-        const x = rr(Math.random, bounds.min.x - spanX * 0.15, bounds.max.x + spanX * 0.15);
-        const z = rr(Math.random, bounds.min.z - spanZ * 0.15, bounds.max.z + spanZ * 0.15);
+        const x = rr(
+          Math.random,
+          bounds.min.x - spanX * 0.15,
+          bounds.max.x + spanX * 0.15,
+        );
+        const z = rr(
+          Math.random,
+          bounds.min.z - spanZ * 0.15,
+          bounds.max.z + spanZ * 0.15,
+        );
         const y = rr(
           Math.random,
           bounds.max.y - Math.max(0.2, (bounds.max.y - bounds.min.y) * 0.25),
@@ -5802,17 +5937,25 @@
         if (!bounds) return;
         const spawnRate = 0.2 + amount * (0.8 + rateMul * 4.6);
         fallingSpawnAcc += dt * spawnRate;
-        while (fallingSpawnAcc >= 1 && fallingLeaves.length < FALLING_LEAF_MAX) {
+        while (
+          fallingSpawnAcc >= 1 &&
+          fallingLeaves.length < FALLING_LEAF_MAX
+        ) {
           spawnFallingLeaf(bounds);
           fallingSpawnAcc -= 1;
         }
         const minY = Math.min(bounds.min.y - 1.5, -4.2);
-        const maxR = Math.max(4, Math.hypot(bounds.max.x - bounds.min.x, bounds.max.z - bounds.min.z) * 1.4);
+        const maxR = Math.max(
+          4,
+          Math.hypot(bounds.max.x - bounds.min.x, bounds.max.z - bounds.min.z) *
+            1.4,
+        );
         for (let i = fallingLeaves.length - 1; i >= 0; i--) {
           const p = fallingLeaves[i];
           const m = p.mesh;
           if (!m) continue;
-          const sway = Math.sin(fallingLeafTime * p.swayFreq + p.swayPhase) * p.swayAmp;
+          const sway =
+            Math.sin(fallingLeafTime * p.swayFreq + p.swayPhase) * p.swayAmp;
           m.position.x += (p.vx + sway) * dt;
           m.position.y += p.vy * dt * (0.8 + amount * 0.9);
           m.position.z += p.vz * dt;
@@ -6571,9 +6714,21 @@
             yawBias += rr(r, -0.08, 0.08) + asymSign * (0.08 + drama * 0.12);
             pitchBias *= 0.35;
           }
-          const basalBendBoost = clamp(styleProfile.basalBendBoost ?? 0, 0, 1.2);
-          const basalDropBoost = clamp(styleProfile.basalDropBoost ?? 0, 0, 1.2);
-          const basalLeanBoost = clamp(styleProfile.basalLeanBoost ?? 0, 0, 1.2);
+          const basalBendBoost = clamp(
+            styleProfile.basalBendBoost ?? 0,
+            0,
+            1.2,
+          );
+          const basalDropBoost = clamp(
+            styleProfile.basalDropBoost ?? 0,
+            0,
+            1.2,
+          );
+          const basalLeanBoost = clamp(
+            styleProfile.basalLeanBoost ?? 0,
+            0,
+            1.2,
+          );
           yawBias +=
             bendDir.x *
             basalInfluence *
@@ -6586,10 +6741,7 @@
             basalLeanBoost *
             (0.12 + drama * 0.2);
           pitchBias -=
-            trunkDrop *
-            basalInfluence *
-            basalDropBoost *
-            (0.14 + drama * 0.28);
+            trunkDrop * basalInfluence * basalDropBoost * (0.14 + drama * 0.28);
           yawBias +=
             branchTwist * rr(r, -0.11, 0.11) * (0.45 + styleProfile.trunkTwist);
           yawBias += trunkTwistAmp * rr(r, -0.14, 0.14) * (0.5 + 0.6 * tNorm);
@@ -6679,12 +6831,17 @@
           if (trunkType === "cascade" && tNorm > 0.42) {
             np.y -= (tNorm - 0.42) * (0.22 + drama * 0.5 + trunkDrop * 0.35);
           }
-          if ((trunkType === "cascade" || trunkType === "windswept") && tNorm < 0.48) {
+          if (
+            (trunkType === "cascade" || trunkType === "windswept") &&
+            tNorm < 0.48
+          ) {
             const basalDropEase = 0.42 + 0.58 * (tNorm / 0.48);
             np.y -=
               trunkDrop *
               basalInfluence *
-              (0.08 + 0.14 * drama + 0.08 * (styleProfile.basalDropBoost ?? 0)) *
+              (0.08 +
+                0.14 * drama +
+                0.08 * (styleProfile.basalDropBoost ?? 0)) *
               basalDropEase;
           }
           if (trunkType === "literati" && tNorm < 0.4) {
@@ -7615,9 +7772,7 @@
                 );
                 d0.y -=
                   trunkType === "cascade"
-                    ? 0.16 +
-                      0.36 * (1 - firstDepthNorm) +
-                      0.24 * trainingDrop
+                    ? 0.16 + 0.36 * (1 - firstDepthNorm) + 0.24 * trainingDrop
                     : 0.08 + 0.24 * (1 - firstDepthNorm);
               } else if (m === 1) {
                 const returnSweep =
@@ -7959,7 +8114,9 @@
         if (locked) randomLockedIds.add(id);
         else randomLockedIds.delete(id);
         saveRandomLocks();
-        const btn = document.querySelector(`.random-lock-btn[data-lock-id="${id}"]`);
+        const btn = document.querySelector(
+          `.random-lock-btn[data-lock-id="${id}"]`,
+        );
         updateRandomLockButton(btn, locked);
       }
 
@@ -7970,7 +8127,9 @@
           const field = control.closest(".field");
           if (!field || field.classList.contains("seed-row")) return;
           field.classList.add("has-lock");
-          let btn = field.querySelector(`.random-lock-btn[data-lock-id="${id}"]`);
+          let btn = field.querySelector(
+            `.random-lock-btn[data-lock-id="${id}"]`,
+          );
           if (!btn) {
             btn = document.createElement("button");
             btn.type = "button";
@@ -8238,17 +8397,20 @@
       moduleManifestContext.sharedControlResolver = sharedControlResolver;
       moduleManifestContext.sharedControlService = sharedControlService;
       const moduleManifestMap = buildModuleManifestMap(moduleManifestContext);
-      const moduleReadinessReport = validateModuleManifestMap(moduleManifestMap);
+      const moduleReadinessReport =
+        validateModuleManifestMap(moduleManifestMap);
       window.bonsaiModuleManifestMap = moduleManifestMap;
       window.bonsaiModuleReadinessReport = moduleReadinessReport;
-      window.bonsaiModuleReadinessSummary =
-        summarizeModuleReadiness(moduleReadinessReport);
+      window.bonsaiModuleReadinessSummary = summarizeModuleReadiness(
+        moduleReadinessReport,
+      );
       window.bonsaiActiveModuleManifest = getModuleManifest(
         DEFAULT_MODULE_CODE,
         moduleManifestContext,
       );
       window.bonsaiSharedControlDefinitions =
-        window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() || [];
+        window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() ||
+        [];
       window.bonsaiSharedControlGroups =
         window.bonsaiActiveModuleManifest?.getSharedControlGroups?.() || [];
       window.bonsaiSharedControlResolver = sharedControlResolver;
@@ -8273,7 +8435,8 @@
             moduleManifestMap?.[DEFAULT_MODULE_CODE] ||
             getModuleManifest(DEFAULT_MODULE_CODE, moduleManifestContext);
           window.bonsaiSharedControlDefinitions =
-            window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() || [];
+            window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() ||
+            [];
           window.bonsaiSharedControlGroups =
             window.bonsaiActiveModuleManifest?.getSharedControlGroups?.() || [];
           window.bonsaiSharedControlResolver = sharedControlResolver;
@@ -8343,7 +8506,9 @@
           fromDb = null;
         }
         if (Array.isArray(fromDb)) {
-          snapshots = fromDb.map((snap) => normalizeSnapshotRecord(snap)).filter(Boolean);
+          snapshots = fromDb
+            .map((snap) => normalizeSnapshotRecord(snap))
+            .filter(Boolean);
           snapshots = snapshots.sort(
             (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
           );
@@ -8354,7 +8519,9 @@
           const raw = localStorage.getItem(SNAPSHOT_STORAGE_KEY);
           const parsed = raw ? JSON.parse(raw) : [];
           snapshots = Array.isArray(parsed)
-            ? parsed.map((snap) => normalizeSnapshotRecord(snap)).filter(Boolean)
+            ? parsed
+                .map((snap) => normalizeSnapshotRecord(snap))
+                .filter(Boolean)
             : [];
           snapshots = snapshots.sort(
             (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
@@ -8905,7 +9072,9 @@
         if (exportDimsRow) exportDimsRow.hidden = !isImage;
         if (exportAlphaRow) exportAlphaRow.hidden = !isPng;
         if (exportImageBtn) exportImageBtn.disabled = !isImage;
-        if (exportModelBtn) exportModelBtn.disabled = !kind.startsWith("gl") && kind !== "scene-json";
+        if (exportModelBtn)
+          exportModelBtn.disabled =
+            !kind.startsWith("gl") && kind !== "scene-json";
         if (exportGifBtn) exportGifBtn.disabled = kind !== "gif";
       }
 
@@ -9724,7 +9893,8 @@
       }
 
       function isTypingContext(target) {
-        const tag = target && target.tagName ? target.tagName.toLowerCase() : "";
+        const tag =
+          target && target.tagName ? target.tagName.toLowerCase() : "";
         return (
           tag === "input" ||
           tag === "select" ||
@@ -9891,7 +10061,9 @@
         } else if (e.key === "p" || e.key === "P") {
           e.preventDefault();
           setTipsVisible(!(tipsToggle ? tipsToggle.checked : false));
-          showToast(tipsToggle?.checked ? "Tips overlay on" : "Tips overlay off");
+          showToast(
+            tipsToggle?.checked ? "Tips overlay on" : "Tips overlay off",
+          );
         } else if (e.key === "t" || e.key === "T") {
           e.preventDefault();
           const on = !(toolbarToggle ? toolbarToggle.checked : true);
@@ -10132,7 +10304,10 @@
         const cameraReserve = cameraVisible
           ? Math.ceil(cameraPad.getBoundingClientRect().width) + 12
           : 0;
-        const maxToolbarW = Math.max(180, window.innerWidth - 12 - cameraReserve);
+        const maxToolbarW = Math.max(
+          180,
+          window.innerWidth - 12 - cameraReserve,
+        );
         canvasToolbar.style.bottom = `${bottomOffset}px`;
         canvasToolbar.style.left =
           cameraReserve > 0
@@ -10164,7 +10339,8 @@
         if (cameraPad) cameraPad.style.display = on ? "grid" : "none";
         if (cameraPadToggle) cameraPadToggle.checked = !!on;
         requestAnimationFrame(updateCanvasToolbarOffset);
-        if (!silent) showToast(on ? "Camera controls on" : "Camera controls off");
+        if (!silent)
+          showToast(on ? "Camera controls on" : "Camera controls off");
       }
 
       function setSidePanelVisible(on, silent = false) {
@@ -10204,7 +10380,9 @@
         setCameraPadVisible(enabled, true);
         setSidePanelVisible(enabled, true);
         if (!enabled) setDemoMode(false, true);
-        showToast(enabled ? "Core debug controls on" : "All debug controls off");
+        showToast(
+          enabled ? "Core debug controls on" : "All debug controls off",
+        );
       }
 
       function areDebugTogglesAllOn() {
@@ -10440,13 +10618,15 @@
       async function initial() {
         closeDeleteConfirm();
         const storedModule =
-          localStorage.getItem(ACTIVE_MODULE_STORAGE_KEY) || DEFAULT_MODULE_CODE;
+          localStorage.getItem(ACTIVE_MODULE_STORAGE_KEY) ||
+          DEFAULT_MODULE_CODE;
         moduleSwitcher.initialize();
         window.bonsaiActiveModuleManifest =
           moduleManifestMap?.[DEFAULT_MODULE_CODE] ||
           getModuleManifest(DEFAULT_MODULE_CODE, moduleManifestContext);
         window.bonsaiSharedControlDefinitions =
-          window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() || [];
+          window.bonsaiActiveModuleManifest?.getSharedControlDefinitions?.() ||
+          [];
         window.bonsaiSharedControlGroups =
           window.bonsaiActiveModuleManifest?.getSharedControlGroups?.() || [];
         window.bonsaiSharedControlResolver = sharedControlResolver;
@@ -10481,7 +10661,8 @@
           const storedLeaves = localStorage.getItem("bonsai.fallingLeavesOn");
           if (storedLeaves !== null) {
             const s = String(storedLeaves).toLowerCase();
-            fallingLeavesToggle.checked = s === "1" || s === "on" || s === "true";
+            fallingLeavesToggle.checked =
+              s === "1" || s === "on" || s === "true";
           }
         }
         if (fallingLeavesAmountUI) {
@@ -10525,9 +10706,12 @@
           }
         }
         applyBackground();
-        sharedControlService.syncValues(["backgroundPreset", "backgroundColor"], {
-          reason: "initial-background-state",
-        });
+        sharedControlService.syncValues(
+          ["backgroundPreset", "backgroundColor"],
+          {
+            reason: "initial-background-state",
+          },
+        );
         await loadSnapshotsFromStorage();
         renderSnapshotGallery();
         renderHelpTipsList();
@@ -10581,4 +10765,6 @@
       initial();
     </script>
   </body>
+  <script src="./_DesignSystem/js/theme-registry.js"></script>
+  <script src="./_DesignSystem/js/theme-selector.js"></script>
 </html>
