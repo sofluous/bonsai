@@ -1,8 +1,9 @@
-import {
+(function () {
+const {
   DEFAULT_MODULE_CODE,
   getModuleEntry,
   getModuleManifestKey,
-} from "./moduleRegistry.js";
+} = window.BonsaiModuleRegistry;
 
 function deepClone(value) {
   if (value === undefined) return undefined;
@@ -39,7 +40,7 @@ function assignPath(target, path, value) {
   return target;
 }
 
-export function createBonsaiHubShell({
+function createBonsaiHubShell({
   adapter,
   mode = DEFAULT_MODULE_CODE,
   moduleCode = DEFAULT_MODULE_CODE,
@@ -140,3 +141,8 @@ export function createBonsaiHubShell({
     subscribe,
   };
 }
+
+window.BonsaiHubShellModule = {
+  createBonsaiHubShell,
+};
+})();

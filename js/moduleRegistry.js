@@ -1,7 +1,8 @@
-export const ACTIVE_MODULE_STORAGE_KEY = "bonsai.activeModule";
-export const DEFAULT_MODULE_CODE = "bonsai";
+(function () {
+const ACTIVE_MODULE_STORAGE_KEY = "bonsai.activeModule";
+const DEFAULT_MODULE_CODE = "bonsai";
 
-export const MODULE_REGISTRY = Object.freeze([
+const MODULE_REGISTRY = Object.freeze([
   Object.freeze({
     code: "bonsai",
     manifestKey: "bonsai",
@@ -38,19 +39,30 @@ export const MODULE_REGISTRY = Object.freeze([
   }),
 ]);
 
-export function listModules() {
+function listModules() {
   return MODULE_REGISTRY.slice();
 }
 
-export function getModuleEntry(moduleCode = DEFAULT_MODULE_CODE) {
+function getModuleEntry(moduleCode = DEFAULT_MODULE_CODE) {
   const code = String(moduleCode || DEFAULT_MODULE_CODE).toLowerCase();
   return MODULE_REGISTRY.find((entry) => entry.code === code) || null;
 }
 
-export function getDefaultModuleEntry() {
+function getDefaultModuleEntry() {
   return getModuleEntry(DEFAULT_MODULE_CODE);
 }
 
-export function getModuleManifestKey(moduleCode = DEFAULT_MODULE_CODE) {
+function getModuleManifestKey(moduleCode = DEFAULT_MODULE_CODE) {
   return getModuleEntry(moduleCode)?.manifestKey || DEFAULT_MODULE_CODE;
 }
+
+window.BonsaiModuleRegistry = {
+  ACTIVE_MODULE_STORAGE_KEY,
+  DEFAULT_MODULE_CODE,
+  MODULE_REGISTRY,
+  listModules,
+  getModuleEntry,
+  getDefaultModuleEntry,
+  getModuleManifestKey,
+};
+})();

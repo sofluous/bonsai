@@ -1,13 +1,14 @@
-import { DEFAULT_MODULE_CODE, getModuleEntry } from "./moduleRegistry.js";
-import { createBonsaiModuleManifest } from "./manifests/bonsaiManifest.js";
-import { createSakanaModuleManifest } from "./manifests/sakanaManifest.js";
+(function () {
+const { DEFAULT_MODULE_CODE, getModuleEntry } = window.BonsaiModuleRegistry;
+const { createBonsaiModuleManifest, createSakanaModuleManifest } =
+  window.BonsaiManifestFactories;
 
 const MANIFEST_FACTORIES = {
   bonsai: createBonsaiModuleManifest,
   sakana: createSakanaModuleManifest,
 };
 
-export function getModuleManifest(moduleCode = DEFAULT_MODULE_CODE, context = {}) {
+function getModuleManifest(moduleCode = DEFAULT_MODULE_CODE, context = {}) {
   const moduleEntry = getModuleEntry(moduleCode);
   if (!moduleEntry) return null;
   const factory = MANIFEST_FACTORIES[moduleEntry.manifestKey];
@@ -18,7 +19,7 @@ export function getModuleManifest(moduleCode = DEFAULT_MODULE_CODE, context = {}
   });
 }
 
-export function buildModuleManifestMap(context = {}) {
+function buildModuleManifestMap(context = {}) {
   const manifests = {};
   Object.keys(MANIFEST_FACTORIES).forEach((moduleCode) => {
     const manifest = getModuleManifest(moduleCode, context);
@@ -26,3 +27,9 @@ export function buildModuleManifestMap(context = {}) {
   });
   return manifests;
 }
+
+window.BonsaiManifestRegistry = {
+  getModuleManifest,
+  buildModuleManifestMap,
+};
+})();

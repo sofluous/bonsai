@@ -1,9 +1,10 @@
-import {
+(function () {
+const {
   listCoreSharedControlGroups,
   listCoreSharedControls,
-} from "../sharedControlCatalog.js";
+} = window.BonsaiSharedControlCatalog;
 
-export function createBonsaiModuleManifest({
+function createBonsaiModuleManifest({
   moduleEntry,
   adapter,
   hubShell,
@@ -55,3 +56,8 @@ export function createBonsaiModuleManifest({
     },
   };
 }
+
+window.BonsaiManifestFactories = window.BonsaiManifestFactories || {};
+window.BonsaiManifestFactories.createBonsaiModuleManifest =
+  createBonsaiModuleManifest;
+})();

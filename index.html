@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="neon-grid">
+<html lang="en" data-theme="neon-grid" data-ds-theme-storage="bonsai.theme" data-ds-theme-default="neon-grid">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -3240,6 +3240,7 @@
                     id="themeSelect"
                     class="ds-select"
                     aria-label="Design theme"
+                    data-ds-theme-select
                   >
                     <option value="">Loading themes...</option>
                   </select>
@@ -3790,28 +3791,37 @@
       </div>
     </div>
 
+    <script src="./js/sharedControlCatalog.js"></script>
+    <script src="./js/moduleRegistry.js"></script>
+    <script src="./js/bonsaiHubAdapter.js"></script>
+    <script src="./js/bonsaiHubShell.js"></script>
+    <script src="./js/sharedControlResolver.js"></script>
+    <script src="./js/sharedControlService.js"></script>
+    <script src="./js/manifests/bonsaiManifest.js"></script>
+    <script src="./js/manifests/sakanaManifest.js"></script>
+    <script src="./js/moduleManifestRegistry.js"></script>
+    <script src="./js/moduleReadiness.js"></script>
+    <script src="./js/moduleSwitcher.js"></script>
     <script type="module">
       import * as THREE from "three";
       import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-      import { createBonsaiHubAdapter } from "./js/bonsaiHubAdapter.js";
-      import { createBonsaiHubShell } from "./js/bonsaiHubShell.js";
-      import {
-        buildModuleManifestMap,
-        getModuleManifest,
-      } from "./js/moduleManifestRegistry.js";
-      import {
+      const { createBonsaiHubAdapter } = window.BonsaiHubAdapterModule;
+      const { createBonsaiHubShell } = window.BonsaiHubShellModule;
+      const { buildModuleManifestMap, getModuleManifest } =
+        window.BonsaiManifestRegistry;
+      const {
         ACTIVE_MODULE_STORAGE_KEY,
         DEFAULT_MODULE_CODE,
         MODULE_REGISTRY,
         getModuleEntry,
-      } from "./js/moduleRegistry.js";
-      import {
-        summarizeModuleReadiness,
-        validateModuleManifestMap,
-      } from "./js/moduleReadiness.js";
-      import { createModuleSwitcher } from "./js/moduleSwitcher.js";
-      import { createSharedControlResolver } from "./js/sharedControlResolver.js";
-      import { createSharedControlService } from "./js/sharedControlService.js";
+      } = window.BonsaiModuleRegistry;
+      const { summarizeModuleReadiness, validateModuleManifestMap } =
+        window.BonsaiModuleReadiness;
+      const { createModuleSwitcher } = window.BonsaiModuleSwitcherModule;
+      const { createSharedControlResolver } =
+        window.BonsaiSharedControlResolverModule;
+      const { createSharedControlService } =
+        window.BonsaiSharedControlServiceModule;
       // --- UI refs ---
       const $ = (id) => document.getElementById(id);
       const cssVar = (name, fallback = "") =>
@@ -10108,119 +10118,7 @@
         if (e.key === "[") onHold(+1, false);
         if (e.key === "]") onHold(-1, false);
       });
-
-      // === Theme switching (DesignSystemizer) ===
-      (() => {
-        const themeSelect = document.getElementById("themeSelect");
-        if (!themeSelect) return;
-        const rootEl = document.documentElement;
-
-        const formatThemeLabel = (name) =>
-          String(name || "")
-            .trim()
-            .split("-")
-            .filter(Boolean)
-            .map((part) =>
-              part.length <= 3
-                ? part.toUpperCase()
-                : part.charAt(0).toUpperCase() + part.slice(1),
-            )
-            .join(" ");
-
-        const discoverDesignSystemThemes = () => {
-          const set = new Set();
-          const push = (v) => {
-            const t = String(v || "").trim();
-            if (t) set.add(t);
-          };
-          const collectFromSelector = (text) => {
-            if (!text || text.indexOf("[data-theme") < 0) return;
-            const rx =
-              /\[data-theme(?:\s*=\s*(?:(['"])([^'"]+)\1|([^\]'"\s]+)))?\]/g;
-            let m;
-            while ((m = rx.exec(text))) {
-              const name = m[2] || m[3] || "";
-              if (name) push(name);
-            }
-          };
-          const visitRules = (rules) => {
-            if (!rules) return;
-            for (const rule of Array.from(rules)) {
-              const text = String(rule.selectorText || "");
-              collectFromSelector(text);
-              if (rule.cssRules && rule.cssRules.length) {
-                visitRules(rule.cssRules);
-              } else if (rule.styleSheet) {
-                // CSSImportRule: recurse into imported stylesheet
-                try {
-                  if (rule.styleSheet.cssRules) {
-                    visitRules(rule.styleSheet.cssRules);
-                  }
-                } catch (err) {}
-              }
-            }
-          };
-          push(rootEl.getAttribute("data-theme"));
-          for (const opt of Array.from(themeSelect.options || [])) {
-            push(opt.value);
-          }
-          for (const sheet of Array.from(document.styleSheets || [])) {
-            let rules;
-            try {
-              rules = sheet.cssRules || sheet.rules;
-            } catch (err) {
-              continue;
-            }
-            visitRules(rules);
-          }
-          return Array.from(set).sort((a, b) => a.localeCompare(b));
-        };
-
-        const buildThemeOptions = (themeNames) => {
-          const options = themeNames.length
-            ? themeNames
-            : [rootEl.getAttribute("data-theme") || "steel-night"];
-          themeSelect.innerHTML = "";
-          for (const theme of options) {
-            const opt = document.createElement("option");
-            opt.value = theme;
-            opt.textContent = formatThemeLabel(theme);
-            themeSelect.appendChild(opt);
-          }
-        };
-
-        const setTheme = (theme) => {
-          if (!theme) return;
-          rootEl.setAttribute("data-theme", theme);
-          localStorage.setItem("bonsai.theme", theme);
-        };
-
-        const themes = discoverDesignSystemThemes();
-        buildThemeOptions(themes);
-
-        const storedTheme =
-          localStorage.getItem("bonsai.theme") ||
-          rootEl.getAttribute("data-theme") ||
-          themes[0] ||
-          "steel-night";
-        const hasStored = Array.from(themeSelect.options).some(
-          (opt) => opt.value === storedTheme,
-        );
-        if (!hasStored) {
-          const opt = document.createElement("option");
-          opt.value = storedTheme;
-          opt.textContent = formatThemeLabel(storedTheme);
-          themeSelect.appendChild(opt);
-        }
-        themeSelect.value = storedTheme;
-        setTheme(storedTheme);
-
-        themeSelect.addEventListener("change", () => {
-          setTheme(themeSelect.value);
-        });
-      })();
-
-      // Toolbar actions – forward to existing controls
+      // Toolbar actions
       if (tbSnapAdd) tbSnapAdd.addEventListener("click", createSnapshot);
 
       // Rotate hold via same handlers you have for the side-panel buttons
@@ -10768,3 +10666,5 @@
   <script src="./_DesignSystem/js/theme-registry.js"></script>
   <script src="./_DesignSystem/js/theme-selector.js"></script>
 </html>
+
+

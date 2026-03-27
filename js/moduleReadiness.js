@@ -1,4 +1,5 @@
-export function validateModuleManifest(manifest) {
+(function () {
+function validateModuleManifest(manifest) {
   const issues = [];
   if (!manifest) {
     return {
@@ -49,14 +50,14 @@ export function validateModuleManifest(manifest) {
   };
 }
 
-export function validateModuleManifestMap(manifestMap = {}) {
+function validateModuleManifestMap(manifestMap = {}) {
   return Object.entries(manifestMap).reduce((report, [moduleCode, manifest]) => {
     report[moduleCode] = validateModuleManifest(manifest);
     return report;
   }, {});
 }
 
-export function summarizeModuleReadiness(report = {}) {
+function summarizeModuleReadiness(report = {}) {
   return Object.entries(report).reduce((summary, [moduleCode, result]) => {
     summary[moduleCode] = {
       ok: !!result?.ok,
@@ -66,3 +67,10 @@ export function summarizeModuleReadiness(report = {}) {
     return summary;
   }, {});
 }
+
+window.BonsaiModuleReadiness = {
+  validateModuleManifest,
+  validateModuleManifestMap,
+  summarizeModuleReadiness,
+};
+})();

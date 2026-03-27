@@ -1,3 +1,4 @@
+(function () {
 const CORE_SHARED_CONTROLS = Object.freeze([
   Object.freeze({
     id: "qualityTier",
@@ -110,10 +111,16 @@ const CORE_SHARED_CONTROL_GROUPS = Object.freeze([
   }),
 ]);
 
-export function listCoreSharedControls() {
+function listCoreSharedControls() {
   return CORE_SHARED_CONTROLS.slice();
 }
 
-export function listCoreSharedControlGroups() {
+function listCoreSharedControlGroups() {
   return CORE_SHARED_CONTROL_GROUPS.slice();
 }
+
+window.BonsaiSharedControlCatalog = {
+  listCoreSharedControls,
+  listCoreSharedControlGroups,
+};
+})();

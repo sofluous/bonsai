@@ -1,4 +1,5 @@
-export function createModuleSwitcher({
+(function () {
+function createModuleSwitcher({
   moduleSwitch,
   moduleSwitchBtn,
   moduleSwitchMenu,
@@ -132,3 +133,8 @@ export function createModuleSwitcher({
     bindEvents,
   };
 }
+
+window.BonsaiModuleSwitcherModule = {
+  createModuleSwitcher,
+};
+})();

@@ -1,4 +1,5 @@
-export function createBonsaiHubAdapter(deps) {
+(function () {
+function createBonsaiHubAdapter(deps) {
   const {
     $,
     qualityModeUI,
@@ -582,3 +583,8 @@ export function createBonsaiHubAdapter(deps) {
     normalizeSnapshotRecord,
   };
 }
+
+window.BonsaiHubAdapterModule = {
+  createBonsaiHubAdapter,
+};
+})();

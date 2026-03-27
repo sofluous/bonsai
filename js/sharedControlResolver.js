@@ -1,3 +1,4 @@
+(function () {
 function getControlValue(el) {
   if (!el) return undefined;
   return el.type === "checkbox" ? !!el.checked : el.value;
@@ -25,7 +26,7 @@ function createEventForElement(el, eventName) {
   return new Event(type, { bubbles: true });
 }
 
-export function createSharedControlResolver({ $, getManifest }) {
+function createSharedControlResolver({ $, getManifest }) {
   function readManifest() {
     return typeof getManifest === "function" ? getManifest() : null;
   }
@@ -104,3 +105,8 @@ export function createSharedControlResolver({ $, getManifest }) {
     hasControl,
   };
 }
+
+window.BonsaiSharedControlResolverModule = {
+  createSharedControlResolver,
+};
+})();

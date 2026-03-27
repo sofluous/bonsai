@@ -1,13 +1,34 @@
-import {
+(function () {
+const {
   listCoreSharedControlGroups,
   listCoreSharedControls,
-} from "../sharedControlCatalog.js";
-import {
-  SAKANA_MODULE_BOOTSTRAP,
-  createSakanaModuleRuntimeStub,
-} from "../modules/sakana/index.js";
+} = window.BonsaiSharedControlCatalog;
 
-export function createSakanaModuleManifest({
+const SAKANA_MODULE_BOOTSTRAP = Object.freeze({
+  code: "sakana",
+  runtime: "scaffolded-stub",
+  entry: "./js/modules/sakana/index.js",
+  status: "planned",
+});
+
+function createSakanaModuleRuntimeStub() {
+  return {
+    bootstrap: SAKANA_MODULE_BOOTSTRAP,
+    schema: {},
+    defaults: {},
+    presets: [],
+    variants: [],
+    controlGroups: [],
+    sanitizeConfig(config) {
+      return config || {};
+    },
+    validateConfig() {
+      return { ok: true, issues: [] };
+    },
+  };
+}
+
+function createSakanaModuleManifest({
   moduleEntry,
   sharedControlResolver,
   sharedControlService,
@@ -89,3 +110,8 @@ export function createSakanaModuleManifest({
     },
   };
 }
+
+window.BonsaiManifestFactories = window.BonsaiManifestFactories || {};
+window.BonsaiManifestFactories.createSakanaModuleManifest =
+  createSakanaModuleManifest;
+})();

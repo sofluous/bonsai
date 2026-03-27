@@ -1,3 +1,4 @@
+(function () {
 function assignPath(target, path, value) {
   if (!target || !path) return target;
   const parts = String(path).split(".");
@@ -33,7 +34,7 @@ function cloneValue(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
-export function createSharedControlService({ resolver, getSharedState, applySharedPatch }) {
+function createSharedControlService({ resolver, getSharedState, applySharedPatch }) {
   function listDefinitions() {
     return resolver?.listDefinitions?.() || [];
   }
@@ -181,3 +182,8 @@ export function createSharedControlService({ resolver, getSharedState, applyShar
     applyStateSubset,
   };
 }
+
+window.BonsaiSharedControlServiceModule = {
+  createSharedControlService,
+};
+})();
