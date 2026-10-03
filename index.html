@@ -27,18 +27,18 @@
         --bo-tab-h: var(--ds-size-tab-h, 34px);
         --bo-rail-btn-h: 42px;
         --bo-rail-btn-h-mobile: 36px;
-        --bo-control-gap: 6px;
-        --bo-control-gap-lg: 8px;
-        --bo-panel-pad-x: 12px;
-        --bo-panel-pad-y: 8px;
+        --bo-control-gap: var(--ds-field-row-gap, 6px);
+        --bo-control-gap-lg: var(--ds-rhythm-content-tight, 8px);
+        --bo-panel-pad-x: var(--ds-panel-scroll-pad-x, 12px);
+        --bo-panel-pad-y: var(--ds-panel-scroll-pad-y, 8px);
         --bo-field-label-w: var(--ds-field-label-w, 124px);
         --bo-field-value-w: 56px;
         --bo-field-action-w: var(
           --ds-field-action-w,
           calc(var(--ds-control-h-sm) + 6px)
         );
-        --bo-cam-cell: 36px;
-        --bo-cam-gap: 6px;
+        --bo-cam-cell: var(--ds-icon-action-size, 36px);
+        --bo-cam-gap: var(--ds-toolbar-compact-gap, 6px);
         --bo-shell-radius: var(--ds-radius-3);
         --bo-shell-surface: color-mix(
           in oklab,
@@ -910,7 +910,7 @@
         display: grid;
         grid-template-columns: 1fr;
         gap: 6px;
-        padding: 6px;
+        padding: var(--bo-cam-gap);
         border: 1px solid
           color-mix(in oklab, var(--ds-accent-strong) 28%, var(--ds-border));
         background: color-mix(
@@ -3633,57 +3633,57 @@
         </div>
         <div class="hud-camera" aria-label="Camera view controls">
           <div class="camera-top">
-            <button class="btn ds-btn" id="camZoomOut" title="Zoom out">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action" id="camZoomOut" title="Zoom out" aria-label="Zoom out">
               <span class="iconoir iconoir-zoom-out" aria-hidden="true"></span>
             </button>
-            <button class="btn ds-btn" id="camZoomIn" title="Zoom in">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action" id="camZoomIn" title="Zoom in" aria-label="Zoom in">
               <span class="iconoir iconoir-zoom-in" aria-hidden="true"></span>
             </button>
-            <button class="btn ds-btn" id="camZoomReset" title="Reset view">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action" id="camZoomReset" title="Reset view" aria-label="Reset view">
               <span class="iconoir iconoir-refresh" aria-hidden="true"></span>
             </button>
           </div>
           <div class="camera-gizmo">
-            <button class="btn ds-btn g-front" id="viewFront" title="Front">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-front" id="viewFront" title="Front" aria-label="Front">
               <span class="iconoir iconoir-view-grid" aria-hidden="true"></span>
             </button>
-            <button class="btn ds-btn g-top" id="viewTop" title="Top">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-top" id="viewTop" title="Top" aria-label="Top">
               <span
                 class="iconoir iconoir-nav-arrow-up"
                 aria-hidden="true"
               ></span>
             </button>
-            <button class="btn ds-btn g-back" id="viewBack" title="Back">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-back" id="viewBack" title="Back" aria-label="Back">
               <span
                 class="iconoir iconoir-view-columns-3"
                 aria-hidden="true"
               ></span>
             </button>
-            <button class="btn ds-btn g-left" id="viewLeft" title="Left">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-left" id="viewLeft" title="Left" aria-label="Left">
               <span
                 class="iconoir iconoir-nav-arrow-left"
                 aria-hidden="true"
               ></span>
             </button>
-            <button class="btn ds-btn g-home" id="viewHome" title="Home view">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-home" id="viewHome" title="Home view" aria-label="Home view">
               <span class="iconoir iconoir-home-alt" aria-hidden="true"></span>
             </button>
-            <button class="btn ds-btn g-right" id="viewRight" title="Right">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-right" id="viewRight" title="Right" aria-label="Right">
               <span
                 class="iconoir iconoir-nav-arrow-right"
                 aria-hidden="true"
               ></span>
             </button>
-            <button class="btn ds-btn g-iso" id="viewIso" title="Isometric">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-iso" id="viewIso" title="Isometric" aria-label="Isometric">
               <span class="iconoir iconoir-cube" aria-hidden="true"></span>
             </button>
-            <button class="btn ds-btn g-bottom" id="viewBottom" title="Bottom">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-bottom" id="viewBottom" title="Bottom" aria-label="Bottom">
               <span
                 class="iconoir iconoir-nav-arrow-down"
                 aria-hidden="true"
               ></span>
             </button>
-            <button class="btn ds-btn g-fit" id="viewFit" title="Fit to frame">
+            <button class="btn ds-btn ds-btn-icon ds-icon-action g-fit" id="viewFit" title="Fit to frame" aria-label="Fit to frame">
               <span
                 class="iconoir iconoir-frame-select"
                 aria-hidden="true"
