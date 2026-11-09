@@ -47,6 +47,7 @@ function createModuleSwitcher({
       showToast?.("Unknown module", "warn");
       return false;
     }
+    moduleSwitchBtn?.focus();
     if (key === defaultModuleCode) {
       localStorage.setItem(activeModuleStorageKey, defaultModuleCode);
       onActivateModule?.(key, moduleEntry, manifest);
@@ -98,11 +99,23 @@ function createModuleSwitcher({
         e.stopPropagation();
         const nextOpen = moduleSwitch?.dataset.open !== "true";
         setOpen(nextOpen);
-        if (nextOpen) syncState();
+        if (nextOpen) {
+          syncState();
+          moduleSwitchOptions?.querySelector("button")?.focus();
+        }
       });
     }
     if (moduleSwitchMenu) {
       moduleSwitchMenu.addEventListener("click", (e) => e.stopPropagation());
+      moduleSwitchMenu.addEventListener("keydown", (e) => {
+        const items = Array.from(moduleSwitchOptions?.querySelectorAll("button") || []);
+        if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key) || !items.length) return;
+        e.preventDefault();
+        const current = items.indexOf(document.activeElement);
+        const index = e.key === "Home" ? 0 : e.key === "End" ? items.length - 1
+          : (current + (e.key === "ArrowUp" ? -1 : 1) + items.length) % items.length;
+        items[index].focus();
+      });
     }
     document.addEventListener("click", (e) => {
       if (!moduleSwitch || !moduleSwitch.dataset.open) return;

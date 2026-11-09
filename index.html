@@ -96,11 +96,9 @@
         position: fixed;
         inset: 0;
         display: grid;
-        grid-template-columns: var(--rail-w) var(--panel-w) 1fr;
-        grid-template-rows: var(--bo-app-head-h) 1fr;
-        grid-template-areas:
-          "apphead apphead stage"
-          "rail panel stage";
+        grid-template-columns: calc(var(--rail-w) + var(--panel-w)) minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr);
+        grid-template-areas: "controls stage";
         gap: var(--bo-shell-gap);
         padding: var(--bo-shell-pad);
         background: var(--ds-bg);
@@ -534,9 +532,6 @@
         cursor: pointer;
       }
 
-      .section-vis-toggle[aria-pressed="false"] {
-        color: var(--ds-danger);
-      }
 
       .section-vis-toggle:hover,
       .section-vis-toggle:focus-visible {
@@ -630,23 +625,46 @@
         transform: translateY(-50%);
       }
 
-      .random-lock-btn.is-faint {
+      /* Quiet utilities: each row/header owns reveal; state never changes on hover. */
+      .ds-utility-toggle,
+      .ds-utility-toggle[aria-pressed="true"] {
         color: var(--ds-icon-action-fg);
-        opacity: 0.24;
         background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+        opacity: 0;
+        pointer-events: none;
       }
-
-      .random-lock-btn.is-locked {
-        color: var(--ds-icon-action-fg-active);
+      .ds-utility-scope:hover .ds-utility-toggle,
+      .ds-utility-scope:has(:focus-visible) .ds-utility-toggle,
+      .ds-utility-toggle[aria-pressed="true"],
+      html[data-utility-input="touch"] .ds-utility-toggle {
         opacity: 1;
-        background: transparent;
+        pointer-events: auto;
       }
-
-      .random-lock-btn.is-preview {
+      .ds-utility-toggle:hover,
+      .ds-utility-toggle:focus-visible {
         color: var(--ds-icon-action-fg-hover);
-        opacity: 1;
         background: var(--ds-icon-action-hover-bg);
       }
+      .ds-utility-toggle:focus-visible {
+        outline: 2px solid var(--ds-accent);
+        outline-offset: 2px;
+      }
+      @media (any-hover: none) {
+        html:not([data-utility-input="mouse"]) .ds-utility-toggle {
+          opacity: 1;
+          pointer-events: auto;
+        }
+      }
+      #app.panel-hidden .app-head-main { display: none; }
+      #panel .section[data-tab="gallery"] .field {
+        display: block;
+        padding-right: 0;
+        min-width: 0;
+      }
+      .gallery-grid { width: 100%; }
+      .gallery-tile { min-width: 0; }
 
       .form .field > input,
       .form .field > select {
@@ -846,29 +864,6 @@
         border: 0;
       }
 
-      .panel-actions {
-        position: relative;
-        bottom: 0;
-        z-index: 6;
-        display: flex;
-        gap: var(--bo-control-gap);
-        justify-content: flex-end;
-        align-items: center;
-        flex-shrink: 0;
-        padding: 8px var(--bo-panel-pad-x);
-        border-top: 1px solid
-          color-mix(in oklab, var(--ds-accent-strong) 28%, var(--ds-border));
-        background: color-mix(in oklab, var(--ds-bg-elevated) 94%, transparent);
-      }
-
-      .panel-actions .btn {
-        width: auto;
-        min-height: var(--ds-control-h-sm);
-        max-height: var(--ds-control-h-sm);
-        display: inline-flex;
-        align-items: center;
-      }
-
       #snapshotGallery {
         align-content: start;
       }
@@ -889,9 +884,11 @@
 
       .gallery-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
         gap: 8px;
       }
+
+      #galleryLoadMoreBtn[hidden] { display: none; }
 
       .gallery-more-row {
         margin-top: 8px;
@@ -1730,9 +1727,7 @@
       /* When collapsed, hide the left column (settings panel) and expand the stage */
       #app.panel-hidden {
         grid-template-columns: var(--rail-w) 1fr;
-        grid-template-areas:
-          "apphead stage"
-          "rail stage";
+        grid-template-areas: "controls stage";
       }
 
       #app.panel-hidden #panel {
@@ -1916,10 +1911,6 @@
           display: none !important;
         }
 
-        .panel-actions {
-          display: none;
-        }
-
         /* Toolbar: keep centered above footer with our JS bottom-offset */
         #canvasToolbar {
           left: 50%;
@@ -2045,6 +2036,81 @@
           --bo-mobile-panel-h: clamp(220px, 38vh, 340px);
         }
       }
+
+      /* One shell owns the surface; header and rail use internal dividers. */
+      #controlShell {
+        grid-area: controls;
+        display: grid;
+        grid-template-columns: var(--rail-w) minmax(0, 1fr);
+        grid-template-rows: var(--bo-app-head-h) minmax(0, 1fr);
+        grid-template-areas: "apphead apphead" "rail panel";
+        min-width: 0;
+        min-height: 0;
+        background: var(--bo-shell-surface);
+        border: var(--bo-shell-border);
+        border-radius: var(--bo-shell-radius);
+        box-shadow: var(--bo-shell-shadow);
+      }
+      #controlShell > .app-head,
+      #controlShell > #sidebar,
+      #controlShell > #panel,
+      #controlShell > #mobileRailTail {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      #controlShell > .app-head {
+        border-bottom: var(--bo-shell-border);
+      }
+      #controlShell > #sidebar {
+        border-right: var(--bo-shell-border);
+      }
+      #panel::before { content: none; }
+      #app.panel-hidden #controlShell {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "apphead" "rail";
+      }
+      #app.panel-hidden #sidebar { border-right: none; }
+
+      @media (max-width: 900px) {
+        #controlShell,
+        #app.panel-hidden #controlShell {
+          position: fixed;
+          inset: auto 0 0;
+          z-index: 6;
+          height: calc(var(--bo-mobile-panel-h) + var(--mobile-rail-h));
+          grid-template-columns: minmax(0, 1fr) calc(var(--mobile-rail-h) + var(--bo-control-gap));
+          grid-template-rows: minmax(0, 1fr) var(--mobile-rail-h);
+          grid-template-areas: "panel panel" "rail tail";
+          background: var(--ds-bg-elevated);
+          border: none;
+          border-top: var(--bo-shell-border);
+          border-radius: 0;
+        }
+        #controlShell > #panel,
+        #controlShell > #sidebar,
+        #controlShell > #mobileRailTail {
+          position: relative;
+          inset: auto;
+          width: auto;
+          height: auto;
+          max-height: none;
+          min-width: 0;
+          min-height: 0;
+          box-sizing: border-box;
+        }
+        #controlShell > #mobileRailTail { grid-area: tail; }
+        #controlShell > #sidebar,
+        #controlShell > #mobileRailTail { border-top: var(--bo-shell-border); }
+        #app.panel-hidden #controlShell {
+          height: var(--mobile-rail-h);
+          grid-template-rows: var(--mobile-rail-h);
+          grid-template-areas: "rail tail";
+        }
+        #app.panel-hidden #sidebar,
+        #app.panel-hidden #mobileRailTail { border-top: none; }
+      }
     </style>
 
     <!-- Import map for bare specifier "three" -->
@@ -2059,24 +2125,25 @@
 
   <body>
     <div id="app">
+      <div id="controlShell" role="region" aria-label="Bonsai controls">
       <div class="app-head">
         <div class="app-head-main">
           <h1 class="app-title">POLYGON BONSAI</h1>
           <div class="module-switch" id="moduleSwitch" data-open="false">
             <button
               id="moduleSwitchBtn"
-              class="btn ds-btn btn-icon ds-btn-icon module-switch-btn"
+              class="ds-icon-action module-switch-btn"
               type="button"
               aria-haspopup="menu"
               aria-expanded="false"
               aria-controls="moduleSwitchMenu"
-              title="Switch module"
+              title="Development modules"
             >
               <span
-                class="iconoir iconoir-nav-arrow-down"
+                class="iconoir iconoir-more-horiz"
                 aria-hidden="true"
               ></span>
-              <span class="sr-only">Switch module</span>
+              <span class="sr-only">Development modules</span>
             </button>
             <div
               id="moduleSwitchMenu"
@@ -2378,7 +2445,7 @@
                     min="0"
                     max="5"
                     step="0.01"
-                    value="0.55"
+                    value="2.2"
                   />
                 </div>
                 <div class="field no-val">
@@ -2389,7 +2456,7 @@
                     min="0"
                     max="5"
                     step="0.01"
-                    value="0.9"
+                    value="2"
                   />
                 </div>
                 <div class="field no-val">
@@ -2400,7 +2467,7 @@
                     min="0.5"
                     max="2.5"
                     step="0.01"
-                    value="1"
+                    value="1.15"
                   />
                 </div>
               </div>
@@ -3366,7 +3433,7 @@
                 <div class="field no-label no-val no-readout">
                   <div class="gallery-label-row">
                     <h2 class="section-title">
-                      Snapshots<span id="snapshotCount" class="snapshot-count"
+                      Saves<span id="snapshotCount" class="snapshot-count"
                         >0</span
                       >
                     </h2>
@@ -3548,17 +3615,9 @@
               </div>
             </div>
           </div>
-          <div class="panel-actions">
-            <button id="snapSave" class="btn ds-btn btn-primary ds-btn-primary">
-              <span
-                class="iconoir iconoir-media-image-plus"
-                aria-hidden="true"
-              ></span>
-              Snapshot
-            </button>
-          </div>
         </div>
       </aside>
+      </div>
       <div id="stageWrap">
         <div id="bgOverlay"></div>
         <div id="stage"></div>
@@ -3585,12 +3644,14 @@
         </div>
         <div id="canvasToolbar" role="toolbar" aria-label="Canvas tools">
           <button
-            id="randomizeAll"
-            class="btn ds-btn ds-btn-primary"
-            title="Randomize All (R)"
+            id="tbSnapAdd"
+            class="btn ds-btn btn-icon ds-btn-icon"
+            title="Save (Enter)" aria-label="Save"
           >
-            <span class="iconoir iconoir-dice-three" aria-hidden="true"></span>
-            <span>Random</span>
+            <span
+              class="iconoir iconoir-media-image-plus"
+              aria-hidden="true"
+            ></span>
           </button>
           <span class="split" aria-hidden="true"></span>
           <button
@@ -3621,14 +3682,12 @@
             ></span>
           </button>
           <button
-            id="tbSnapAdd"
-            class="btn ds-btn btn-icon ds-btn-icon"
-            title="Snapshot (Enter)"
+            id="randomizeAll"
+            class="btn ds-btn ds-btn-primary"
+            title="Randomize All (R)"
           >
-            <span
-              class="iconoir iconoir-media-image-plus"
-              aria-hidden="true"
-            ></span>
+            <span class="iconoir iconoir-dice-three" aria-hidden="true"></span>
+            <span>Random</span>
           </button>
         </div>
         <div class="hud-camera" aria-label="Camera view controls">
@@ -3731,7 +3790,7 @@
             <li><span class="kbd">Space</span> play/pause rotation</li>
             <li><span class="kbd">F</span> frame bonsai</li>
             <li><span class="kbd">R</span> randomize all properties</li>
-            <li><span class="kbd">Enter</span> save snapshot</li>
+            <li><span class="kbd">Enter</span> save</li>
             <li>
               <span class="kbd">[</span>/<span class="kbd">]</span> hold manual
               spin
@@ -3768,7 +3827,7 @@
         aria-modal="true"
         aria-labelledby="confirmTitle"
       >
-        <h3 id="confirmTitle">Delete Snapshot?</h3>
+        <h3 id="confirmTitle">Delete Save?</h3>
         <p id="confirmText">This action cannot be undone.</p>
         <label class="confirm-skip">
           <input id="confirmSkip" type="checkbox" />
@@ -3966,7 +4025,6 @@
       const tipsToggle = $("tipsToggle");
       const tipsClose = $("tipsClose");
       const tipsMessage = $("tipsMessage");
-      const snapSaveBtn = $("snapSave");
       const snapshotCount = $("snapshotCount");
       const snapImportFile = $("snapImportFile");
       const snapshotGallery = $("snapshotGallery");
@@ -4133,7 +4191,7 @@
         "Tip: drag to orbit, wheel or pinch to zoom.",
         "Tip: use [F] to frame the bonsai in view.",
         "Tip: press [R] to randomize all bonsai properties.",
-        "Tip: press [Enter] to save a snapshot instantly.",
+        "Tip: press [Enter] to save instantly.",
         "Tip: press [P] to toggle this tips overlay.",
         "Tip: press [D] to run demo auto-random mode.",
         "Tip: debug quick toggles: [O] overlay, [T] toolbar, [C] camera, [S] panel.",
@@ -4359,7 +4417,7 @@
         if (prevTab === nextTab) {
           syncRailTabState();
           syncSectionDividers();
-          updatePanelPrimaryAction();
+
           return;
         }
         panelRoot.setAttribute("data-tab", nextTab);
@@ -4376,7 +4434,7 @@
         localStorage.setItem("bonsai.panelTab", nextTab);
         requestAnimationFrame(updateCanvasToolbarOffset);
         syncSectionDividers();
-        updatePanelPrimaryAction();
+
       }
 
       function syncRailTabState(forceClear = false) {
@@ -4485,7 +4543,7 @@
         const btn = section.querySelector(":scope > h2 .section-vis-toggle");
         if (!btn) return;
         const visible = isPlantPartVisible(part);
-        btn.setAttribute("aria-pressed", visible ? "true" : "false");
+        btn.setAttribute("aria-pressed", visible ? "false" : "true");
         btn.title = visible ? "Hide section output" : "Show section output";
         btn.innerHTML = visible
           ? '<span class="iconoir iconoir-eye" aria-hidden="true"></span>'
@@ -4569,7 +4627,7 @@
         const btn = section.querySelector(":scope > h2 .section-vis-toggle");
         if (!btn) return;
         const visible = isVesselPartVisible(part);
-        btn.setAttribute("aria-pressed", visible ? "true" : "false");
+        btn.setAttribute("aria-pressed", visible ? "false" : "true");
         btn.title = visible ? "Hide section output" : "Show section output";
         btn.innerHTML = visible
           ? '<span class="iconoir iconoir-eye" aria-hidden="true"></span>'
@@ -4711,14 +4769,15 @@
             section.getAttribute("data-plant-part") || "",
           );
           if (vesselPart || plantPart) {
+            h2.classList.add("ds-utility-scope");
             let visBtn = actionsEl.querySelector(
               ":scope > .section-vis-toggle",
             );
             if (!visBtn) {
               visBtn = document.createElement("button");
               visBtn.type = "button";
-              visBtn.className = "section-vis-toggle ds-icon-action";
-              visBtn.setAttribute("aria-label", `Toggle ${title} visibility`);
+              visBtn.className = "section-vis-toggle ds-icon-action ds-utility-toggle";
+              visBtn.setAttribute("aria-label", `Hide ${title}`);
               visBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -5362,11 +5421,12 @@
         }
       }
 
+      // Scene-content light levels: readable neutral presets, separate from UI theme tokens.
       const LIGHT_PRESETS = {
-        balanced: { key: 0.55, hemi: 0.9, exposure: 1.0 },
-        studio: { key: 1.2, hemi: 1.35, exposure: 1.18 },
+        balanced: { key: 2.2, hemi: 2.0, exposure: 1.15 },
+        studio: { key: 3.0, hemi: 2.5, exposure: 1.18 },
         dramatic: { key: 1.6, hemi: 0.35, exposure: 0.92 },
-        soft: { key: 0.8, hemi: 1.6, exposure: 1.12 },
+        soft: { key: 1.6, hemi: 2.8, exposure: 1.12 },
         neon: { key: 0.45, hemi: 0.25, exposure: 1.55 },
       };
 
@@ -7990,7 +8050,7 @@
         snapshots.splice(idx, 1);
         saveSnapshotsToStorage();
         renderSnapshotGallery();
-        showToast("Snapshot deleted");
+        showToast("Save deleted");
       }
 
       function requestDeleteSnapshot(id) {
@@ -8077,6 +8137,13 @@
         "emissiveColor",
         "emissiveStrength",
       ];
+      document.addEventListener("pointerdown", (event) => {
+        document.documentElement.dataset.utilityInput = event.pointerType === "mouse" ? "mouse" : "touch";
+      }, true);
+      document.addEventListener("pointermove", (event) => {
+        if (event.pointerType === "mouse") document.documentElement.dataset.utilityInput = "mouse";
+      }, { passive: true });
+
       const RANDOM_LOCK_STORAGE_KEY = "bonsai.randomLocks.v1";
       let randomLockedIds = new Set();
 
@@ -8107,16 +8174,11 @@
         return randomLockedIds.has(id);
       }
 
-      function updateRandomLockButton(btn, locked, preview = false) {
+      function updateRandomLockButton(btn, locked) {
         if (!btn) return;
-        btn.classList.toggle("is-locked", !!locked);
-        btn.classList.toggle("is-preview", !!preview);
-        btn.classList.toggle("is-faint", !locked && !preview);
         btn.setAttribute("aria-pressed", locked ? "true" : "false");
         btn.title = locked ? "Unlock randomization" : "Lock randomization";
-        let icon = "iconoir-lock";
-        if (locked && preview) icon = "iconoir-lock-slash";
-        btn.innerHTML = `<span class="iconoir ${icon}"></span>`;
+        btn.innerHTML = `<span class="iconoir ${locked ? "iconoir-lock" : "iconoir-lock-slash"}" aria-hidden="true"></span>`;
       }
 
       function setRandomLock(id, locked) {
@@ -8136,44 +8198,20 @@
           if (!control) return;
           const field = control.closest(".field");
           if (!field || field.classList.contains("seed-row")) return;
-          field.classList.add("has-lock");
+          field.classList.add("has-lock", "ds-utility-scope");
           let btn = field.querySelector(
             `.random-lock-btn[data-lock-id="${id}"]`,
           );
           if (!btn) {
             btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "random-lock-btn ds-icon-action";
+            btn.className = "random-lock-btn ds-icon-action ds-utility-toggle";
             btn.dataset.lockId = id;
             btn.setAttribute("aria-label", `Lock ${id} from randomization`);
-            btn.addEventListener("mouseenter", () => {
-              updateRandomLockButton(btn, isRandomLocked(id), true);
-            });
-            btn.addEventListener("mouseleave", () => {
-              updateRandomLockButton(btn, isRandomLocked(id), false);
-            });
-            btn.addEventListener("focus", () => {
-              updateRandomLockButton(btn, isRandomLocked(id), true);
-            });
-            btn.addEventListener("blur", () => {
-              updateRandomLockButton(btn, isRandomLocked(id), false);
-            });
-            btn.addEventListener("pointerdown", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setRandomLock(id, !isRandomLocked(id));
-              updateRandomLockButton(btn, isRandomLocked(id), true);
-            });
             btn.addEventListener("click", (e) => {
               e.preventDefault();
               e.stopPropagation();
-            });
-            btn.addEventListener("keydown", (e) => {
-              if (e.key !== "Enter" && e.key !== " ") return;
-              e.preventDefault();
-              e.stopPropagation();
               setRandomLock(id, !isRandomLocked(id));
-              updateRandomLockButton(btn, isRandomLocked(id), true);
             });
             field.appendChild(btn);
           }
@@ -8191,8 +8229,12 @@
         const tag = (el.tagName || "").toLowerCase();
         if (tag === "select") {
           if (!el.options || !el.options.length) return;
-          const idx = Math.floor(Math.random() * el.options.length);
-          el.selectedIndex = idx;
+          // These selectors also encode visibility; randomization must preserve it.
+          const visibilityControl = ["vesselType", "mediumType", "platformType"].includes(el.id);
+          if (visibilityControl && el.value === "none") return;
+          const options = Array.from(el.options).filter((option) => !option.disabled && (!visibilityControl || option.value !== "none"));
+          if (!options.length) return;
+          el.value = options[Math.floor(Math.random() * options.length)].value;
           return;
         }
         if (el.type === "color") {
@@ -8488,14 +8530,14 @@
             }));
             localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(lean));
             showToast(
-              "Storage quota reached. Snapshot previews were removed, but states are saved.",
+              "Storage quota reached. Saved previews were removed, but states are saved.",
               "warn",
               6200,
             );
             return true;
           } catch (_e) {
             showToast(
-              "Storage full. Could not save snapshots. Export gallery JSON recommended.",
+              "Storage full. Could not save. Export gallery JSON recommended.",
               "warn",
               6200,
             );
@@ -8561,7 +8603,7 @@
           .replaceAll("'", "&#39;");
       }
 
-      function placeholderThumb(name = "Snapshot") {
+      function placeholderThumb(name = "Save") {
         const label = encodeURIComponent(String(name).slice(0, 18));
         return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230f1b24'/><stop offset='1' stop-color='%231a2d3a'/></linearGradient></defs><rect width='320' height='200' fill='url(%23g)'/><rect x='18' y='18' width='284' height='164' rx='10' fill='none' stroke='%233a586d' stroke-width='2'/><text x='160' y='108' text-anchor='middle' fill='%23c9e9ff' font-size='18' font-family='monospace'>${label}</text></svg>`;
       }
@@ -8573,7 +8615,7 @@
         if (!snapshots.length) {
           const empty = document.createElement("div");
           empty.className = "snapshot-sub";
-          empty.textContent = "No snapshots yet.";
+          empty.textContent = "No saves yet.";
           snapshotGallery.appendChild(empty);
           if (galleryLoadMoreBtn) galleryLoadMoreBtn.hidden = true;
           return;
@@ -8597,8 +8639,8 @@
           const img = document.createElement("img");
           img.className = "snapshot-thumb";
           img.loading = "lazy";
-          img.alt = "Snapshot preview";
-          const fallback = placeholderThumb(snap.name || "Snapshot");
+          img.alt = "Saved preview";
+          const fallback = placeholderThumb(snap.name || "Save");
           img.src = snap.thumb || snap.thumbnail || fallback;
           img.onerror = () => {
             img.onerror = null;
@@ -8609,7 +8651,7 @@
           meta.className = "snapshot-meta";
           const name = document.createElement("div");
           name.className = "snapshot-name";
-          name.textContent = snap.name || "Snapshot";
+          name.textContent = snap.name || "Save";
           const sub = document.createElement("div");
           sub.className = "snapshot-sub";
           const hasPreview = !!(snap.thumb || snap.thumbnail);
@@ -8662,7 +8704,7 @@
         );
         saveSnapshotsToStorage();
         renderSnapshotGallery();
-        showToast("Snapshot saved");
+        showToast("Saved");
       }
 
       function backfillSnapshotPreview(id) {
@@ -8855,11 +8897,6 @@
         applyPresetToExportDimensions(exportSizePresetUI.value);
       }
 
-      function updatePanelPrimaryAction() {
-        if (!snapSaveBtn) return;
-        snapSaveBtn.innerHTML = `<span class="iconoir iconoir-media-image-plus" aria-hidden="true"></span> Snapshot`;
-      }
-
       function setExportTab(tab) {
         const nextTab = tab === "model" || tab === "gif" ? tab : "image";
         activeExportTab = nextTab;
@@ -8871,7 +8908,7 @@
         if (exportPanelModel) exportPanelModel.hidden = nextTab !== "model";
         if (exportPanelGif) exportPanelGif.hidden = nextTab !== "gif";
         updateExportSettingsVisibility();
-        updatePanelPrimaryAction();
+
       }
 
       function exportCurrentView(kind, opts = {}) {
@@ -9689,7 +9726,7 @@
               syncHubState("snapshot-recall");
               backfillSnapshotPreview(id);
               renderSnapshotGallery();
-              showToast("Snapshot loaded");
+              showToast("Save loaded");
               return;
             }
             if (action === "delete") {
@@ -9741,11 +9778,6 @@
       if (camZoomResetBtn) {
         camZoomResetBtn.addEventListener("click", () => setViewPreset("home"));
       }
-      if (snapSaveBtn) {
-        snapSaveBtn.addEventListener("click", () => {
-          createSnapshot();
-        });
-      }
       if (galleryExportAllBtn) {
         galleryExportAllBtn.addEventListener("click", () => {
           const payload = {
@@ -9756,7 +9788,7 @@
           const blob = new Blob([JSON.stringify(payload, null, 2)], {
             type: "application/json",
           });
-          downloadBlob(blob, `bonsai_snapshots_${Date.now()}.json`);
+          downloadBlob(blob, `bonsai_saves_${Date.now()}.json`);
           showToast("Gallery exported");
         });
       }
@@ -9792,7 +9824,7 @@
             renderSnapshotGallery();
             showToast("Gallery imported");
           } catch (err) {
-            console.warn("Snapshot import failed", err);
+            console.warn("Save import failed", err);
             showToast("Import failed", "warn");
           } finally {
             snapImportFile.value = "";
@@ -9825,7 +9857,7 @@
       if (exportImageKindUI) {
         exportImageKindUI.addEventListener("change", () => {
           updateExportSettingsVisibility();
-          updatePanelPrimaryAction();
+
           syncExportDimensionsUI();
           syncHubSharedState("export-image-kind");
         });
@@ -9833,7 +9865,7 @@
       if (exportModelKindUI) {
         exportModelKindUI.addEventListener("change", () => {
           updateExportSettingsVisibility();
-          updatePanelPrimaryAction();
+
           syncHubSharedState("export-model-kind");
         });
       }
@@ -10037,7 +10069,8 @@
 
       // Keyboard shortcuts
       window.addEventListener("keydown", (e) => {
-        if (isTypingContext(e.target)) return;
+        if (e.defaultPrevented || isTypingContext(e.target)) return;
+        if ((e.key === "Enter" || e.code === "Space") && e.target.closest?.("button, [role='button'], [role='menuitem']")) return;
 
         if (e.key === "Escape") {
           if (helpModal && !helpModal.hidden) {
@@ -10445,6 +10478,7 @@
       obs.observe(appRoot, { attributes: true, attributeFilter: ["class"] });
 
       function setPanelHidden(on) {
+        if (on) moduleSwitcher.setOpen(false);
         appRoot.classList.toggle("panel-hidden", !!on);
         if (sidePanelToggle) sidePanelToggle.checked = !on;
         syncRailTabState(!!on);
@@ -10666,5 +10700,4 @@
   <script src="./design-system/js/theme-registry.js"></script>
   <script src="./design-system/js/theme-selector.js"></script>
 </html>
-
 

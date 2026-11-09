@@ -16,7 +16,11 @@ With Node.js (validated with 24.14.1), check modules from this directory:
 Get-ChildItem js -Recurse -File -Filter *.js | ForEach-Object { node --check $_.FullName; if ($LASTEXITCODE -ne 0) { throw "Syntax check failed" } }
 ```
 
-There is no configured automated app test/build/lint pipeline. Check the inline HTML module as well when changing it; manually verify regeneration, snapshots/import/export, and runtime interactions after behavior changes.
+Focused state regressions: `node --test tests/ui-state.test.cjs`. Optional browser acceptance: `node tests/ui.browser.cjs` with `playwright-core` and installed Edge; set `BONSAI_PLAYWRIGHT` to an external driver module path and optionally `BONSAI_SCREENSHOT` to a PNG output path. The browser check starts/stops its own local server and requires access to the existing CDNs.
+
+Lighting acceptance: `node tests/lighting.browser.cjs` uses the same Edge/driver setup. Optional `BONSAI_LIGHTING_OUTPUT` writes comparisons into an existing directory. It verifies fixed-seed brightness, background/preset/rotation cases and legacy numerical lighting recall.
+
+There is no configured build/lint pipeline. Check the inline HTML module as well when changing it; manually verify regeneration, snapshots/import/export, and runtime interactions after behavior changes.
 
 | Location | Ownership |
 | --- | --- |
