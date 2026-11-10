@@ -19,6 +19,11 @@ function createBonsaiHubAdapter(deps) {
     applyVec3,
     getCurrentSeed,
     getAutoOn,
+    getSceneState = () => ({}),
+    applySceneState = () => {},
+    syncSnapshotEffects = () => {},
+    beginSnapshotRestore = () => {},
+    endSnapshotRestore = () => {},
   } = deps;
 
   const HUB_SHARED_CONTROL_MAP = {
@@ -140,15 +145,31 @@ function createBonsaiHubAdapter(deps) {
       );
   }
 
+  function readAutoSpeed() {
+    const value = Number(controls.autoRotateSpeed);
+    return Number.isFinite(value) ? value : 0.8;
+  }
+
+  function readCameraState() {
+    return {
+      position: toVec3Array(camera.position),
+      target: toVec3Array(controls.target),
+      up: toVec3Array(camera.up),
+      fov: camera.fov,
+      near: camera.near,
+      far: camera.far,
+      zoom: camera.zoom,
+    };
+  }
+
   function readHubSharedState() {
     const shared = {
       seed: getCurrentSeed(),
       qualityTier: qualityModeUI?.value || "auto",
       camera: {
-        position: toVec3Array(camera.position),
-        target: toVec3Array(controls.target),
+        ...readCameraState(),
         autoRotateOn: !!getAutoOn(),
-        autoRotateSpeed: parseFloat(controls.autoRotateSpeed) || 0.8,
+        autoRotateSpeed: readAutoSpeed(),
       },
       lighting: {},
       background: {},
@@ -170,6 +191,7 @@ function createBonsaiHubAdapter(deps) {
   function readBonsaiModuleState() {
     const moduleState = {
       controls: {},
+      scene: getSceneState(),
     };
 
     document
@@ -204,7 +226,6 @@ function createBonsaiHubAdapter(deps) {
         if (el.id === "seedLabel") return;
         setControlValue(el, getDefaultControlValue(el));
       });
-    sanitizeTerminalBounds();
   }
 
   function sortedSnapshotEntries(controlsState) {
@@ -335,6 +356,7 @@ function createBonsaiHubAdapter(deps) {
         : getCurrentSeed(),
       qualityTier: String(controlsState.qualityMode || "auto"),
       camera: {
+        ...state.camera,
         position: Array.isArray(state.camera?.position)
           ? state.camera.position
           : toVec3Array(camera.position),
@@ -344,7 +366,7 @@ function createBonsaiHubAdapter(deps) {
         autoRotateOn: state.autoOn !== false,
         autoRotateSpeed: Number.isFinite(Number(state.autoSpeed))
           ? Number(state.autoSpeed)
-          : parseFloat(controls.autoRotateSpeed) || 0.8,
+          : 0.8,
       },
       lighting: {},
       background: {},
@@ -377,6 +399,7 @@ function createBonsaiHubAdapter(deps) {
         version: "0.1.0-plan",
         config: {
           controls: moduleControls,
+          scene: state.scene && typeof state.scene === "object" ? state.scene : {},
         },
       },
       appShell,
@@ -413,9 +436,11 @@ function createBonsaiHubAdapter(deps) {
       autoOn: readPath(hub, "camera.autoRotateOn") !== false,
       autoSpeed: Number.isFinite(Number(readPath(hub, "camera.autoRotateSpeed")))
         ? Number(readPath(hub, "camera.autoRotateSpeed"))
-        : parseFloat(controls.autoRotateSpeed) || 0.8,
+        : 0.8,
       controls: controlsState,
+      scene: moduleConfig.scene && typeof moduleConfig.scene === "object" ? moduleConfig.scene : {},
       camera: {
+        ...hub.camera,
         position: Array.isArray(readPath(hub, "camera.position"))
           ? readPath(hub, "camera.position")
           : toVec3Array(camera.position),
@@ -450,7 +475,7 @@ function createBonsaiHubAdapter(deps) {
       source.namespaced.hub &&
       source.namespaced.module
     ) {
-      return source.namespaced;
+      return { ...source.namespaced, mode: source.namespaced.mode || "bonsai" };
     }
     const looksLikeLegacyState =
       (source.controls && typeof source.controls === "object") ||
@@ -463,6 +488,7 @@ function createBonsaiHubAdapter(deps) {
 
   function normalizeSnapshotRecord(snap) {
     if (!snap || typeof snap !== "object" || !snap.id) return null;
+    if ((snap.mode && snap.mode !== "bonsai") || (snap.module?.key && snap.module.key !== "bonsai")) return null;
     const normalized = { ...snap };
     const stateLooksLegacy =
       normalized.state &&
@@ -475,6 +501,8 @@ function createBonsaiHubAdapter(deps) {
       ? legacyStateToNamespacedSnapshot(normalized.state)
       : getNamespacedSnapshotEnvelope(normalized.state) ||
         getNamespacedSnapshotEnvelope(normalized);
+    if (!namespaced || namespaced.mode !== "bonsai" ||
+        (namespaced.module?.key && namespaced.module.key !== "bonsai")) return null;
     if (namespaced) {
       normalized.mode = namespaced.mode || "bonsai";
       normalized.hub = namespaced.hub;
@@ -492,14 +520,9 @@ function createBonsaiHubAdapter(deps) {
   }
 
   function applyNamespacedSnapshotEnvelope(namespaced) {
-    if (!namespaced || typeof namespaced !== "object") return false;
-    bonsaiHubAdapter.applySharedState(namespaced.hub || {});
-    bonsaiHubAdapter.applyAppShellState(namespaced.appShell || {});
-    bonsaiHubAdapter.applyModuleState(
-      namespaced.module && namespaced.module.config
-        ? namespaced.module.config
-        : {},
-    );
+    if (!namespaced || typeof namespaced !== "object" || namespaced.mode !== "bonsai") return false;
+    if (namespaced.module?.key && namespaced.module.key !== "bonsai") return false;
+    applyLegacySnapshotState(namespacedSnapshotToLegacyState(namespaced));
     return true;
   }
 
@@ -508,32 +531,57 @@ function createBonsaiHubAdapter(deps) {
       state.controls && typeof state.controls === "object"
         ? state.controls
         : {};
-    resetPanelControlsToDefaults();
-    sortedSnapshotEntries(c).forEach(([id, value]) => {
-      const el = $(id);
-      if (!el) return;
-      setControlValue(el, value);
-    });
-    sanitizeTerminalBounds();
-    setSeed(
-      Number.isFinite(Number(state.seed)) ? Number(state.seed) : getCurrentSeed(),
-    );
-    applyBackground();
-    applyLightingFromUI();
-    applyVesselOnly();
-    applyRenderStyle();
-    regenerate();
-    if (state.camera) {
-      applyVec3(camera.position, state.camera.position);
-      applyVec3(controls.target, state.camera.target);
-      camera.updateProjectionMatrix();
-      controls.update();
+    beginSnapshotRestore();
+    try {
+      resetPanelControlsToDefaults();
+      sortedSnapshotEntries(c).forEach(([id, value]) => {
+        const el = $(id);
+        if (!el) return;
+        setControlValue(el, value);
+      });
+      setSeed(
+        Number.isFinite(Number(state.seed)) ? Number(state.seed) : getCurrentSeed(),
+      );
+      applySceneState(state.scene || {});
+      syncSnapshotEffects(state.scene || {});
+      // Bounds depend on the restored quality budget, not the previous scene.
+      sanitizeTerminalBounds();
+      applyBackground();
+      applyLightingFromUI();
+      applyVesselOnly();
+      applyRenderStyle();
+      regenerate();
+      if (state.camera) {
+        // Consume pending orbit damping before applying the saved camera.
+        const damping = controls.enableDamping;
+        controls.enableDamping = false;
+        controls.update();
+        controls.enableDamping = damping;
+        const view = state.camera;
+        camera.fov = Number.isFinite(view.fov) && view.fov > 0 && view.fov < 180 ? view.fov : 38;
+        camera.zoom = Number.isFinite(view.zoom) && view.zoom > 0 ? view.zoom : 1;
+        camera.near = Number.isFinite(view.near) && view.near > 0 ? view.near : 0.1;
+        camera.far = Number.isFinite(view.far) && view.far > camera.near ? view.far : Math.max(200, camera.near + 1);
+        applyVec3(camera.up, view.up || [0, 1, 0]);
+        applyVec3(camera.position, state.camera.position);
+        applyVec3(controls.target, state.camera.target);
+        const position = toVec3Array(camera.position);
+        const target = toVec3Array(controls.target);
+        const distance = Math.hypot(...position.map((value, index) => value - target[index]));
+        if (Number.isFinite(distance) && distance > 0) {
+          // Generated zoom limits must not clamp a valid historical saved view.
+          controls.minDistance = Math.min(controls.minDistance ?? 0, distance * (1 - 1e-9));
+          controls.maxDistance = Math.max(controls.maxDistance ?? Infinity, distance * (1 + 1e-9));
+        }
+        camera.updateProjectionMatrix();
+        controls.update();
+      }
+      setAutoSpeed(Number.isFinite(Number(state.autoSpeed)) ? Number(state.autoSpeed) : 0.8);
+      setAutoRotate(state.autoOn !== false);
+      refreshAllReadouts();
+    } finally {
+      endSnapshotRestore();
     }
-    if (Number.isFinite(Number(state.autoSpeed))) {
-      setAutoSpeed(Number(state.autoSpeed));
-    }
-    setAutoRotate(state.autoOn !== false);
-    refreshAllReadouts();
   }
 
   function captureControlState() {
@@ -548,13 +596,11 @@ function createBonsaiHubAdapter(deps) {
     return {
       seed: getCurrentSeed(),
       autoOn: !!getAutoOn(),
-      autoSpeed: parseFloat(controls.autoRotateSpeed) || 0.8,
+      autoSpeed: readAutoSpeed(),
       controls: controlsState,
       namespaced: bonsaiHubAdapter.captureNamespacedState(),
-      camera: {
-        position: toVec3Array(camera.position),
-        target: toVec3Array(controls.target),
-      },
+      scene: getSceneState(),
+      camera: readCameraState(),
     };
   }
 

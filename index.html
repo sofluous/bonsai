@@ -4089,12 +4089,15 @@
         fitMargin: 1.18,
       };
       let gifLibPromise = null;
+      let gifExportInProgress = false;
       let gifWorkerUrl = "";
 
       // --- Scene ---
       const scene = new THREE.Scene();
       // If true, we auto refit after major layout changes (resize/panel toggle).
       const AUTO_REFIT_ON_LAYOUT = true;
+      let snapshotRestoreInProgress = false;
+      let snapshotViewRevision = 0;
 
       // Debug target gizmo (shows camera focus)
       const gizmo = new THREE.Group();
@@ -4831,7 +4834,8 @@
       }
 
       function applySpins(dt) {
-        const uiSpeed = parseFloat(controls.autoRotateSpeed) || 0.8;
+        const rawSpeed = Number(controls.autoRotateSpeed);
+        const uiSpeed = Number.isFinite(rawSpeed) ? rawSpeed : 0.8;
         if (autoOn && uiSpeed !== 0) spinBy(uiSpeed * AUTO_BASE, dt);
         if (holdSpin !== 0) spinBy(holdSpin * 1.2, dt);
       }
@@ -4858,7 +4862,10 @@
       }
 
       function refitSoon() {
+        if (snapshotRestoreInProgress) return;
+        const revision = snapshotViewRevision;
         requestAnimationFrame(() => {
+          if (revision !== snapshotViewRevision) return;
           // Ensure renderer size & aspect are synced first
           onResizeCore();
           // One authoritative frame after layout is stable
@@ -4867,7 +4874,12 @@
       }
 
       // Debounced resize that can refit after layout shifts (e.g., panel show/hide, orientation changes)
-      const onResize = debounce(() => {
+      const onResize = debounce((revision) => {
+        if (revision !== snapshotViewRevision) {
+          onResizeCore();
+          updateCanvasToolbarOffset();
+          return;
+        }
         if (
           qualityModeUI &&
           String(
@@ -4882,8 +4894,8 @@
       }, 120);
 
       // Initial and listeners
-      onResize(); // run once after boot
-      window.addEventListener("resize", onResize);
+      onResize(snapshotViewRevision); // run once after boot
+      window.addEventListener("resize", () => onResize(snapshotViewRevision));
 
       // Keep renderer exactly matched to #stage via ResizeObserver
       let lastW = 0,
@@ -8400,6 +8412,68 @@
         if ([x, y, z].every(Number.isFinite)) target.set(x, y, z);
       }
 
+      function captureSnapshotScene() {
+        return {
+          transform: {
+            position: toVec3Array(ike.position),
+            rotation: ike.rotation.toArray(),
+            scale: toVec3Array(ike.scale),
+          },
+          plantVisibility: { ...plantPartVisibility },
+          lastVisibleTypes: Object.fromEntries(["vessel", "medium", "platform"].map((part) => {
+            const control = getVesselPartControl(part);
+            return [part, control?.value !== "none" ? control?.value : control?.dataset.lastVisibleValue || getDefaultVesselPartType(part)];
+          })),
+          // Freeze auto's resolved geometry budget for cross-device recall.
+          qualityTier: SAFE_INST_LIMIT === 900 ? "high" : SAFE_INST_LIMIT === 320 ? "mobile" : "balanced",
+        };
+      }
+
+      function restoreSnapshotScene(saved) {
+        const transform = saved.transform || {};
+        applyVec3(ike.position, [0, 0, 0]);
+        applyVec3(ike.scale, [1, 1, 1]);
+        ike.rotation.set(0, 0, 0);
+        applyVec3(ike.position, transform.position);
+        if (Array.isArray(transform.scale) && transform.scale.every((value) => Number.isFinite(value) && value > 0)) {
+          applyVec3(ike.scale, transform.scale);
+        }
+        const rotation = transform.rotation;
+        if (Array.isArray(rotation) && rotation.length === 4 && rotation.slice(0, 3).every(Number.isFinite) &&
+            ["XYZ", "YZX", "ZXY", "XZY", "YXZ", "ZYX"].includes(rotation[3])) {
+          ike.rotation.set(...rotation);
+        }
+        ["leaves", "branches", "trunk"].forEach((part) => {
+          plantPartVisibility[part] = typeof saved.plantVisibility?.[part] === "boolean" ? saved.plantVisibility[part] : true;
+        });
+        ["vessel", "medium", "platform"].forEach((part) => {
+          const control = getVesselPartControl(part);
+          if (!control) return;
+          const value = saved.lastVisibleTypes?.[part];
+          const valid = value !== "none" && Array.from(control.options).some((option) => option.value === value);
+          control.dataset.lastVisibleValue = valid ? value : control.value !== "none" ? control.value : getDefaultVesselPartType(part);
+        });
+      }
+
+      function syncSnapshotEffects(saved) {
+        const quality = ["high", "mobile", "balanced"].includes(saved.qualityTier) ? saved.qualityTier : qualityModeUI?.value || "auto";
+        applyQualityProfile(quality);
+        const themeSelect = $("themeSelect");
+        if (themeSelect && window.DesignSystemThemeSelector) {
+          themeSelect.value = window.DesignSystemThemeSelector.applyTheme(themeSelect.value);
+        }
+        setTipsVisible(!!tipsToggle?.checked);
+        setToolbarVisible(!!toolbarToggle?.checked, true);
+        setCameraPadVisible(!!cameraPadToggle?.checked, true);
+        setSidePanelVisible(!!sidePanelToggle?.checked, true);
+        setDemoMode(!!demoModeToggle?.checked, true);
+        syncAllPlantPartToggleButtons();
+        syncAllVesselPartToggleButtons();
+        syncFallingLeafColor();
+        updateExportSettingsVisibility();
+        onResizeCore();
+      }
+
       const {
         bonsaiHubAdapter,
         captureControlState,
@@ -8424,6 +8498,14 @@
         applyVec3,
         getCurrentSeed: () => currentSeed,
         getAutoOn: () => autoOn,
+        getSceneState: captureSnapshotScene,
+        applySceneState: restoreSnapshotScene,
+        syncSnapshotEffects,
+        beginSnapshotRestore: () => {
+          snapshotRestoreInProgress = true;
+          snapshotViewRevision += 1;
+        },
+        endSnapshotRestore: () => { snapshotRestoreInProgress = false; },
       });
       window.bonsaiHubAdapter = bonsaiHubAdapter;
       const bonsaiHubShell = createBonsaiHubShell({
@@ -8731,14 +8813,14 @@
       }
 
       function getExportCropRect(srcW, srcH, cropMode = "full") {
-        let sx = 0;
-        let sy = 0;
+
+
         let sw = srcW;
         let sh = srcH;
         if (cropMode === "square") {
           const side = Math.min(srcW, srcH);
-          sx = Math.floor((srcW - side) / 2);
-          sy = Math.floor((srcH - side) / 2);
+
+
           sw = side;
           sh = side;
         } else if (cropMode === "portrait") {
@@ -8746,23 +8828,25 @@
           const currentAspect = srcW / srcH;
           if (currentAspect > targetAspect) {
             sw = Math.floor(srcH * targetAspect);
-            sx = Math.floor((srcW - sw) / 2);
+
           } else {
             sh = Math.floor(srcW / targetAspect);
-            sy = Math.floor((srcH - sh) / 2);
+
           }
         } else if (cropMode === "landscape") {
           const targetAspect = 16 / 9;
           const currentAspect = srcW / srcH;
           if (currentAspect > targetAspect) {
             sw = Math.floor(srcH * targetAspect);
-            sx = Math.floor((srcW - sw) / 2);
+
           } else {
             sh = Math.floor(srcW / targetAspect);
-            sy = Math.floor((srcH - sh) / 2);
+
           }
         }
-        return { sx, sy, sw, sh };
+        sw = Math.max(1, sw);
+        sh = Math.max(1, sh);
+        return { sx: Math.floor((srcW - sw) / 2), sy: Math.floor((srcH - sh) / 2), sw, sh };
       }
 
       function getExportTargetSize(opts = {}) {
@@ -8911,6 +8995,72 @@
 
       }
 
+      function createModelExport(portable = false) {
+        ike.updateMatrixWorld(true);
+        const object = ike.clone(true);
+        const geometries = new Map();
+        const materials = new Map();
+        const instanceColors = new WeakMap();
+        const ownedMaterials = new Set();
+        const copyMaterial = (material) => {
+          if (!materials.has(material)) {
+            const copy = portable && material.isMeshToonMaterial
+              ? new THREE.MeshStandardMaterial({ color: material.color, roughness: 1, metalness: 0,
+                  opacity: material.opacity, transparent: material.transparent, side: material.side,
+                  vertexColors: material.vertexColors, alphaTest: material.alphaTest })
+              : material.clone();
+            materials.set(material, copy);
+            ownedMaterials.add(copy);
+          }
+          return materials.get(material);
+        };
+        const expandInstances = (parent) => {
+          parent.children.slice().forEach((child) => {
+            if (!child.isInstancedMesh) { expandInstances(child); return; }
+            const group = new THREE.Group().copy(child, false);
+            for (let i = 0; i < child.count; i += 1) {
+              const mesh = new THREE.Mesh(child.geometry, child.material);
+              child.getMatrixAt(i, mesh.matrix);
+              mesh.matrixAutoUpdate = false;
+              if (child.instanceColor) {
+                const color = new THREE.Color();
+                child.getColorAt(i, color);
+                instanceColors.set(mesh, color);
+              }
+              group.add(mesh);
+            }
+            parent.remove(child);
+            parent.add(group);
+          });
+        };
+        if (portable) expandInstances(object);
+        object.traverse((node) => {
+          if (!node.geometry || !node.material) return;
+          if (!geometries.has(node.geometry)) {
+            // Native primitive JSON otherwise rebuilds undeformed constructor geometry.
+            geometries.set(node.geometry, new THREE.BufferGeometry().copy(node.geometry));
+          }
+          node.geometry = geometries.get(node.geometry);
+          const mapMaterial = (material) => {
+            let copy = copyMaterial(material);
+            if (instanceColors.has(node)) {
+              copy = copy.clone();
+              copy.color?.multiply(instanceColors.get(node));
+              ownedMaterials.add(copy);
+            }
+            return copy;
+          };
+          node.material = Array.isArray(node.material) ? node.material.map(mapMaterial) : mapMaterial(node.material);
+        });
+        return {
+          object,
+          dispose() {
+            geometries.forEach((geometry) => geometry.dispose());
+            ownedMaterials.forEach((material) => material.dispose());
+          },
+        };
+      }
+
       function exportCurrentView(kind, opts = {}) {
         try {
           const mode = String(kind || "png");
@@ -8942,6 +9092,7 @@
               mode === "png"
                 ? canvas.toDataURL(mime)
                 : canvas.toDataURL(mime, quality);
+            if (!data.startsWith(`data:${mime};`)) throw new Error("Image encoder unavailable or output too large");
             const a = document.createElement("a");
             a.href = data;
             a.download = `bonsai_${Date.now()}.${mode}`;
@@ -8950,39 +9101,32 @@
             return;
           }
           if (mode === "scene-json") {
-            const payload = {
-              version: 1,
-              exportedAt: Date.now(),
-              model: ike.toJSON(),
-            };
-            const blob = new Blob([JSON.stringify(payload, null, 2)], {
-              type: "application/json",
-            });
-            downloadBlob(blob, `bonsai_model_${Date.now()}.json`);
-            showToast("Exported model JSON");
+            const model = createModelExport();
+            try {
+              const payload = { version: 1, exportedAt: Date.now(), model: model.object.toJSON(), state: captureControlState() };
+              downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), `bonsai_model_${Date.now()}.json`);
+              showToast("Exported model JSON");
+            } finally {
+              model.dispose();
+            }
             return;
           }
           if (mode === "glb") {
+            const model = createModelExport(true);
             import("https://unpkg.com/three@0.160.0/examples/jsm/exporters/GLTFExporter.js")
-              .then(({ GLTFExporter }) => {
-                const exporter = new GLTFExporter();
-                exporter.parse(
-                  ike,
-                  (result) => {
-                    if (!(result instanceof ArrayBuffer)) return;
-                    downloadBlob(
-                      new Blob([result], { type: "model/gltf-binary" }),
-                      `bonsai_model_${Date.now()}.glb`,
-                    );
-                    showToast("Exported GLB");
-                  },
-                  { binary: true, onlyVisible: true },
-                );
+              .then(({ GLTFExporter }) => new Promise((resolve, reject) => {
+                new GLTFExporter().parse(model.object, resolve, reject, { binary: true, onlyVisible: true });
+              }))
+              .then((result) => {
+                if (!(result instanceof ArrayBuffer)) throw new Error("Exporter did not return a binary model");
+                downloadBlob(new Blob([result], { type: "model/gltf-binary" }), `bonsai_model_${Date.now()}.glb`);
+                showToast("Exported GLB");
               })
               .catch((err) => {
                 console.warn("GLB export unavailable", err);
                 showToast("GLB export unavailable", "warn");
-              });
+              })
+              .finally(() => model.dispose());
           }
         } catch (err) {
           console.warn("Export failed", err);
@@ -8991,120 +9135,126 @@
       }
 
       function loadGifExporter() {
-        if (window.GIF) return Promise.resolve(window.GIF);
         if (gifLibPromise) return gifLibPromise;
-        gifLibPromise = new Promise(async (resolve, reject) => {
+        gifLibPromise = (async () => {
           const sources = [
-            {
-              lib: "https://unpkg.com/gif.js@0.2.0/dist/gif.js",
-              worker: "https://unpkg.com/gif.js@0.2.0/dist/gif.worker.js",
-            },
-            {
-              lib: "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js",
-              worker:
-                "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js",
-            },
-            {
-              lib: "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js",
-              worker:
-                "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js",
-            },
+            "https://unpkg.com/gif.js@0.2.0/dist/",
+            "https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/",
+            "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/",
           ];
-
-          const loadScript = (url) =>
-            new Promise((res, rej) => {
-              const script = document.createElement("script");
-              script.src = url;
-              script.async = true;
-              script.onload = () => res();
-              script.onerror = () => rej(new Error(`Failed to load: ${url}`));
-              document.head.appendChild(script);
-            });
-
-          for (const src of sources) {
+          const loadScript = (url) => new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            const timer = setTimeout(() => { script.remove(); reject(new Error("GIF library request timed out")); }, 10000);
+            script.src = url;
+            script.onload = () => { clearTimeout(timer); resolve(); };
+            script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error("GIF library unavailable")); };
+            document.head.appendChild(script);
+          });
+          for (const source of sources) {
             try {
-              await loadScript(src.lib);
-              if (window.GIF) {
-                gifWorkerUrl = src.worker;
-                resolve(window.GIF);
-                return;
-              }
-            } catch (err) {
-              // try next CDN
-            }
+              if (!window.GIF) await loadScript(`${source}gif.js`);
+              if (!window.GIF) continue;
+              const response = await fetch(`${source}gif.worker.js`, { signal: AbortSignal.timeout(10000) });
+              if (!response.ok) throw new Error("GIF worker unavailable");
+              // Workers require a same-origin URL even when the CDN supports CORS.
+              gifWorkerUrl = URL.createObjectURL(new Blob([await response.text()], { type: "text/javascript" }));
+              return window.GIF;
+            } catch (_error) { /* Try the next pinned CDN. */ }
           }
-          reject(new Error("Unable to load GIF exporter from available CDNs"));
-        });
+          throw new Error("Unable to load GIF encoder and worker");
+        })().catch((error) => { gifLibPromise = null; throw error; });
         return gifLibPromise;
       }
 
+      function getGifFrameDelay(frameIndex, fps) {
+        // GIF delays use 10 ms ticks; distribute rounding to preserve loop duration.
+        return Math.max(10, (Math.round((frameIndex + 1) * 100 / fps) - Math.round(frameIndex * 100 / fps)) * 10);
+      }
+
       async function exportLoopGif() {
-        const { size: outSize, frames, fps, fitMargin } = GIF_EXPORT_RULES;
-        const frameDelayMs = Math.max(10, Math.round(1000 / fps));
-        const prevRot = ike.rotation.y;
-        const prevTarget = controls.target.clone();
-        const prevCameraPos = camera.position.clone();
-        const prevAuto = autoOn;
-        const prevHold = holdSpin;
+        if (gifExportInProgress) return;
+        gifExportInProgress = true;
+        updateExportSettingsVisibility();
+        let encoder;
         try {
           const GIF = await loadGifExporter();
+          const { size, frames, fps, fitMargin } = GIF_EXPORT_RULES;
+          const previous = {
+            rotation: ike.rotation.clone(), target: controls.target.clone(), position: camera.position.clone(), up: camera.up.clone(),
+            near: camera.near, far: camera.far, zoom: camera.zoom, aspect: camera.aspect,
+            auto: autoOn, hold: holdSpin, enabled: controls.enabled, damping: controls.enableDamping,
+            minDistance: controls.minDistance, maxDistance: controls.maxDistance,
+            size: renderer.getSize(new THREE.Vector2()), pixelRatio: renderer.getPixelRatio(),
+          };
+          encoder = new GIF({ workers: 1, quality: 10, width: size, height: size, workerScript: gifWorkerUrl, repeat: 0 });
           showToast("Rendering GIF...");
-          setAutoRotate(false);
-          holdSpin = 0;
-
-          const { center, radius } = getBonsaiSphere();
-          const dist = fitDistanceForSphere(radius, camera.fov, 1, fitMargin);
-          const baseViewDir = new THREE.Vector3(1, 0.62, 1).normalize();
-          controls.target.copy(center);
-          camera.position.copy(center).addScaledVector(baseViewDir, dist);
-          controls.update();
-
-          const gif = new GIF({
-            workers: 1,
-            quality: 10,
-            width: outSize,
-            height: outSize,
-            workerScript:
-              gifWorkerUrl ||
-              "https://unpkg.com/gif.js@0.2.0/dist/gif.worker.js",
-          });
-
-          for (let i = 0; i < frames; i++) {
-            ike.rotation.y = prevRot + (Math.PI * 2 * i) / frames;
-            const frameCanvas = buildExportCanvas({
-              cropMode: "square",
-              sizePreset: "custom",
-              width: outSize,
-              height: outSize,
-              transparent: false,
-            });
-            gif.addFrame(frameCanvas, { copy: true, delay: frameDelayMs });
+          try {
+            setAutoRotate(false);
+            holdSpin = 0;
+            controls.enabled = false;
+            controls.enableDamping = false;
+            renderer.setPixelRatio(1);
+            renderer.setSize(size, size, false);
+            camera.aspect = 1;
+            camera.zoom = 1;
+            camera.up.set(0, 1, 0);
+            // Fit the entire swept arrangement, including leaning/off-center forms.
+            const bounds = new THREE.Box3();
+            for (let i = 0; i < frames; i += 1) {
+              ike.rotation.y = previous.rotation.y + Math.PI * 2 * i / frames;
+              bounds.union(getSceneBounds());
+            }
+            const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+            const distance = fitDistanceForSphere(Math.max(.001, sphere.radius), camera.fov, 1, fitMargin);
+            controls.target.copy(sphere.center);
+            camera.position.copy(sphere.center).addScaledVector(new THREE.Vector3(1, .62, 1).normalize(), distance);
+            camera.near = Math.max(.01, distance * .02);
+            camera.far = Math.max(camera.near + 1, distance * 10);
+            camera.lookAt(sphere.center);
+            camera.updateProjectionMatrix();
+            for (let i = 0; i < frames; i += 1) {
+              ike.rotation.y = previous.rotation.y + Math.PI * 2 * i / frames;
+              encoder.addFrame(buildExportCanvas({ cropMode: "full", sizePreset: "custom", width: size, height: size, transparent: false }),
+                { copy: true, delay: getGifFrameDelay(i, fps) });
+            }
+          } finally {
+            // Restore before asynchronous encoding so later user edits are never rewound.
+            controls.update();
+            ike.rotation.copy(previous.rotation);
+            controls.target.copy(previous.target);
+            camera.position.copy(previous.position);
+            camera.up.copy(previous.up);
+            Object.assign(camera, { near: previous.near, far: previous.far, zoom: previous.zoom, aspect: previous.aspect });
+            controls.minDistance = previous.minDistance;
+            controls.maxDistance = previous.maxDistance;
+            controls.update();
+            controls.enabled = previous.enabled;
+            controls.enableDamping = previous.damping;
+            holdSpin = previous.hold;
+            setAutoRotate(previous.auto);
+            renderer.setPixelRatio(previous.pixelRatio);
+            renderer.setSize(previous.size.x, previous.size.y, false);
+            camera.updateProjectionMatrix();
+            renderer.render(scene, camera);
           }
-
-          await new Promise((resolve, reject) => {
-            gif.on("finished", (blob) => {
-              downloadBlob(blob, `bonsai_loop_${Date.now()}.gif`);
-              resolve();
-            });
-            gif.on("abort", () => reject(new Error("GIF render aborted")));
-            gif.on("error", (err) =>
-              reject(err || new Error("GIF render failed")),
-            );
-            gif.render();
+          const blob = await new Promise((resolve, reject) => {
+            const timer = setTimeout(() => { encoder.abort(); reject(new Error("GIF encoding timed out")); }, 60000);
+            const finish = (callback, result) => { clearTimeout(timer); callback(result); };
+            encoder.on("finished", (result) => finish(resolve, result));
+            encoder.on("abort", () => finish(reject, new Error("GIF render aborted")));
+            encoder.on("error", (error) => finish(reject, error || new Error("GIF encoding failed")));
+            try { encoder.render(); } catch (error) { finish(reject, error); }
           });
+          downloadBlob(blob, `bonsai_loop_${Date.now()}.gif`);
           showToast("Exported GIF (square seamless loop)");
-        } catch (err) {
-          console.warn("GIF export failed", err);
-          const reason =
-            err && err.message ? String(err.message) : "Unknown error";
-          showToast(`GIF export failed: ${reason}`, "warn");
+        } catch (error) {
+          console.warn("GIF export failed", error);
+          showToast(`GIF export failed: ${error?.message || "Unknown error"}`, "warn");
         } finally {
-          ike.rotation.y = prevRot;
-          controls.target.copy(prevTarget);
-          camera.position.copy(prevCameraPos);
-          controls.update();
-          holdSpin = prevHold;
-          setAutoRotate(prevAuto);
+          // gif.js 0.2.0 keeps completed workers alive unless the host releases them.
+          [...(encoder?.activeWorkers || []), ...(encoder?.freeWorkers || [])].forEach((worker) => worker.terminate());
+          gifExportInProgress = false;
+          updateExportSettingsVisibility();
         }
       }
 
@@ -9122,7 +9272,10 @@
         if (exportModelBtn)
           exportModelBtn.disabled =
             !kind.startsWith("gl") && kind !== "scene-json";
-        if (exportGifBtn) exportGifBtn.disabled = kind !== "gif";
+        if (exportGifBtn) {
+          exportGifBtn.disabled = kind !== "gif" || gifExportInProgress;
+          exportGifBtn.setAttribute("aria-busy", gifExportInProgress ? "true" : "false");
+        }
       }
 
       function tick() {
@@ -9802,12 +9955,13 @@
           try {
             const text = await file.text();
             const parsed = JSON.parse(text);
-            const incoming = Array.isArray(parsed)
-              ? parsed
-              : Array.isArray(parsed?.snapshots)
-                ? parsed.snapshots
-                : [];
-            if (!incoming.length) return;
+            const incoming = Array.isArray(parsed) ? parsed : parsed?.snapshots;
+            if (!Array.isArray(incoming)) throw new Error("Expected a gallery array");
+            if (!incoming.length) {
+              showToast("No saves to import", "info");
+              return;
+            }
+            let added = 0;
             const existing = new Set(snapshots.map((s) => s.id));
             incoming.forEach((snap) => {
               const normalized = normalizeSnapshotRecord(snap);
@@ -9815,6 +9969,7 @@
               if (existing.has(normalized.id)) return;
               snapshots.push(normalized);
               existing.add(normalized.id);
+              added += 1;
             });
             snapshots = snapshots.sort(
               (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
@@ -9822,7 +9977,7 @@
             snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
             saveSnapshotsToStorage();
             renderSnapshotGallery();
-            showToast("Gallery imported");
+            showToast(added ? `Imported ${added} save${added === 1 ? "" : "s"}` : "No new valid saves to import", added ? "info" : "warn");
           } catch (err) {
             console.warn("Save import failed", err);
             showToast("Import failed", "warn");
@@ -10331,6 +10486,7 @@
           demoTimer = 0;
         }
         stopTipsCycle();
+        if (gifWorkerUrl) URL.revokeObjectURL(gifWorkerUrl);
       });
 
       function clamp(v, lo, hi) {
@@ -10398,7 +10554,7 @@
         const visible = !!on;
         tipsBar.style.display = visible ? "flex" : "none";
         if (tipsToggle) tipsToggle.checked = visible;
-        localStorage.setItem("bonsai.tipsVisible", visible ? "1" : "0");
+        if (!snapshotRestoreInProgress) localStorage.setItem("bonsai.tipsVisible", visible ? "1" : "0");
         if (visible) {
           renderTipMessage();
           startTipsCycle();
@@ -10472,12 +10628,11 @@
         demoIntervalUI.addEventListener("blur", syncDemoInterval);
       }
 
-      // Refit when the panel is toggled (class changes)
+      // Panel layout changes refit explicitly; snapshot restoration preserves its saved view.
       const appRoot = document.getElementById("app");
-      const obs = new MutationObserver(() => refitSoon());
-      obs.observe(appRoot, { attributes: true, attributeFilter: ["class"] });
 
       function setPanelHidden(on) {
+        const changed = appRoot.classList.contains("panel-hidden") !== !!on;
         if (on) moduleSwitcher.setOpen(false);
         appRoot.classList.toggle("panel-hidden", !!on);
         if (sidePanelToggle) sidePanelToggle.checked = !on;
@@ -10488,9 +10643,9 @@
         });
         updatePanelToggleIcon();
         // persist preference
-        localStorage.setItem("bonsai.panelHidden", on ? "1" : "0");
+        if (!snapshotRestoreInProgress) localStorage.setItem("bonsai.panelHidden", on ? "1" : "0");
         requestAnimationFrame(updateCanvasToolbarOffset);
-        refitSoon();
+        if (changed) refitSoon();
       }
 
       function applyToggleIcon(btn, icon, title) {

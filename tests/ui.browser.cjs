@@ -20,13 +20,13 @@ const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),
  await checkDesktopShell();
  const lock=page.locator('.random-lock-btn:visible').first();const row=lock.locator('..');
  await row.hover();await lock.click();assert.equal(await lock.getAttribute('aria-pressed'),'true');
- await page.mouse.move(1100,200);await page.waitForTimeout(200);assert.equal(await lock.evaluate(e=>getComputedStyle(e).opacity),'1');
+ await page.mouse.move(1100,200);await page.waitForTimeout(200);await page.waitForFunction(el=>getComputedStyle(el).opacity==='1',await lock.elementHandle());
  assert.ok(await lock.locator('.iconoir-lock').count());
- await row.hover();await lock.click();await page.mouse.move(1100,200);await page.waitForTimeout(200);assert.equal(await lock.evaluate(e=>getComputedStyle(e).opacity),'0');
+ await row.hover();await lock.click();await page.mouse.move(1100,200);await page.waitForTimeout(200);await page.waitForFunction(el=>getComputedStyle(el).opacity==='0',await lock.elementHandle());
  await row.hover();await lock.focus();await page.keyboard.press('Space');assert.equal(await lock.getAttribute('aria-pressed'),'true');
  await page.keyboard.press('Space');assert.equal(await lock.getAttribute('aria-pressed'),'false');
  const vis=page.locator('.section-vis-toggle:visible').first();await vis.locator('xpath=ancestor::h2').hover();await vis.click();assert.equal(await vis.getAttribute('aria-pressed'),'true');assert.equal(await vis.locator('.iconoir-eye-closed').count(),1);
- await page.mouse.move(1100,200);assert.equal(await vis.evaluate(e=>getComputedStyle(e).opacity),'1');
+ await page.mouse.move(1100,200);await page.waitForFunction(el=>getComputedStyle(el).opacity==='1',await vis.elementHandle());
  await vis.click();assert.equal(await vis.getAttribute('aria-pressed'),'false');
  await page.locator('#moduleSwitchBtn').click();await page.keyboard.press('ArrowDown');await page.keyboard.press('Escape');assert.equal(await page.locator('#moduleSwitchBtn').getAttribute('aria-expanded'),'false');
  await page.locator('#moduleSwitchBtn').click();await page.locator('#panelToggle').click();assert.equal(await page.locator('#moduleSwitch').isVisible(),false);assert.equal(await page.locator('#moduleSwitchBtn').getAttribute('aria-expanded'),'false');await page.locator('#panelToggle').click();

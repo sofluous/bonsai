@@ -1,0 +1,190 @@
+{
+  "id": "snap_1773122813080_923215",
+  "name": "magnolia 11:06:53 PM",
+  "createdAt": 1773122813080,
+  "state": {
+    "seed": 535847342,
+    "autoOn": true,
+    "autoSpeed": 0.8,
+    "controls": {
+      "bgTex": "mist",
+      "bgColor": "#ee0569",
+      "fallingLeavesToggle": false,
+      "fallingLeavesAmount": "0.19",
+      "fallingLeavesRate": "0.1",
+      "fallingLeavesDiameter": "0.74",
+      "fallingLeavesSizeVar": "1",
+      "lightPreset": "neon",
+      "bgLightLink": true,
+      "keyLight": "1.43",
+      "hemiLight": "2.68",
+      "exposure": "0.96",
+      "seedLabel": "535847342",
+      "treeType": "magnolia",
+      "heightScale": "1",
+      "levels": "10",
+      "branchColor": "#329c4d",
+      "bDepth": "3",
+      "bLen": "1",
+      "branchStart": "0.15",
+      "branchBias": "0.07",
+      "branchDrop": "0.7",
+      "branchPull": "0.13",
+      "bLenVar": "0.25",
+      "bFall": "0.85",
+      "curvature": "0.81",
+      "trunkArch": "0.22",
+      "trunkDrop": "0.64",
+      "trunkLean": "0.65",
+      "trunkTwistAmp": "0.86",
+      "trunkBaseWidth": "0.193",
+      "trunkWidthVar": "0.74",
+      "uniformity": "0.67",
+      "spread": "1.13",
+      "upBias": "0.56",
+      "bonsaiStyle": "formal",
+      "extremeModePreset": "",
+      "drama": "0.67",
+      "asymmetry": "0.51",
+      "branchTwist": "0.34",
+      "leafType": "half",
+      "leafColor": "#b90972",
+      "plumage": "wind-left",
+      "bMin": "1",
+      "bMax": "5",
+      "density": "2.88",
+      "leafSpread": "1.93",
+      "leafSize": "1.56",
+      "leafVar": "0.25",
+      "maxLeaves": "200",
+      "lowerBias": "0.99",
+      "minPerTerminal": "2",
+      "maxPerTerminal": "2",
+      "vesselType": "faceted",
+      "vesselColor": "#f2bcba",
+      "vesselDia": "1.57",
+      "vesselDepth": "2.25",
+      "vesselOffsetY": "-0.33",
+      "vesselLip": "0.03",
+      "vesselFoot": "0.81",
+      "vesselOpacity": "0.08",
+      "vesselBlur": "0.97",
+      "mediumType": "sand",
+      "mediumColor": "#f55db2",
+      "mediumDia": "2.34",
+      "mediumDepth": "1.03",
+      "mediumOffsetY": "0.91",
+      "mediumOpacity": "0.07",
+      "mediumBlur": "0.48",
+      "platformType": "disc",
+      "platformColor": "#f0a1fd",
+      "platformDia": "0.57",
+      "platformDepth": "0.41",
+      "platformOffsetY": "0.12",
+      "platformOpacity": "0.18",
+      "platformBlur": "0.44",
+      "wireToggle": false,
+      "renderMode": "toon",
+      "emissiveColor": "#e22b6c",
+      "emissiveStrength": "0.16",
+      "themeSelect": "steel-night",
+      "qualityMode": "auto",
+      "autoSpeed": "0.8",
+      "tipsToggle": false,
+      "debugToggle": false,
+      "toolbarToggle": true,
+      "cameraPadToggle": true,
+      "sidePanelToggle": true,
+      "demoInterval": "6",
+      "demoModeToggle": false,
+      "exportCropMode": "full",
+      "exportSizePreset": "current",
+      "exportWidth": "1392",
+      "exportHeight": "919",
+      "exportTransparent": true,
+      "exportImageKind": "png",
+      "exportQuality": "0.92",
+      "exportModelKind": "glb"
+    },
+    "namespaced": {
+      "mode": "bonsai",
+      "hub": {
+        "seed": 535847342,
+        "qualityTier": "auto",
+        "camera": {
+          "position": [
+            18.41382612246129,
+            11.707016845011186,
+            17.698199311144663
+          ],
+          "target": [
+            -0.33203639300478094,
+            0.4594993357315284,
+            -1.0476632043214142
+          ],
+          "autoRotateOn": true,
+          "autoRotateSpeed": 0.8
+        },
+        "lighting": {},
+        "background": {},
+        "export": {
+          "image": {},
+          "model": {}
+        }
+      },
+      "module": {
+        "key": "bonsai",
+        "version": "0.1.0-plan",
+        "config": {
+          "controls": {}
+        }
+      },
+      "appShell": {}
+    },
+    "camera": {
+      "position": [
+        18.41382612246129,
+        11.707016845011186,
+        17.698199311144663
+      ],
+      "target": [
+        -0.33203639300478094,
+        0.4594993357315284,
+        -1.0476632043214142
+      ]
+    }
+  },
+  "mode": "bonsai",
+  "hub": {
+    "seed": 535847342,
+    "qualityTier": "auto",
+    "camera": {
+      "position": [
+        18.41382612246129,
+        11.707016845011186,
+        17.698199311144663
+      ],
+      "target": [
+        -0.33203639300478094,
+        0.4594993357315284,
+        -1.0476632043214142
+      ],
+      "autoRotateOn": true,
+      "autoRotateSpeed": 0.8
+    },
+    "lighting": {},
+    "background": {},
+    "export": {
+      "image": {},
+      "model": {}
+    }
+  },
+  "module": {
+    "key": "bonsai",
+    "version": "0.1.0-plan",
+    "config": {
+      "controls": {}
+    }
+  },
+  "appShell": {}
+}

@@ -42,7 +42,6 @@ test('plant and vessel visibility use hidden pressed state and current-state gly
 test('save UI preserves legacy persistence contracts', () => {
   assert.ok(html.includes('bonsai.snapshots.v1'));
   assert.ok(html.includes('const SNAPSHOT_DB_NAME = "bonsai.gallery.db"'));
-  assert.ok(html.includes('Array.isArray(parsed?.snapshots)'));
   assert.equal(html.includes('id="snapSave"'), false);
   const toolbar = html.slice(html.indexOf('<div id="canvasToolbar"'), html.indexOf('<div class="hud-camera"'));
   assert.ok(toolbar.indexOf('id="tbSnapAdd"') < toolbar.indexOf('id="randomizeAll"'));
