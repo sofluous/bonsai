@@ -65,7 +65,7 @@ const probe = `window.__saveProbe = {
   }
   const exportPromise=page.waitForEvent('download');await page.locator('#galleryExportAllBtn').click();
   const download=await exportPromise;const exported=JSON.parse(fs.readFileSync(await download.path(),'utf8'));
-  assert.equal(exported.version,1);assert.equal(exported.snapshots.length,3);
+  assert.equal(exported.version,1);assert.equal(exported.snapshots.length,3);assert.ok(exported.snapshots.every(s=>s.schemaVersion===2));
   await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelector('#snapshotCount')?.textContent==='3');
   const persisted=await page.evaluate(()=>window.__saveProbe.stored());
   assert.deepEqual(persisted.map(s=>s.id).sort(),references.map(s=>s.id).sort());
@@ -84,16 +84,38 @@ const probe = `window.__saveProbe = {
    await imported.evaluate(state=>window.__saveProbe.apply(state),state);await imported.waitForTimeout(200);
    equal(reference.signature,await imported.evaluate(()=>window.__saveProbe.signature()),reference.species+' exported/imported Recall');
   }
+  // Version 2 authority ignores conflicting compatibility mirrors, including after import.
+  const canonicalRecord=exported.snapshots[0];const canonicalReference=references.find(item=>item.id===canonicalRecord.id);
+  const conflict=JSON.parse(JSON.stringify(canonicalRecord));conflict.id='canonical-conflict';
+  conflict.mode='sakana';conflict.module={key:'sakana'};conflict.state.seed=98765;conflict.state.controls.treeType='pine';conflict.state.camera.fov=70;conflict.state.scene.transform.rotation=[0,2.8,0,'XYZ'];
+  await imported.evaluate(()=>window.__saveProbe.mutate());await imported.evaluate(state=>window.__saveProbe.apply(state),conflict.state);await imported.waitForTimeout(200);
+  equal(canonicalReference.signature,await imported.evaluate(()=>window.__saveProbe.signature()),'direct canonical conflict precedence');
+  await upload([conflict]);const migratedConflict=await imported.evaluate(()=>window.__saveProbe.stored().find(s=>s.id==='canonical-conflict'));
+  assert.equal(migratedConflict.state.seed,canonicalRecord.state.namespaced.hub.seed);assert.equal(migratedConflict.state.camera.fov,canonicalRecord.state.namespaced.hub.camera.fov);
+  await imported.evaluate(()=>window.__saveProbe.mutate());await imported.evaluate(state=>window.__saveProbe.apply(state),migratedConflict.state);await imported.waitForTimeout(200);
+  equal(canonicalReference.signature,await imported.evaluate(()=>window.__saveProbe.signature()),'imported canonical conflict precedence');
+  // Older readers use the generated mirrors without the version/authority markers.
+  const legacyMirror=JSON.parse(JSON.stringify(canonicalRecord.state));delete legacyMirror.schemaVersion;delete legacyMirror.namespaced;
+  await imported.evaluate(()=>window.__saveProbe.mutate());await imported.evaluate(state=>window.__saveProbe.apply(state),legacyMirror);await imported.waitForTimeout(200);
+  equal(canonicalReference.signature,await imported.evaluate(()=>window.__saveProbe.signature()),'legacy reader compatibility mirror');
   // Verify full namespaced envelopes, both nested and top-level forms.
   const current=exported.snapshots[0];
   await upload([{id:'namespaced-nested',state:current.state.namespaced},{id:'namespaced-top',...current.state.namespaced}]);
-  await imported.waitForFunction(()=>document.querySelector('#snapshotCount').textContent==='5');
+  await imported.waitForFunction(()=>document.querySelector('#snapshotCount').textContent==='6');
   const currentReference=references.find(item=>item.id===current.id);
   for(const id of ['namespaced-nested','namespaced-top']) {
    await imported.evaluate(()=>window.__saveProbe.mutate());
    const state=await imported.evaluate(id=>window.__saveProbe.stored().find(s=>s.id===id).state,id);
    await imported.evaluate(state=>window.__saveProbe.apply(state),state);await imported.waitForTimeout(200);
    equal(currentReference.signature,await imported.evaluate(()=>window.__saveProbe.signature()),id);
+  }
+  for(const schemaVersion of [undefined,1]) {
+   const old=JSON.parse(JSON.stringify(canonicalRecord));old.id='old-conflict-'+String(schemaVersion);old.schemaVersion=schemaVersion;
+   old.state.namespaced.hub.seed=98765;old.state.namespaced.module.config.controls.treeType='pine';
+   await upload([old]);const migrated=await imported.evaluate(id=>window.__saveProbe.stored().find(s=>s.id===id),old.id);
+   assert.equal(migrated.schemaVersion,2);assert.equal(migrated.state.namespaced.hub.seed,canonicalRecord.state.seed);
+   await imported.evaluate(()=>window.__saveProbe.mutate());await imported.evaluate(state=>window.__saveProbe.apply(state),migrated.state);await imported.waitForTimeout(200);
+   equal(canonicalReference.signature,await imported.evaluate(()=>window.__saveProbe.signature()),'historical conflict precedence '+String(schemaVersion));
   }
   await imported.evaluate(()=>window.__saveProbe.mutate());
   const quotaState=exported.snapshots[0].state;
@@ -117,7 +139,7 @@ const probe = `window.__saveProbe = {
   }
   const count=await imported.locator('#snapshotCount').textContent();
   await upload(exported);assert.equal(await imported.locator('#snapshotCount').textContent(),count);
-  for(const bad of ['{broken',{},[{id:'empty',state:{}}],[{id:'sakana',state:{mode:'sakana',hub:{},module:{key:'sakana'}}}]]) {
+  for(const bad of ['{broken',{}, {version:2,snapshots:[{...current,id:'future-gallery'}]},[{...current,id:'future-record',schemaVersion:99}],[{...current,id:'missing-authority',schemaVersion:2,state:{seed:5,controls:{}}}],[{id:'empty',state:{}}],[{id:'sakana',state:{mode:'sakana',hub:{},module:{key:'sakana'}}}]]) {
    await upload(bad);assert.equal(await imported.locator('#snapshotCount').textContent(),count);
   }
   await imported.setViewportSize({width:390,height:844});await imported.waitForTimeout(250);
@@ -130,7 +152,7 @@ const probe = `window.__saveProbe = {
   const desktop=await imported.evaluate(()=>window.__saveProbe.signature());
   assert.equal(desktop.quality,320);assert.equal(desktop.hash,mobile.hash);equal(mobile.camera,desktop.camera,'cross-viewport saved camera');
   assert.deepEqual(errors,[]);
-  const report={current:references.map(({species,id,signature})=>({species,id,hash:signature.hash,imageHash:signature.imageHash,seed:signature.seed,quality:signature.quality})),historical,checks:['UI Save/Recall','JSON export/fresh-context import','IndexedDB reload','nested/top-level namespaced records','historical array import and repeated recall','duplicate/malformed/unsupported import','zero-speed view stability','queued resize cannot replace saved framing/quality','recall with unavailable localStorage writes','auto-quality geometry preserved across compact/desktop viewports'],errors};
+  const report={current:references.map(({species,id,signature})=>({species,id,hash:signature.hash,imageHash:signature.imageHash,seed:signature.seed,quality:signature.quality})),historical,checks:['UI Save/Recall','JSON export/fresh-context import','IndexedDB reload','nested/top-level namespaced records','historical array import and repeated recall','duplicate/malformed/unsupported import','version 2 conflicting mirror precedence','legacy reader mirror recall','unversioned and version 1 conflicting namespace migration','zero-speed view stability','queued resize cannot replace saved framing/quality','recall with unavailable localStorage writes','auto-quality geometry preserved across compact/desktop viewports'],errors};
   if(process.env.BONSAI_SAVE_REPORT)fs.writeFileSync(process.env.BONSAI_SAVE_REPORT,JSON.stringify(report,null,2));
   console.log(JSON.stringify(report));
  }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

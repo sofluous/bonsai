@@ -486,37 +486,63 @@ function createBonsaiHubAdapter(deps) {
     return looksLikeLegacyState ? legacyStateToNamespacedSnapshot(source) : null;
   }
 
+  const SAVE_SCHEMA_VERSION = 2;
+
+  function getAuthoritativeNamespacedState(source) {
+    const envelope = source?.namespaced;
+    const object = (value) => value && typeof value === "object" && !Array.isArray(value);
+    if (!object(envelope) || envelope.mode !== "bonsai" ||
+        !object(envelope.hub) || !object(envelope.module) || envelope.module.key !== "bonsai" ||
+        !object(envelope.module.config) || !object(envelope.module.config.controls) ||
+        !object(envelope.appShell)) return null;
+    return envelope;
+  }
+
+  function withLegacyMirror(namespaced, previous = {}) {
+    return {
+      ...previous,
+      ...structuredClone(namespacedSnapshotToLegacyState(namespaced)),
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      namespaced,
+    };
+  }
+
   function normalizeSnapshotRecord(snap) {
     if (!snap || typeof snap !== "object" || !snap.id) return null;
-    if ((snap.mode && snap.mode !== "bonsai") || (snap.module?.key && snap.module.key !== "bonsai")) return null;
-    const normalized = { ...snap };
-    const stateLooksLegacy =
-      normalized.state &&
-      typeof normalized.state === "object" &&
-      ((normalized.state.controls &&
-        typeof normalized.state.controls === "object") ||
-        "seed" in normalized.state ||
-        "camera" in normalized.state);
-    const namespaced = stateLooksLegacy
-      ? legacyStateToNamespacedSnapshot(normalized.state)
-      : getNamespacedSnapshotEnvelope(normalized.state) ||
-        getNamespacedSnapshotEnvelope(normalized);
+    if (snap.schemaVersion !== SAVE_SCHEMA_VERSION &&
+        ((snap.mode && snap.mode !== "bonsai") || (snap.module?.key && snap.module.key !== "bonsai"))) return null;
+    if (snap.schemaVersion !== undefined && snap.schemaVersion !== 1 && snap.schemaVersion !== SAVE_SCHEMA_VERSION) return null;
+    let namespaced;
+    if (snap.schemaVersion === SAVE_SCHEMA_VERSION) {
+      // Version 2 never falls back to a stale compatibility mirror.
+      namespaced = getAuthoritativeNamespacedState(snap.state);
+    } else {
+      const state = snap.state;
+      const legacy = state && typeof state === "object" &&
+        ((state.controls && typeof state.controls === "object") || "seed" in state || "camera" in state);
+      // Historical records keep their original precedence during migration.
+      namespaced = legacy ? legacyStateToNamespacedSnapshot(state)
+        : getNamespacedSnapshotEnvelope(state) || getNamespacedSnapshotEnvelope(snap);
+    }
     if (!namespaced || namespaced.mode !== "bonsai" ||
         (namespaced.module?.key && namespaced.module.key !== "bonsai")) return null;
-    if (namespaced) {
-      normalized.mode = namespaced.mode || "bonsai";
-      normalized.hub = namespaced.hub;
-      normalized.module = namespaced.module;
-      normalized.appShell = namespaced.appShell || {};
-      normalized.state =
-        normalized.state && typeof normalized.state === "object"
-          ? {
-              ...normalized.state,
-              namespaced,
-            }
-          : namespacedSnapshotToLegacyState(namespaced);
-    }
-    return normalized;
+    // Fill the envelope shape for historical namespaced-only records as well.
+    namespaced = {
+      ...namespaced,
+      module: { ...namespaced.module, key: "bonsai", config: {
+        ...namespaced.module?.config,
+        controls: namespaced.module?.config?.controls || {},
+      } },
+      appShell: namespaced.appShell || {},
+    };
+    if (!getAuthoritativeNamespacedState({ namespaced })) return null;
+    return {
+      ...snap,
+      schemaVersion: SAVE_SCHEMA_VERSION,
+      mode: "bonsai",
+      ...structuredClone({ hub: namespaced.hub, module: namespaced.module, appShell: namespaced.appShell }),
+      state: withLegacyMirror(namespaced, snap.state),
+    };
   }
 
   function applyNamespacedSnapshotEnvelope(namespaced) {
@@ -593,19 +619,24 @@ function createBonsaiHubAdapter(deps) {
         controlsState[el.id] =
           el.type === "checkbox" ? !!el.checked : el.value;
       });
-    return {
+    const legacy = {
       seed: getCurrentSeed(),
       autoOn: !!getAutoOn(),
       autoSpeed: readAutoSpeed(),
       controls: controlsState,
-      namespaced: bonsaiHubAdapter.captureNamespacedState(),
       scene: getSceneState(),
       camera: readCameraState(),
     };
+    return withLegacyMirror(legacyStateToNamespacedSnapshot(legacy));
   }
 
   function applyControlState(state) {
     if (!state || typeof state !== "object") return;
+    if (state.schemaVersion !== undefined) {
+      if (state.schemaVersion !== SAVE_SCHEMA_VERSION) return false;
+      const namespaced = getAuthoritativeNamespacedState(state);
+      return namespaced ? applyNamespacedSnapshotEnvelope(namespaced) : false;
+    }
     const stateLooksLegacy =
       (state.controls && typeof state.controls === "object") ||
       "seed" in state ||

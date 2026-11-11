@@ -16,7 +16,7 @@ With Node.js (validated with 24.14.1), check modules from this directory:
 Get-ChildItem js -Recurse -File -Filter *.js | ForEach-Object { node --check $_.FullName; if ($LASTEXITCODE -ne 0) { throw "Syntax check failed" } }
 ```
 
-State regressions: `node --test tests/ui-state.test.cjs tests/save-state.test.cjs tests/export-state.test.cjs`. Optional browser acceptance: `node tests/ui.browser.cjs` with `playwright-core` and installed Edge; set `BONSAI_PLAYWRIGHT` to an external driver module path and optionally `BONSAI_SCREENSHOT` to a PNG output path. The browser check starts/stops its own local server and requires access to the existing CDNs.
+State regressions: `node --test tests/ui-state.test.cjs tests/save-state.test.cjs tests/export-state.test.cjs tests/storage-state.test.cjs`. Optional browser acceptance: `node tests/ui.browser.cjs` with `playwright-core` and installed Edge; set `BONSAI_PLAYWRIGHT` to an external driver module path and optionally `BONSAI_SCREENSHOT` to a PNG output path. The browser check starts/stops its own local server and requires access to the existing CDNs.
 
 Lighting acceptance: `node tests/lighting.browser.cjs` uses the same Edge/driver setup. Optional `BONSAI_LIGHTING_OUTPUT` writes comparisons into an existing directory. It verifies fixed-seed brightness, background/preset/rotation cases and legacy numerical lighting recall.
 
@@ -34,3 +34,7 @@ There is no configured build/lint pipeline. Check the inline HTML module as well
 Keep the sandbox with its modules until deliberately extracted; it need not ship with the production page. No hosting config is supplied. Git ignore rules do not define deployment exclusions.
 
 See [AGENTS.md](AGENTS.md) for engineering constraints. Optional full-workspace docs live at `../_docs/README.md`; serving/runtime modules do not depend on that folder and it may be absent in a clone.
+
+Storage/gallery acceptance: `node tests/storage.browser.cjs` uses the same external Edge/driver setup. Covers stale-database recovery after fallback writes/deletions, total write failure/retry, 500-record batched galleries and keyboard focus/action behavior. Optional `BONSAI_STORAGE_REPORT` writes JSON evidence.
+
+Save compatibility: current records/state carry `schemaVersion: 2`, with `state.namespaced` authoritative and legacy fields generated for compatibility. Unversioned/schema-1 records migrate using their historical legacy-first precedence. Missing/malformed version-2 authority is rejected; unsupported stored records remain preserved in writes/exports. Gallery exports retain wrapper version 1. Schema-1-only older builds preserve version-2 records but cannot open them; older readers that ignore versions can use legacy mirrors. No automatic pruning or compatibility-field removal is performed.

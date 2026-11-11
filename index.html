@@ -7986,10 +7986,14 @@
       const SNAPSHOT_DB_KEY = "snapshots";
       const SNAPSHOT_RENDER_BATCH = 24;
       let snapshots = [];
+      // Keep unreadable stored records opaque so later writes/exports preserve them.
+      let preservedSnapshotRecords = [];
       let snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
       let selectedSnapshotId = null;
       let pendingDeleteSnapshotId = null;
       let snapshotDbPromise = null;
+      let snapshotWriteQueue = Promise.resolve();
+      let snapshotStorageRevision = 0;
 
       function openSnapshotDb() {
         if (!("indexedDB" in window)) return Promise.resolve(null);
@@ -8002,22 +8006,32 @@
               db.createObjectStore(SNAPSHOT_DB_STORE, { keyPath: "id" });
             }
           };
-          req.onsuccess = () => resolve(req.result);
+          req.onsuccess = () => {
+            req.result.onversionchange = () => {
+              req.result.close();
+              snapshotDbPromise = null;
+            };
+            resolve(req.result);
+          };
           req.onerror = () =>
             reject(req.error || new Error("IndexedDB open failed"));
+        });
+        snapshotDbPromise = snapshotDbPromise.catch((error) => {
+          snapshotDbPromise = null;
+          throw error;
         });
         return snapshotDbPromise;
       }
 
-      async function dbPutSnapshots(list) {
+      async function dbPutSnapshots(list, updatedAt) {
         const db = await openSnapshotDb();
         if (!db) return false;
         return new Promise((resolve, reject) => {
           const tx = db.transaction(SNAPSHOT_DB_STORE, "readwrite");
           const store = tx.objectStore(SNAPSHOT_DB_STORE);
-          store.put({ id: SNAPSHOT_DB_KEY, data: list, updatedAt: Date.now() });
+          store.put({ id: SNAPSHOT_DB_KEY, data: list, updatedAt });
           tx.oncomplete = () => resolve(true);
-          tx.onerror = () =>
+          tx.onerror = tx.onabort = () =>
             reject(tx.error || new Error("IndexedDB put failed"));
         });
       }
@@ -8029,7 +8043,7 @@
           const tx = db.transaction(SNAPSHOT_DB_STORE, "readonly");
           const store = tx.objectStore(SNAPSHOT_DB_STORE);
           const req = store.get(SNAPSHOT_DB_KEY);
-          req.onsuccess = () => resolve(req.result?.data ?? null);
+          req.onsuccess = () => resolve(req.result ?? null);
           req.onerror = () =>
             reject(req.error || new Error("IndexedDB get failed"));
         });
@@ -8060,13 +8074,13 @@
         const idx = snapshots.findIndex((s) => s.id === id);
         if (idx < 0) return;
         snapshots.splice(idx, 1);
-        saveSnapshotsToStorage();
+        saveSnapshotsToStorage("Save deleted");
         renderSnapshotGallery();
-        showToast("Save deleted");
       }
 
       function requestDeleteSnapshot(id) {
-        const skip = localStorage.getItem("bonsai.skipDeleteConfirm") === "1";
+        let skip = false;
+        try { skip = localStorage.getItem("bonsai.skipDeleteConfirm") === "1"; } catch {}
         if (skip) {
           deleteSnapshotById(id);
           return;
@@ -8590,42 +8604,41 @@
         bonsaiHubShell.refreshState(reason);
       }
 
-      async function saveSnapshotsToStorage() {
-        snapshots = snapshots
-          .map((snap) => normalizeSnapshotRecord(snap))
-          .filter(Boolean);
-        try {
-          if (await dbPutSnapshots(snapshots)) return true;
-        } catch (e) {
-          // fall through to localStorage fallback
-        }
-        try {
-          localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(snapshots));
-          return true;
-        } catch (e) {
-          // Fallback: keep all snapshot state, but drop thumbnails if quota is hit.
+      function saveSnapshotsToStorage(successMessage = "") {
+        snapshots = snapshots.map(normalizeSnapshotRecord).filter(Boolean);
+        // Capture now and serialize writes so an older async write cannot win.
+        const list = structuredClone([...snapshots, ...preservedSnapshotRecords]);
+        const supportedCount = snapshots.length;
+        const updatedAt = Math.max(Date.now(), snapshotStorageRevision + 1);
+        snapshotStorageRevision = updatedAt;
+        const write = async () => {
           try {
-            const lean = snapshots.map((s) => ({
-              ...s,
-              thumb: "",
-              thumbnail: "",
-            }));
-            localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(lean));
-            showToast(
-              "Storage quota reached. Saved previews were removed, but states are saved.",
-              "warn",
-              6200,
-            );
+            if (await dbPutSnapshots(list, updatedAt)) {
+              try { localStorage.removeItem(SNAPSHOT_STORAGE_KEY); } catch {}
+              if (successMessage) showToast(successMessage);
+              return true;
+            }
+          } catch { /* Try the atomic fallback below. */ }
+          const persistFallback = (data) => localStorage.setItem(
+            SNAPSHOT_STORAGE_KEY, JSON.stringify({ updatedAt, snapshots: data }),
+          );
+          try {
+            persistFallback(list);
+            if (successMessage) showToast(successMessage);
             return true;
-          } catch (_e) {
-            showToast(
-              "Storage full. Could not save. Export gallery JSON recommended.",
-              "warn",
-              6200,
-            );
-            return false;
+          } catch {
+            try {
+              persistFallback(list.map((s, index) => index < supportedCount ? { ...s, thumb: "", thumbnail: "" } : s));
+              showToast("Saved without previews. Storage is nearly full; export gallery JSON for a backup.", "warn", 6200);
+              return true;
+            } catch {
+              showToast("Changes are only in this session. Storage is unavailable or full; export gallery JSON before closing.", "warn", 10000);
+              return false;
+            }
           }
-        }
+        };
+        snapshotWriteQueue = snapshotWriteQueue.then(write, write);
+        return snapshotWriteQueue;
       }
 
       function updateSnapshotCount() {
@@ -8634,40 +8647,40 @@
 
       async function loadSnapshotsFromStorage() {
         let fromDb = null;
-        try {
-          fromDb = await dbGetSnapshots();
-        } catch (e) {
-          fromDb = null;
-        }
-        if (Array.isArray(fromDb)) {
-          snapshots = fromDb
-            .map((snap) => normalizeSnapshotRecord(snap))
-            .filter(Boolean);
-          snapshots = snapshots.sort(
-            (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
-          );
-          snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
-          return;
-        }
+        let fallback = null;
+        try { fromDb = await dbGetSnapshots(); } catch {}
         try {
           const raw = localStorage.getItem(SNAPSHOT_STORAGE_KEY);
-          const parsed = raw ? JSON.parse(raw) : [];
-          snapshots = Array.isArray(parsed)
-            ? parsed
-                .map((snap) => normalizeSnapshotRecord(snap))
-                .filter(Boolean)
-            : [];
-          snapshots = snapshots.sort(
-            (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
-          );
-          // migrate legacy localStorage data into IndexedDB if available
-          if (snapshots.length) {
-            saveSnapshotsToStorage();
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            fallback = Array.isArray(parsed)
+              ? { snapshots: parsed, updatedAt: 0 }
+              : parsed;
+            if (!Array.isArray(fallback?.snapshots)) throw new Error("Invalid gallery");
           }
-        } catch (e) {
-          snapshots = [];
+        } catch {
+          showToast("Local gallery could not be read. Existing storage was left intact; import a gallery backup if needed.", "warn", 10000);
         }
+        const dbValid = Array.isArray(fromDb?.data);
+        const localValid = Array.isArray(fallback?.snapshots);
+        const useLocal = localValid && (!dbValid ||
+          (Number(fallback.updatedAt) || 0) > (Number(fromDb.updatedAt) || 0));
+        const list = useLocal ? fallback.snapshots : dbValid ? fromDb.data : [];
+        snapshotStorageRevision = Math.max(Number(fromDb?.updatedAt) || 0, Number(fallback?.updatedAt) || 0);
+        snapshots = [];
+        preservedSnapshotRecords = [];
+        for (const record of list) {
+          const normalized = normalizeSnapshotRecord(record);
+          if (normalized) snapshots.push(normalized);
+          else preservedSnapshotRecords.push(record);
+        }
+        snapshots.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        if (preservedSnapshotRecords.length) showToast(
+          `${preservedSnapshotRecords.length} stored record(s) cannot be opened by this version. They are preserved in storage and gallery JSON exports.`, "warn", 10000,
+        );
         snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
+        // A fallback can represent an empty gallery after deleting its last Save.
+        if (useLocal) await saveSnapshotsToStorage();
       }
 
       function formatSnapshotTime(ts) {
@@ -8690,9 +8703,15 @@
         return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230f1b24'/><stop offset='1' stop-color='%231a2d3a'/></linearGradient></defs><rect width='320' height='200' fill='url(%23g)'/><rect x='18' y='18' width='284' height='164' rx='10' fill='none' stroke='%233a586d' stroke-width='2'/><text x='160' y='108' text-anchor='middle' fill='%23c9e9ff' font-size='18' font-family='monospace'>${label}</text></svg>`;
       }
 
-      function renderSnapshotGallery() {
+      function renderSnapshotGallery(append = false) {
         if (!snapshotGallery) return;
-        snapshotGallery.innerHTML = "";
+        const focused = document.activeElement;
+        const focusedTile = snapshotGallery.contains(focused) ? focused.closest(".gallery-tile") : null;
+        const focusId = focusedTile?.dataset.id;
+        const focusAction = focused?.dataset.action;
+        const fragment = document.createDocumentFragment();
+        const existingCount = append ? snapshotGallery.querySelectorAll(".gallery-tile").length : 0;
+        if (!append) snapshotGallery.innerHTML = "";
         updateSnapshotCount();
         if (!snapshots.length) {
           const empty = document.createElement("div");
@@ -8711,7 +8730,7 @@
             SNAPSHOT_RENDER_BATCH;
         }
         const visibleCount = Math.min(snapshots.length, snapshotRenderCount);
-        const visible = snapshots.slice(0, visibleCount);
+        const visible = snapshots.slice(existingCount, visibleCount);
         visible.forEach((snap) => {
           const item = document.createElement("div");
           item.className = "gallery-tile";
@@ -8760,8 +8779,14 @@
           item.appendChild(img);
           item.appendChild(meta);
           item.appendChild(row);
-          snapshotGallery.appendChild(item);
+          fragment.appendChild(item);
         });
+        snapshotGallery.appendChild(fragment);
+        if (focusId) {
+          const tile = Array.from(snapshotGallery.children).find((item) => item.dataset.id === focusId);
+          const target = focusAction ? tile?.querySelector(`[data-action="${focusAction}"]`) : tile;
+          target?.focus({ preventScroll: true });
+        }
         if (galleryLoadMoreBtn) {
           galleryLoadMoreBtn.hidden = visibleCount >= snapshots.length;
           galleryLoadMoreBtn.textContent = `Load More (${snapshots.length - visibleCount} remaining)`;
@@ -8773,6 +8798,7 @@
         const now = Date.now();
         const thumb = renderer.domElement.toDataURL("image/jpeg", 0.78);
         const snap = {
+          schemaVersion: 2,
           id: `snap_${now}_${Math.floor(Math.random() * 1e6)}`,
           name: `${treeType?.value || "bonsai"} ${new Date(now).toLocaleTimeString()}`,
           createdAt: now,
@@ -8784,9 +8810,8 @@
           snapshotRenderCount,
           SNAPSHOT_RENDER_BATCH,
         );
-        saveSnapshotsToStorage();
+        saveSnapshotsToStorage("Saved");
         renderSnapshotGallery();
-        showToast("Saved");
       }
 
       function backfillSnapshotPreview(id) {
@@ -9866,6 +9891,12 @@
       initFieldReadouts();
       updateEmissiveFieldState();
 
+      function updateGallerySelection() {
+        snapshotGallery?.querySelectorAll(".gallery-tile").forEach((tile) => {
+          tile.classList.toggle("is-selected", tile.dataset.id === selectedSnapshotId);
+        });
+      }
+
       if (snapshotGallery) {
         snapshotGallery.addEventListener("click", (e) => {
           const target = e.target.closest("button[data-action]");
@@ -9891,22 +9922,23 @@
           if (!tile || !snapshotGallery.contains(tile)) return;
           const id = tile.dataset.id || null;
           selectedSnapshotId = selectedSnapshotId === id ? null : id;
-          renderSnapshotGallery();
+          updateGallerySelection();
         });
         snapshotGallery.addEventListener("keydown", (e) => {
           if (e.key !== "Enter" && e.key !== " ") return;
+          if (e.target.closest("button")) return;
           const tile = e.target.closest(".gallery-tile");
           if (!tile || !snapshotGallery.contains(tile)) return;
           e.preventDefault();
           const id = tile.dataset.id || null;
           selectedSnapshotId = selectedSnapshotId === id ? null : id;
-          renderSnapshotGallery();
+          updateGallerySelection();
         });
       }
       if (galleryLoadMoreBtn) {
         galleryLoadMoreBtn.addEventListener("click", () => {
           snapshotRenderCount += SNAPSHOT_RENDER_BATCH;
-          renderSnapshotGallery();
+          renderSnapshotGallery(true);
         });
       }
 
@@ -9936,7 +9968,7 @@
           const payload = {
             version: 1,
             exportedAt: Date.now(),
-            snapshots,
+            snapshots: [...snapshots, ...preservedSnapshotRecords],
           };
           const blob = new Blob([JSON.stringify(payload, null, 2)], {
             type: "application/json",
@@ -9955,6 +9987,10 @@
           try {
             const text = await file.text();
             const parsed = JSON.parse(text);
+            if (!Array.isArray(parsed) && parsed?.version !== undefined && parsed.version !== 1) {
+              showToast("This gallery version is not supported. No saves were imported.", "warn");
+              return;
+            }
             const incoming = Array.isArray(parsed) ? parsed : parsed?.snapshots;
             if (!Array.isArray(incoming)) throw new Error("Expected a gallery array");
             if (!incoming.length) {
@@ -9962,10 +9998,11 @@
               return;
             }
             let added = 0;
-            const existing = new Set(snapshots.map((s) => s.id));
+            let skipped = 0;
+            const existing = new Set([...snapshots, ...preservedSnapshotRecords].map((s) => s?.id));
             incoming.forEach((snap) => {
               const normalized = normalizeSnapshotRecord(snap);
-              if (!normalized || !normalized.id || !normalized.state) return;
+              if (!normalized || !normalized.id || !normalized.state) { skipped += 1; return; }
               if (existing.has(normalized.id)) return;
               snapshots.push(normalized);
               existing.add(normalized.id);
@@ -9975,9 +10012,10 @@
               (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
             );
             snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
-            saveSnapshotsToStorage();
             renderSnapshotGallery();
-            showToast(added ? `Imported ${added} save${added === 1 ? "" : "s"}` : "No new valid saves to import", added ? "info" : "warn");
+            if (added) await saveSnapshotsToStorage(`Imported ${added} save${added === 1 ? "" : "s"}`);
+            else if (!skipped) showToast("No new valid saves to import", "warn");
+            if (skipped) showToast(`${skipped} unsupported or invalid record(s) skipped. Keep the original import file.`, "warn", 6200);
           } catch (err) {
             console.warn("Save import failed", err);
             showToast("Import failed", "warn");
@@ -9989,7 +10027,7 @@
       if (confirmDeleteBtn) {
         confirmDeleteBtn.addEventListener("click", () => {
           if (confirmSkip && confirmSkip.checked) {
-            localStorage.setItem("bonsai.skipDeleteConfirm", "1");
+            try { localStorage.setItem("bonsai.skipDeleteConfirm", "1"); } catch {}
           }
           if (pendingDeleteSnapshotId)
             deleteSnapshotById(pendingDeleteSnapshotId);
