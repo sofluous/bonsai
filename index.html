@@ -388,6 +388,9 @@
         position: relative;
       }
 
+      .module-tabpanel[hidden] { display: none; }
+      :is(.module-tabpanel, .export-panel):focus-visible { outline: 2px solid var(--ds-focus, var(--ds-accent)); outline-offset: -2px; }
+
       .bonsai-tabs {
         position: relative;
         z-index: 5;
@@ -440,7 +443,7 @@
         border-right: none;
       }
 
-      .bonsai-tab[aria-pressed="true"] {
+      .bonsai-tab[aria-selected="true"] {
         color: var(
           --ds-tab-active-fg,
           var(--ds-btn-primary-text, var(--ds-text))
@@ -1077,7 +1080,7 @@
         border-right: none;
       }
 
-      .export-tab[aria-pressed="true"] {
+      .export-tab[aria-selected="true"] {
         color: var(
           --ds-tab-active-fg,
           var(--ds-btn-primary-text, var(--ds-text))
@@ -1738,6 +1741,15 @@
         /* keep inside canvas on mobile */
       }
 
+      #canvasToolbar.is-constrained {
+        min-width: 0;
+        overflow-x: auto;
+        justify-content: flex-start;
+        scrollbar-width: none;
+      }
+      #canvasToolbar.is-constrained .btn { flex: 0 0 auto; }
+      #canvasToolbar.is-constrained .btn:not(.btn-icon) { width: auto; }
+
       #canvasToolbar .split {
         width: 1px;
         height: 20px;
@@ -1774,7 +1786,7 @@
      - Stage (canvas) next
      - Panel (settings) at the bottom (scrollable) */
         #app {
-          --bo-mobile-panel-h: clamp(220px, 38vh, 360px);
+          --bo-mobile-panel-h: min(clamp(220px, 38vh, 360px), var(--bo-mobile-hud-panel-cap, 100vh));
           --bo-mobile-stage-inset: calc(
             var(--mobile-rail-h) + var(--bo-mobile-panel-h) + 8px
           );
@@ -1954,7 +1966,7 @@
           min-width: 0;
           display: flex;
           flex-wrap: nowrap;
-          justify-content: center;
+          justify-content: flex-start;
           overflow-x: auto;
           overflow-y: hidden;
           touch-action: pan-x;
@@ -2067,7 +2079,7 @@
 
       @media (max-width: 900px) and (orientation: portrait) {
         #app {
-          --bo-mobile-panel-h: clamp(220px, 38vh, 340px);
+          --bo-mobile-panel-h: min(clamp(220px, 38vh, 340px), var(--bo-mobile-hud-panel-cap, 100vh));
         }
       }
 
@@ -2315,7 +2327,11 @@
             <button
               class="bonsai-tab ds-btn"
               data-bonsai-tab="plant"
-              aria-pressed="true"
+              role="tab"
+              id="bonsaiPlantTab"
+              aria-controls="bonsaiPlantPanel"
+              aria-selected="true"
+              tabindex="0"
             >
               <span
                 class="iconoir iconoir-leaf tab-icon"
@@ -2326,7 +2342,11 @@
             <button
               class="bonsai-tab ds-btn"
               data-bonsai-tab="vessel"
-              aria-pressed="false"
+              role="tab"
+              id="bonsaiVesselTab"
+              aria-controls="bonsaiVesselPanel"
+              aria-selected="false"
+              tabindex="-1"
             >
               <span
                 class="iconoir iconoir-cylinder tab-icon"
@@ -2339,7 +2359,11 @@
             <button
               class="btn ds-btn export-tab"
               data-export-tab="image"
-              aria-pressed="true"
+              role="tab"
+              id="exportImageTab"
+              aria-controls="exportPanelImage"
+              aria-selected="true"
+              tabindex="0"
             >
               <span
                 class="iconoir iconoir-screenshot tab-icon"
@@ -2350,7 +2374,11 @@
             <button
               class="btn ds-btn export-tab"
               data-export-tab="model"
-              aria-pressed="false"
+              role="tab"
+              id="exportModelTab"
+              aria-controls="exportPanelModel"
+              aria-selected="false"
+              tabindex="-1"
             >
               <span
                 class="iconoir iconoir-cube tab-icon"
@@ -2361,7 +2389,11 @@
             <button
               class="btn ds-btn export-tab"
               data-export-tab="gif"
-              aria-pressed="false"
+              role="tab"
+              id="exportGifTab"
+              aria-controls="exportPanelGif"
+              aria-selected="false"
+              tabindex="-1"
             >
               <span
                 class="iconoir iconoir-refresh tab-icon"
@@ -2375,7 +2407,7 @@
               <h2>SCENE</h2>
               <div class="form">
                 <div class="field field-inline">
-                  <label>Background</label>
+                  <label for="bgTex">Background</label>
                   <select class="ds-select" id="bgTex">
                     <option value="solid">Solid</option>
                     <option value="grain">Grain</option>
@@ -2385,7 +2417,7 @@
                     <option value="sunburst">Sunburst</option>
                     <option value="contours">Contours</option>
                   </select>
-                  <input id="bgColor" type="color" value="#0e1115" />
+                  <input id="bgColor" type="color" value="#0e1115" aria-label="Background color" />
                 </div>
               </div>
             </div>
@@ -2393,14 +2425,14 @@
               <h2>ATMOSPHERE</h2>
               <div class="form">
                 <div class="field no-val">
-                  <label>Falling Leaves</label>
-                  <label class="ds-switch" aria-label="Falling leaves effect">
-                    <input id="fallingLeavesToggle" type="checkbox" />
+                  <label for="fallingLeavesToggle">Falling Leaves</label>
+                  <label class="ds-switch">
+                    <input id="fallingLeavesToggle" type="checkbox" aria-label="Falling leaves effect" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field no-val">
-                  <label>Amount</label>
+                  <label for="fallingLeavesAmount">Amount</label>
                   <input
                     id="fallingLeavesAmount"
                     type="range"
@@ -2411,7 +2443,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Rate</label>
+                  <label for="fallingLeavesRate">Rate</label>
                   <input
                     id="fallingLeavesRate"
                     type="range"
@@ -2422,7 +2454,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Diameter</label>
+                  <label for="fallingLeavesDiameter">Diameter</label>
                   <input
                     id="fallingLeavesDiameter"
                     type="range"
@@ -2433,7 +2465,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Size Variance</label>
+                  <label for="fallingLeavesSizeVar">Size Variance</label>
                   <input
                     id="fallingLeavesSizeVar"
                     type="range"
@@ -2449,7 +2481,7 @@
               <h2>LIGHTING</h2>
               <div class="form">
                 <div class="field field-inline">
-                  <label>Preset</label>
+                  <label for="lightPreset">Preset</label>
                   <select class="ds-select" id="lightPreset">
                     <option value="balanced">Balanced</option>
                     <option value="studio">Studio Bright</option>
@@ -2462,17 +2494,16 @@
                   </button>
                 </div>
                 <div class="field no-val">
-                  <label>Background</label>
+                  <label for="bgLightLink">Background</label>
                   <label
                     class="ds-switch"
-                    aria-label="Background influences light"
                   >
-                    <input id="bgLightLink" type="checkbox" checked />
+                    <input id="bgLightLink" type="checkbox" checked aria-label="Link lighting to background" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field no-val">
-                  <label>Key</label>
+                  <label for="keyLight">Key</label>
                   <input
                     id="keyLight"
                     type="range"
@@ -2483,7 +2514,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Ambient</label>
+                  <label for="hemiLight">Ambient</label>
                   <input
                     id="hemiLight"
                     type="range"
@@ -2494,7 +2525,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Exposure</label>
+                  <label for="exposure">Exposure</label>
                   <input
                     id="exposure"
                     type="range"
@@ -2506,6 +2537,7 @@
                 </div>
               </div>
             </div>
+            <div id="bonsaiPlantPanel" class="module-tabpanel" role="tabpanel" aria-labelledby="bonsaiPlantTab" tabindex="0">
             <div
               id="speciesSection"
               class="section"
@@ -2515,7 +2547,7 @@
               <h2>SPECIES</h2>
               <div class="form">
                 <div class="field seed-row">
-                  <label>Seed</label>
+                  <label for="seedLabel">Seed</label>
                   <div class="seed-seg ds-seed-segment">
                     <input
                       id="seedLabel"
@@ -2537,7 +2569,7 @@
                   </div>
                 </div>
                 <div class="field no-val">
-                  <label>Type</label>
+                  <label for="treeType">Type</label>
                   <select class="ds-select" id="treeType">
                     <option value="magnolia">Magnolia (petals, arching)</option>
                     <option value="maple">Maple (broad, lobed)</option>
@@ -2549,7 +2581,7 @@
                 </div>
                 <!-- Phase C.1: Height & Leaf Size Controls -->
                 <div class="field">
-                  <label>Plant Height</label>
+                  <label for="heightScale">Plant Height</label>
                   <input
                     id="heightScale"
                     type="range"
@@ -2561,7 +2593,7 @@
                   <span id="heightScale_val">1.00</span>
                 </div>
                 <div class="field no-val">
-                  <label>Levels</label>
+                  <label for="levels">Levels</label>
                   <input
                     id="levels"
                     type="range"
@@ -2572,7 +2604,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Curvature</label>
+                  <label for="curvature">Curvature</label>
                   <input
                     id="curvature"
                     type="range"
@@ -2583,7 +2615,7 @@
                   />
                 </div>
                 <div class="field">
-                  <label>Trunk Arch</label>
+                  <label for="trunkArch">Trunk Arch</label>
                   <input
                     id="trunkArch"
                     type="range"
@@ -2595,7 +2627,7 @@
                   <span id="trunkArch_val">0.55</span>
                 </div>
                 <div class="field">
-                  <label>Trunk Drop</label>
+                  <label for="trunkDrop">Trunk Drop</label>
                   <input
                     id="trunkDrop"
                     type="range"
@@ -2607,7 +2639,7 @@
                   <span id="trunkDrop_val">0.25</span>
                 </div>
                 <div class="field">
-                  <label>Base Lean</label>
+                  <label for="trunkLean">Base Lean</label>
                   <input
                     id="trunkLean"
                     type="range"
@@ -2619,7 +2651,7 @@
                   <span id="trunkLean_val">0.00</span>
                 </div>
                 <div class="field">
-                  <label>Trunk Twist</label>
+                  <label for="trunkTwistAmp">Trunk Twist</label>
                   <input
                     id="trunkTwistAmp"
                     type="range"
@@ -2631,7 +2663,7 @@
                   <span id="trunkTwistAmp_val">0.55</span>
                 </div>
                 <div class="field">
-                  <label>Base Width</label>
+                  <label for="trunkBaseWidth">Base Width</label>
                   <input
                     id="trunkBaseWidth"
                     type="range"
@@ -2643,7 +2675,7 @@
                   <span id="trunkBaseWidth_val">0.110</span>
                 </div>
                 <div class="field">
-                  <label>Width Variance</label>
+                  <label for="trunkWidthVar">Width Variance</label>
                   <input
                     id="trunkWidthVar"
                     type="range"
@@ -2655,7 +2687,7 @@
                   <span id="trunkWidthVar_val">0.35</span>
                 </div>
                 <div class="field no-val">
-                  <label>Uniformity</label>
+                  <label for="uniformity">Uniformity</label>
                   <input
                     id="uniformity"
                     type="range"
@@ -2666,7 +2698,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Spread</label>
+                  <label for="spread">Spread</label>
                   <input
                     id="spread"
                     type="range"
@@ -2677,7 +2709,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Up Bias</label>
+                  <label for="upBias">Up Bias</label>
                   <input
                     id="upBias"
                     type="range"
@@ -2688,7 +2720,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Style</label>
+                  <label for="bonsaiStyle">Style</label>
                   <select class="ds-select" id="bonsaiStyle">
                     <option value="auto">Species Auto</option>
                     <option value="formal">Formal Upright</option>
@@ -2700,7 +2732,7 @@
                   </select>
                 </div>
                 <div class="field field-inline">
-                  <label>Extreme</label>
+                  <label for="extremeModePreset">Extreme</label>
                   <select class="ds-select" id="extremeModePreset">
                     <option value="">None</option>
                     <option value="dramatic-sweep">Dramatic Sweep</option>
@@ -2714,7 +2746,7 @@
                   </button>
                 </div>
                 <div class="field no-val">
-                  <label>Drama</label>
+                  <label for="drama">Drama</label>
                   <input
                     id="drama"
                     type="range"
@@ -2725,7 +2757,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Asymmetry</label>
+                  <label for="asymmetry">Asymmetry</label>
                   <input
                     id="asymmetry"
                     type="range"
@@ -2736,7 +2768,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Twist</label>
+                  <label for="branchTwist">Twist</label>
                   <input
                     id="branchTwist"
                     type="range"
@@ -2768,7 +2800,7 @@
               <h2>LEAVES</h2>
               <div class="form">
                 <div class="field field-inline">
-                  <label>Type</label>
+                  <label for="leafType">Type</label>
                   <select class="ds-select" id="leafType">
                     <option value="diamond">Diamond</option>
                     <option value="lanceolate">Lanceolate</option>
@@ -2786,10 +2818,10 @@
                     <option value="crescent">Crescent</option>
                     <option value="petal">Petal (flower)</option>
                   </select>
-                  <input id="leafColor" type="color" value="#2d6e52" />
+                  <input id="leafColor" type="color" value="#2d6e52" aria-label="Leaf color" />
                 </div>
                 <div class="field no-val">
-                  <label>Plumage</label>
+                  <label for="plumage">Plumage</label>
                   <select class="ds-select" id="plumage">
                     <option value="random">Random</option>
                     <option value="upward">Upward</option>
@@ -2799,7 +2831,7 @@
                   </select>
                 </div>
                 <div class="field no-val">
-                  <label>Level Min</label>
+                  <label for="bMin">Level Min</label>
                   <input
                     id="bMin"
                     type="range"
@@ -2810,7 +2842,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Level Max</label>
+                  <label for="bMax">Level Max</label>
                   <input
                     id="bMax"
                     type="range"
@@ -2821,7 +2853,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Density</label>
+                  <label for="density">Density</label>
                   <input
                     id="density"
                     type="range"
@@ -2832,7 +2864,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Spread</label>
+                  <label for="leafSpread">Spread</label>
                   <input
                     id="leafSpread"
                     type="range"
@@ -2843,7 +2875,7 @@
                   />
                 </div>
                 <div class="field">
-                  <label>Size</label>
+                  <label for="leafSize">Size</label>
                   <input
                     id="leafSize"
                     type="range"
@@ -2856,7 +2888,7 @@
                 </div>
 
                 <div class="field">
-                  <label>Variation (+/-)</label>
+                  <label for="leafVar">Variation (+/-)</label>
                   <input
                     id="leafVar"
                     type="range"
@@ -2870,7 +2902,7 @@
 
                 <!-- Phase B: Leaf Allocation Controls -->
                 <div class="field">
-                  <label>Max Leaves</label>
+                  <label for="maxLeaves">Max Leaves</label>
                   <input
                     id="maxLeaves"
                     type="range"
@@ -2882,7 +2914,7 @@
                   <span id="maxLeaves_val">350</span>
                 </div>
                 <div class="field">
-                  <label>Lower Bias</label>
+                  <label for="lowerBias">Lower Bias</label>
                   <input
                     id="lowerBias"
                     type="range"
@@ -2894,7 +2926,7 @@
                   <span id="lowerBias_val">0.35</span>
                 </div>
                 <div class="field no-val no-readout terminal-pair-row">
-                  <label>Terminal Min/Max</label>
+                  <label for="minPerTerminal">Terminal Min/Max</label>
                   <div class="terminal-pair-inputs">
                     <input
                       class="ds-input"
@@ -2903,8 +2935,7 @@
                       min="0"
                       max="40"
                       step="1"
-                      value="2"
-                    />
+                      value="2" aria-label="Minimum leaves per terminal" />
                     <input
                       class="ds-input"
                       id="maxPerTerminal"
@@ -2912,8 +2943,7 @@
                       min="1"
                       max="120"
                       step="1"
-                      value="24"
-                    />
+                      value="24" aria-label="Maximum leaves per terminal" />
                   </div>
                 </div>
               </div>
@@ -2929,12 +2959,12 @@
               <h2>BRANCHES</h2>
               <div class="form">
                 <div class="field no-val">
-                  <label>Color</label>
+                  <label for="branchColor">Color</label>
                   <input id="branchColor" type="color" value="#3b2d44" />
                 </div>
 
                 <div class="field no-val">
-                  <label>Depth</label>
+                  <label for="bDepth">Depth</label>
                   <input
                     id="bDepth"
                     type="range"
@@ -2946,7 +2976,7 @@
                 </div>
 
                 <div class="field no-val">
-                  <label>Length</label>
+                  <label for="bLen">Length</label>
                   <input
                     id="bLen"
                     type="range"
@@ -2959,7 +2989,7 @@
 
                 <!-- Phase C: Branch Attachment Controls -->
                 <div class="field">
-                  <label>Start Height</label>
+                  <label for="branchStart">Start Height</label>
                   <input
                     id="branchStart"
                     type="range"
@@ -2972,7 +3002,7 @@
                 </div>
 
                 <div class="field">
-                  <label>Lower Bias</label>
+                  <label for="branchBias">Lower Bias</label>
                   <input
                     id="branchBias"
                     type="range"
@@ -2984,7 +3014,7 @@
                   <span id="branchBias_val">0.45</span>
                 </div>
                 <div class="field">
-                  <label>Training Drop</label>
+                  <label for="branchDrop">Training Drop</label>
                   <input
                     id="branchDrop"
                     type="range"
@@ -2996,7 +3026,7 @@
                   <span id="branchDrop_val">0.35</span>
                 </div>
                 <div class="field">
-                  <label>Training Dir</label>
+                  <label for="branchPull">Training Dir</label>
                   <input
                     id="branchPull"
                     type="range"
@@ -3009,7 +3039,7 @@
                 </div>
                 <!-- Phase D: Branch Length Variance & Falloff -->
                 <div class="field">
-                  <label>Length Variation (±%)</label>
+                  <label for="bLenVar">Length Variation (±%)</label>
                   <input
                     id="bLenVar"
                     type="range"
@@ -3022,7 +3052,7 @@
                 </div>
 
                 <div class="field">
-                  <label>Falloff per Depth</label>
+                  <label for="bFall">Falloff per Depth</label>
                   <input
                     id="bFall"
                     type="range"
@@ -3035,7 +3065,9 @@
                 </div>
               </div>
             </div>
+            </div>
 
+            <div id="bonsaiVesselPanel" class="module-tabpanel" role="tabpanel" aria-labelledby="bonsaiVesselTab" tabindex="0" hidden>
             <div
               class="section"
               data-tab="bonsai"
@@ -3045,7 +3077,7 @@
               <h2>VESSEL</h2>
               <div class="form">
                 <div class="field field-inline">
-                  <label>Type</label>
+                  <label for="vesselType">Type</label>
                   <select class="ds-select" id="vesselType">
                     <option value="none">None</option>
                     <option value="glass-cylinder">Glass Cylinder</option>
@@ -3057,10 +3089,10 @@
                     <option value="cascade-tube">Cascade Tube</option>
                     <option value="rings">Rings</option>
                   </select>
-                  <input id="vesselColor" type="color" value="#a5b2bd" />
+                  <input id="vesselColor" type="color" value="#a5b2bd" aria-label="Vessel color" />
                 </div>
                 <div class="field no-val">
-                  <label>Diameter</label>
+                  <label for="vesselDia">Diameter</label>
                   <input
                     id="vesselDia"
                     type="range"
@@ -3071,7 +3103,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Depth</label>
+                  <label for="vesselDepth">Depth</label>
                   <input
                     id="vesselDepth"
                     type="range"
@@ -3082,7 +3114,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Height</label>
+                  <label for="vesselOffsetY">Height</label>
                   <input
                     id="vesselOffsetY"
                     type="range"
@@ -3093,7 +3125,7 @@
                   />
                 </div>
                 <div class="field">
-                  <label>Lip</label>
+                  <label for="vesselLip">Lip</label>
                   <input
                     id="vesselLip"
                     type="range"
@@ -3105,7 +3137,7 @@
                   <span id="vesselLip_val">0.35</span>
                 </div>
                 <div class="field">
-                  <label>Foot</label>
+                  <label for="vesselFoot">Foot</label>
                   <input
                     id="vesselFoot"
                     type="range"
@@ -3117,7 +3149,7 @@
                   <span id="vesselFoot_val">0.35</span>
                 </div>
                 <div class="field no-val">
-                  <label>Opacity</label>
+                  <label for="vesselOpacity">Opacity</label>
                   <input
                     id="vesselOpacity"
                     type="range"
@@ -3128,7 +3160,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Blur</label>
+                  <label for="vesselBlur">Blur</label>
                   <input
                     id="vesselBlur"
                     type="range"
@@ -3150,7 +3182,7 @@
               <h2>MEDIUM</h2>
               <div class="form">
                 <div class="field field-inline">
-                  <label>Type</label>
+                  <label for="mediumType">Type</label>
                   <select class="ds-select" id="mediumType">
                     <option value="none">None</option>
                     <option value="water">Water</option>
@@ -3160,10 +3192,10 @@
                     <option value="rock">Rock</option>
                     <option value="kokedama">Kokedama</option>
                   </select>
-                  <input id="mediumColor" type="color" value="#6eaec9" />
+                  <input id="mediumColor" type="color" value="#6eaec9" aria-label="Medium color" />
                 </div>
                 <div class="field no-val">
-                  <label>Diameter</label>
+                  <label for="mediumDia">Diameter</label>
                   <input
                     id="mediumDia"
                     type="range"
@@ -3174,7 +3206,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Depth</label>
+                  <label for="mediumDepth">Depth</label>
                   <input
                     id="mediumDepth"
                     type="range"
@@ -3185,7 +3217,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Height</label>
+                  <label for="mediumOffsetY">Height</label>
                   <input
                     id="mediumOffsetY"
                     type="range"
@@ -3196,7 +3228,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Opacity</label>
+                  <label for="mediumOpacity">Opacity</label>
                   <input
                     id="mediumOpacity"
                     type="range"
@@ -3207,7 +3239,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Blur</label>
+                  <label for="mediumBlur">Blur</label>
                   <input
                     id="mediumBlur"
                     type="range"
@@ -3229,17 +3261,17 @@
               <h2>PLATFORM</h2>
               <div class="form">
                 <div class="field field-inline">
-                  <label>Type</label>
+                  <label for="platformType">Type</label>
                   <select class="ds-select" id="platformType">
                     <option value="none">None</option>
                     <option value="disc">Disc</option>
                     <option value="tray">Tray</option>
                     <option value="slab">Stone Slab</option>
                   </select>
-                  <input id="platformColor" type="color" value="#858b94" />
+                  <input id="platformColor" type="color" value="#858b94" aria-label="Platform color" />
                 </div>
                 <div class="field no-val">
-                  <label>Diameter</label>
+                  <label for="platformDia">Diameter</label>
                   <input
                     id="platformDia"
                     type="range"
@@ -3250,7 +3282,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Depth</label>
+                  <label for="platformDepth">Depth</label>
                   <input
                     id="platformDepth"
                     type="range"
@@ -3261,7 +3293,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Height</label>
+                  <label for="platformOffsetY">Height</label>
                   <input
                     id="platformOffsetY"
                     type="range"
@@ -3272,7 +3304,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Opacity</label>
+                  <label for="platformOpacity">Opacity</label>
                   <input
                     id="platformOpacity"
                     type="range"
@@ -3283,7 +3315,7 @@
                   />
                 </div>
                 <div class="field no-val">
-                  <label>Blur</label>
+                  <label for="platformBlur">Blur</label>
                   <input
                     id="platformBlur"
                     type="range"
@@ -3295,19 +3327,20 @@
                 </div>
               </div>
             </div>
+            </div>
 
             <div class="section" data-tab="render">
               <h2>RENDER</h2>
               <div class="form">
                 <div class="field no-val">
-                  <label>Wireframe</label>
-                  <label class="ds-switch" aria-label="Wireframe">
-                    <input id="wireToggle" type="checkbox" />
+                  <label for="wireToggle">Wireframe</label>
+                  <label class="ds-switch">
+                    <input id="wireToggle" type="checkbox" aria-label="Wireframe" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field field-inline">
-                  <label>Mode</label>
+                  <label for="renderMode">Mode</label>
                   <select class="ds-select" id="renderMode">
                     <option value="toon">Toon</option>
                     <option value="sketchy">Sketchy</option>
@@ -3317,17 +3350,16 @@
                   </select>
                 </div>
                 <div id="emissiveField" class="field no-val no-readout">
-                  <label>Emissive</label>
+                  <label for="emissiveColor">Emissive</label>
                   <div class="emissive-row">
-                    <input id="emissiveColor" type="color" value="#94e3ff" />
+                    <input id="emissiveColor" type="color" value="#94e3ff" aria-label="Emissive color" />
                     <input
                       id="emissiveStrength"
                       type="range"
                       min="0"
                       max="1"
                       step="0.01"
-                      value="0.5"
-                    />
+                      value="0.5" aria-label="Emissive strength" />
                   </div>
                 </div>
               </div>
@@ -3336,7 +3368,7 @@
               <h2>APPEARANCE</h2>
               <div class="form">
                 <div class="field no-val">
-                  <label>Theme</label>
+                  <label for="themeSelect">Theme</label>
                   <select
                     id="themeSelect"
                     class="ds-select"
@@ -3352,7 +3384,7 @@
               <h2>PERFORMANCE</h2>
               <div class="form">
                 <div class="field no-val">
-                  <label>Quality</label>
+                  <label for="qualityMode">Quality</label>
                   <select class="ds-select" id="qualityMode">
                     <option value="auto">Auto</option>
                     <option value="high">High</option>
@@ -3361,7 +3393,7 @@
                   </select>
                 </div>
                 <div class="field no-val">
-                  <label>Spin Speed</label>
+                  <label for="autoSpeed">Spin Speed</label>
                   <input
                     id="autoSpeed"
                     type="range"
@@ -3405,42 +3437,42 @@
               <h2>DEBUG</h2>
               <div class="form">
                 <div class="field no-val">
-                  <label>[P] Tips Overlay</label>
-                  <label class="ds-switch" aria-label="Tips overlay">
-                    <input id="tipsToggle" type="checkbox" checked />
+                  <label for="tipsToggle">[P] Tips Overlay</label>
+                  <label class="ds-switch">
+                    <input id="tipsToggle" type="checkbox" checked aria-label="Tips overlay" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field no-val">
-                  <label>[O] Overlay HUD</label>
-                  <label class="ds-switch" aria-label="Debug overlay HUD">
-                    <input id="debugToggle" type="checkbox" />
+                  <label for="debugToggle">[O] Overlay HUD</label>
+                  <label class="ds-switch">
+                    <input id="debugToggle" type="checkbox" aria-label="Debug overlay HUD" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field no-val">
-                  <label>[T] Toolbar</label>
-                  <label class="ds-switch" aria-label="Canvas toolbar">
-                    <input id="toolbarToggle" type="checkbox" checked />
+                  <label for="toolbarToggle">[T] Toolbar</label>
+                  <label class="ds-switch">
+                    <input id="toolbarToggle" type="checkbox" checked aria-label="Canvas toolbar" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field no-val">
-                  <label>[C] Camera Controls</label>
-                  <label class="ds-switch" aria-label="Camera controls pad">
-                    <input id="cameraPadToggle" type="checkbox" checked />
+                  <label for="cameraPadToggle">[C] Camera Controls</label>
+                  <label class="ds-switch">
+                    <input id="cameraPadToggle" type="checkbox" checked aria-label="Camera controls pad" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field no-val">
-                  <label>[S] Side Panel</label>
-                  <label class="ds-switch" aria-label="Side panel visibility">
-                    <input id="sidePanelToggle" type="checkbox" checked />
+                  <label for="sidePanelToggle">[S] Side Panel</label>
+                  <label class="ds-switch">
+                    <input id="sidePanelToggle" type="checkbox" checked aria-label="Side panel visibility" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
                 <div class="field no-val no-readout demo-row">
-                  <label>[D] Demo (sec./interval)</label>
+                  <label for="demoInterval">[D] Demo (sec./interval)</label>
                   <input
                     id="demoInterval"
                     class="ds-input"
@@ -3454,9 +3486,8 @@
                   />
                   <label
                     class="ds-switch"
-                    aria-label="Demo mode auto-randomize"
                   >
-                    <input id="demoModeToggle" type="checkbox" />
+                    <input id="demoModeToggle" type="checkbox" aria-label="Demo mode" />
                     <span class="ds-switch-track"></span>
                   </label>
                 </div>
@@ -3501,14 +3532,13 @@
                 id="snapImportFile"
                 type="file"
                 accept="application/json"
-                hidden
-              />
+                hidden aria-label="Import Saves from JSON" />
             </div>
             <div class="section" data-tab="export">
               <div id="exportSettings" class="export-settings">
-                <div id="exportPanelImage" class="export-panel">
+                <div id="exportPanelImage" class="export-panel" role="tabpanel" aria-labelledby="exportImageTab" tabindex="0">
                   <div id="exportCropRow" class="control-row">
-                    <div class="control-label">Framing</div>
+                    <label class="control-label" for="exportCropMode">Framing</label>
                     <div class="control-input">
                       <select id="exportCropMode" class="ds-select">
                         <option value="full">Full Canvas</option>
@@ -3520,10 +3550,10 @@
                     <div class="control-icons"></div>
                   </div>
                   <div id="exportDimsRow" class="control-row">
-                    <div class="control-label">Dimensions</div>
+                    <label class="control-label" for="exportSizePreset">Dimensions</label>
                     <div class="control-input">
                       <div class="res-inputs dimensions-inline">
-                        <select id="exportSizePreset" class="ds-select">
+                        <select id="exportSizePreset" class="ds-select" aria-label="Export size preset">
                           <option value="current">Current</option>
                           <option value="1080-square">1080 Square</option>
                           <option value="1920x1080">1920x1080</option>
@@ -3536,8 +3566,7 @@
                           id="exportWidth"
                           min="1"
                           max="9999"
-                          value="1920"
-                        />
+                          value="1920" aria-label="Export width in pixels" />
                         <span class="dim-sep">x</span>
                         <input
                           class="ds-input dim-field"
@@ -3545,27 +3574,25 @@
                           id="exportHeight"
                           min="1"
                           max="9999"
-                          value="1080"
-                        />
+                          value="1080" aria-label="Export height in pixels" />
                       </div>
                     </div>
                     <div class="control-icons"></div>
                   </div>
                   <div id="exportAlphaRow" class="control-row">
-                    <div class="control-label">Transparent BG</div>
+                    <label class="control-label" for="exportTransparent">Transparent BG</label>
                     <div class="control-input">
                       <label
                         class="ds-switch"
-                        aria-label="Transparent background for PNG export"
                       >
-                        <input id="exportTransparent" type="checkbox" checked />
+                        <input id="exportTransparent" type="checkbox" checked aria-label="Transparent background for PNG export" />
                         <span class="ds-switch-track"></span>
                       </label>
                     </div>
                     <div class="control-icons"></div>
                   </div>
                   <div class="control-row">
-                    <div class="control-label">Format</div>
+                    <label class="control-label" for="exportImageKind">Format</label>
                     <div class="control-input">
                       <select class="ds-select" id="exportImageKind">
                         <option value="png">PNG</option>
@@ -3576,7 +3603,7 @@
                     <div class="control-icons"></div>
                   </div>
                   <div id="exportQualityRow" class="control-row">
-                    <div class="control-label">Quality</div>
+                    <label class="control-label" for="exportQuality">Quality</label>
                     <div class="control-input">
                       <input
                         id="exportQuality"
@@ -3603,9 +3630,9 @@
                   </div>
                 </div>
 
-                <div id="exportPanelModel" class="export-panel" hidden>
+                <div id="exportPanelModel" class="export-panel" hidden role="tabpanel" aria-labelledby="exportModelTab" tabindex="0">
                   <div class="control-row">
-                    <div class="control-label">Format</div>
+                    <label class="control-label" for="exportModelKind">Format</label>
                     <div class="control-input">
                       <select class="ds-select" id="exportModelKind">
                         <option value="glb">GLB</option>
@@ -3628,7 +3655,7 @@
                   </div>
                 </div>
 
-                <div id="exportPanelGif" class="export-panel" hidden>
+                <div id="exportPanelGif" class="export-panel" hidden role="tabpanel" aria-labelledby="exportGifTab" tabindex="0">
                   <p class="export-note">
                     Fixed rules: square frame, auto-fit bonsai, and one full
                     360-degree rotation for seamless looping.
@@ -4452,13 +4479,14 @@
         if (!panelRoot) return;
         const nextTab = tab || "bonsai";
         const prevTab = panelRoot.getAttribute("data-tab") || "bonsai";
+        panelRoot.setAttribute("data-tab", nextTab);
+        syncBonsaiTabAccessibility();
         if (prevTab === nextTab) {
           syncRailTabState();
           syncSectionDividers();
 
           return;
         }
-        panelRoot.setAttribute("data-tab", nextTab);
         syncRailTabState();
         const title = document.getElementById("panelTitle");
         if (title) {
@@ -4483,22 +4511,42 @@
         });
       }
 
+      function syncBonsaiTabAccessibility() {
+        const active = panelRoot?.getAttribute("data-bonsai-tab") || "plant";
+        bonsaiTabs.forEach((button) => {
+          const selected = button.dataset.bonsaiTab === active;
+          button.setAttribute("aria-selected", String(selected));
+          button.tabIndex = selected ? 0 : -1;
+          const panel = $(button.getAttribute("aria-controls"));
+          if (panel) panel.hidden = !selected || panelRoot.getAttribute("data-tab") !== "bonsai";
+        });
+      }
+
       function setBonsaiTab(tab) {
         if (!panelRoot) return;
-        const nextTab = tab || "plant";
+        const nextTab = tab === "vessel" ? "vessel" : "plant";
         const prevTab = panelRoot.getAttribute("data-bonsai-tab") || "plant";
-        if (prevTab === nextTab) {
-          syncSectionDividers();
-          return;
-        }
         panelRoot.setAttribute("data-bonsai-tab", nextTab);
-        bonsaiTabs.forEach((btn) => {
-          const on = btn.dataset.bonsaiTab === nextTab;
-          btn.setAttribute("aria-pressed", on ? "true" : "false");
-        });
-        localStorage.setItem("bonsai.bonsaiTab", nextTab);
+        syncBonsaiTabAccessibility();
+        if (prevTab !== nextTab) localStorage.setItem("bonsai.bonsaiTab", nextTab);
         requestAnimationFrame(updateCanvasToolbarOffset);
         syncSectionDividers();
+      }
+
+      function bindTabKeyboard(buttons, activate) {
+        buttons.forEach((button, index) => {
+          button.addEventListener("keydown", (event) => {
+            let next;
+            if (event.key === "ArrowRight") next = (index + 1) % buttons.length;
+            if (event.key === "ArrowLeft") next = (index + buttons.length - 1) % buttons.length;
+            if (event.key === "Home") next = 0;
+            if (event.key === "End") next = buttons.length - 1;
+            if (next === undefined) return;
+            event.preventDefault();
+            activate(buttons[next]);
+            buttons[next].focus();
+          });
+        });
       }
 
       function organizePlantSections() {
@@ -9061,7 +9109,8 @@
         activeExportTab = nextTab;
         exportTabButtons.forEach((btn) => {
           const on = btn.dataset.exportTab === nextTab;
-          btn.setAttribute("aria-pressed", on ? "true" : "false");
+          btn.setAttribute("aria-selected", String(on));
+          btn.tabIndex = on ? 0 : -1;
         });
         if (exportPanelImage) exportPanelImage.hidden = nextTab !== "image";
         if (exportPanelModel) exportPanelModel.hidden = nextTab !== "model";
@@ -9934,6 +9983,7 @@
           setBonsaiTab(btn.dataset.bonsaiTab || "plant"),
         );
       });
+      bindTabKeyboard(bonsaiTabs, (button) => setBonsaiTab(button.dataset.bonsaiTab));
       organizePlantSections();
       loadRandomLocks();
       ensureRandomLockButtons();
@@ -10207,6 +10257,7 @@
           setExportTab(btn.dataset.exportTab || "image"),
         );
       });
+      bindTabKeyboard(exportTabButtons, (button) => setExportTab(button.dataset.exportTab));
       if (exportImageKindUI) {
         exportImageKindUI.addEventListener("change", () => {
           updateExportSettingsVisibility();
@@ -10559,49 +10610,59 @@
       function updateCanvasToolbarOffset() {
         if (!canvasToolbar) return;
         const mobile = window.matchMedia("(max-width: 900px)").matches;
+        const root = document.getElementById("app");
+        const host = document.getElementById("stageWrap");
         if (!mobile) {
+          root.style.removeProperty("--bo-mobile-hud-panel-cap");
           canvasToolbar.style.bottom = "12px";
           canvasToolbar.style.left = "50%";
           canvasToolbar.style.transform = "translateX(-50%)";
+          canvasToolbar.style.removeProperty("max-width");
+          canvasToolbar.classList.remove("is-constrained");
+          canvasToolbar.scrollLeft = 0;
           if (cameraPad) {
             cameraPad.style.right = "12px";
             cameraPad.style.left = "auto";
             cameraPad.style.bottom = "12px";
+            const cameraWidth = cameraPad.getBoundingClientRect().width;
+            const toolbarWidth = canvasToolbar.getBoundingClientRect().width;
+            // A narrow desktop stage can also need a scrolling command lane.
+            if (cameraWidth && toolbarWidth / 2 + cameraWidth + 20 > host.clientWidth / 2) {
+              const available = Math.max(0, host.clientWidth - cameraWidth - 32);
+              canvasToolbar.classList.add("is-constrained");
+              canvasToolbar.style.maxWidth = `${available}px`;
+              canvasToolbar.style.left = `${12 + available / 2}px`;
+            }
           }
           return;
         }
-        const root = document.getElementById("app");
+        canvasToolbar.classList.add("is-constrained");
         const rail = document.getElementById("sidebar");
         const panel = document.getElementById("panel");
         const railH = rail ? rail.getBoundingClientRect().height : 52;
-        const panelOpen =
-          root &&
-          !root.classList.contains("panel-hidden") &&
-          panel &&
-          getComputedStyle(panel).display !== "none";
+        const cameraRect = cameraPad?.getBoundingClientRect();
+        const cameraVisible = cameraRect?.width > 0 && getComputedStyle(cameraPad).display !== "none";
+        const toolbarRect = canvasToolbar.getBoundingClientRect();
+        const edge = 8;
+        // In shallow landscape, shorten the scrolling panel before clipping HUD controls.
+        const clearance = Math.max(cameraVisible ? cameraRect.height : 0, toolbarRect.height);
+        const cap = `${Math.max(96, Math.floor(host.clientHeight - railH - clearance - edge * 2))}px`;
+        if (root.style.getPropertyValue("--bo-mobile-hud-panel-cap") !== cap) {
+          root.style.setProperty("--bo-mobile-hud-panel-cap", cap);
+          onResizeCore();
+        }
+        const panelOpen = !root.classList.contains("panel-hidden") && panel && getComputedStyle(panel).display !== "none";
         const panelH = panelOpen ? panel.getBoundingClientRect().height : 0;
-        const bottomOffset = Math.max(8, railH + panelH + 8);
-        const cameraVisible =
-          !!cameraPad &&
-          getComputedStyle(cameraPad).display !== "none" &&
-          cameraPad.getBoundingClientRect().width > 0;
-        const cameraReserve = cameraVisible
-          ? Math.ceil(cameraPad.getBoundingClientRect().width) + 12
-          : 0;
-        const maxToolbarW = Math.max(
-          180,
-          window.innerWidth - 12 - cameraReserve,
-        );
+        const bottomOffset = railH + panelH + edge;
+        const cameraReserve = cameraVisible ? Math.ceil(cameraRect.width) + edge : 0;
+        const availableWidth = Math.max(0, host.clientWidth - edge * 2 - cameraReserve);
         canvasToolbar.style.bottom = `${bottomOffset}px`;
-        canvasToolbar.style.left =
-          cameraReserve > 0
-            ? `calc(50% - ${Math.round(cameraReserve / 2)}px)`
-            : "50%";
+        canvasToolbar.style.left = `${edge + availableWidth / 2}px`;
         canvasToolbar.style.transform = "translateX(-50%)";
-        canvasToolbar.style.maxWidth = `${maxToolbarW}px`;
+        canvasToolbar.style.maxWidth = `${availableWidth}px`;
         if (cameraPad) {
           cameraPad.style.left = "auto";
-          cameraPad.style.right = "8px";
+          cameraPad.style.right = `${edge}px`;
           cameraPad.style.bottom = `${bottomOffset}px`;
         }
       }
