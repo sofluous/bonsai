@@ -572,21 +572,21 @@
 
       .form .field {
         display: grid;
-        grid-template-columns: minmax(var(--bo-field-label-w), auto) 1fr auto;
+        grid-template-columns: minmax(var(--bo-field-label-w), auto) minmax(0, 1fr) auto;
         gap: var(--bo-control-gap) var(--bo-control-gap-lg);
         align-items: center;
         position: relative;
         min-height: var(--ds-control-h-sm);
       }
 
-      .form .field:not(.seed-row) {
-        padding-right: var(--bo-field-action-w);
+      .form .field.has-lock:not(.seed-row) {
+        padding-inline-end: calc(var(--bo-field-action-w) * var(--bo-lock-count, 1));
       }
 
       .form .field.field-inline {
         grid-template-columns:
           minmax(var(--bo-field-label-w), auto)
-          1fr auto auto;
+          minmax(0, 1fr) auto auto;
       }
 
       .form .field > label:not(.ds-switch) {
@@ -625,9 +625,8 @@
         transform: translateY(-50%);
       }
 
-      /* Quiet utilities: each row/header owns reveal; state never changes on hover. */
-      .ds-utility-toggle,
-      .ds-utility-toggle[aria-pressed="true"] {
+      /* Owner-approved Raden action-preview exception; state stays in aria-pressed. */
+      .ds-utility-toggle {
         color: var(--ds-icon-action-fg);
         background: transparent;
         border-color: transparent;
@@ -636,14 +635,23 @@
         pointer-events: none;
       }
       .ds-utility-scope:hover .ds-utility-toggle,
-      .ds-utility-scope:has(:focus-visible) .ds-utility-toggle,
-      .ds-utility-toggle[aria-pressed="true"],
-      html[data-utility-input="touch"] .ds-utility-toggle {
+      .ds-utility-scope:has(:focus-visible) .ds-utility-toggle {
+        opacity: 0.55;
+        pointer-events: auto;
+      }
+      .ds-utility-toggle[aria-pressed="true"] {
+        color: var(--ds-icon-action-fg-active, var(--ds-accent));
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
         opacity: 1;
         pointer-events: auto;
       }
-      .ds-utility-toggle:hover,
-      .ds-utility-toggle:focus-visible {
+      .ds-utility-toggle .utility-next { display: none; }
+      .ds-utility-toggle[aria-pressed="true"]:is(:hover, :focus-visible) .utility-current { display: none; }
+      .ds-utility-toggle[aria-pressed="true"]:is(:hover, :focus-visible) .utility-next { display: inline-block; }
+      .ds-utility-toggle:is(:hover, :focus-visible) {
+        opacity: 1;
         color: var(--ds-icon-action-fg-hover);
         background: var(--ds-icon-action-hover-bg);
       }
@@ -651,11 +659,9 @@
         outline: 2px solid var(--ds-accent);
         outline-offset: 2px;
       }
+      html[data-utility-input="touch"] .ds-utility-toggle { opacity: 1; pointer-events: auto; }
       @media (any-hover: none) {
-        html:not([data-utility-input="mouse"]) .ds-utility-toggle {
-          opacity: 1;
-          pointer-events: auto;
-        }
+        html:not([data-utility-input="mouse"]) .ds-utility-toggle { opacity: 1; pointer-events: auto; }
       }
       #app.panel-hidden .app-head-main { display: none; }
       #panel .section[data-tab="gallery"] .field {
@@ -801,6 +807,25 @@
       .btn {
         width: 100%;
         box-sizing: border-box;
+      }
+
+      /* Token-inset chevron; retain native select interaction and theme texture. */
+      #panel select.ds-select {
+        appearance: none;
+        min-width: 0;
+        padding-inline-end: calc(var(--ds-space-3) + var(--ds-space-4));
+        text-overflow: ellipsis;
+        background-image:
+          linear-gradient(45deg, transparent 35%, currentColor 35% 65%, transparent 65%),
+          linear-gradient(135deg, transparent 35%, currentColor 35% 65%, transparent 65%),
+          var(--ds-control-texture-image);
+        background-position: right calc(var(--ds-space-3) + 4px) center, right var(--ds-space-3) center, center;
+        background-size: 4px 4px, 4px 4px, auto;
+        background-repeat: no-repeat, no-repeat, repeat;
+        background-blend-mode: normal, normal, var(--ds-texture-blend);
+      }
+      @media (forced-colors: active) {
+        #panel select.ds-select { appearance: auto; background-image: none; padding-inline-end: var(--ds-space-3); }
       }
 
       /* Keep seed segmented input stable after base control width rules */
@@ -972,41 +997,45 @@
         margin-top: 2px;
       }
 
-      .gallery-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
+      .gallery-select {
         position: absolute;
-        left: 6px;
-        right: 6px;
-        bottom: 6px;
+        inset: 0;
+        z-index: 1;
+        appearance: none;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        border-radius: inherit;
+      }
+      .gallery-select:focus-visible { outline: 2px solid var(--ds-accent); outline-offset: -2px; }
+      .gallery-menu-trigger {
+        position: absolute;
+        top: var(--ds-space-2);
+        right: var(--ds-space-2);
         z-index: 2;
-        padding: 6px;
-        border: 1px solid
-          color-mix(in oklab, var(--ds-accent-strong) 24%, var(--ds-border));
-        background: color-mix(in oklab, var(--ds-bg-elevated) 90%, transparent);
-        backdrop-filter: blur(2px);
         opacity: 0;
-        transform: translateY(3px);
         pointer-events: none;
-        transition:
-          opacity var(--ds-dur-fast) var(--ds-ease-standard),
-          transform var(--ds-dur-fast) var(--ds-ease-standard);
       }
-
-      .gallery-actions .btn {
-        width: 100%;
-        min-width: 0;
-        padding: 0.35rem 0.45rem;
+      .gallery-tile:hover .gallery-menu-trigger,
+      .gallery-tile:focus-within .gallery-menu-trigger,
+      .gallery-tile.is-selected .gallery-menu-trigger,
+      .gallery-menu-trigger[aria-expanded="true"] { opacity: 1; pointer-events: auto; }
+      #galleryCardMenu {
+        position: fixed;
+        z-index: var(--ds-z-popover, 100);
+        display: grid;
+        min-width: 160px;
+        max-width: calc(100vw - 16px);
+        padding: var(--ds-space-1);
+        gap: var(--ds-space-1);
+        border: var(--ds-border-w, 1px) solid var(--ds-border);
+        border-radius: var(--ds-radius-2);
+        background: var(--ds-bg-elevated);
+        box-shadow: var(--ds-shadow-md);
       }
-
-      .gallery-tile:hover .gallery-actions,
-      .gallery-tile:focus-within .gallery-actions,
-      .gallery-tile.is-selected .gallery-actions {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-      }
+      #galleryCardMenu[hidden] { display: none; }
+      #galleryCardMenu button { width: 100%; text-align: left; justify-content: flex-start; }
+      #galleryCardMenu [data-action="delete"] { color: var(--ds-danger); }
 
       .export-tabs {
         display: grid;
@@ -1134,6 +1163,11 @@
         min-height: var(--ds-control-h-sm);
         min-width: 0;
       }
+
+      .control-row:not(:has(> .control-icons > *)) {
+        grid-template-columns: minmax(110px, var(--ds-field-label-w, var(--bo-field-label-w))) minmax(0, 1fr);
+      }
+      .control-row > .control-icons:not(:has(> *)) { display: none; }
 
       .control-label {
         color: color-mix(in oklab, var(--ds-text-muted) 72%, var(--ds-accent));
@@ -1986,11 +2020,11 @@
         }
 
         .form .field {
-          grid-template-columns: minmax(96px, auto) 1fr auto;
+          grid-template-columns: minmax(96px, auto) minmax(0, 1fr) auto;
         }
 
         .form .field.field-inline {
-          grid-template-columns: minmax(96px, auto) 1fr auto auto;
+          grid-template-columns: minmax(96px, auto) minmax(0, 1fr) auto auto;
         }
 
         .form .field.seed-row {
@@ -4414,6 +4448,7 @@
       }
 
       function setPanelTab(tab) {
+        closeGalleryMenu();
         if (!panelRoot) return;
         const nextTab = tab || "bonsai";
         const prevTab = panelRoot.getAttribute("data-tab") || "bonsai";
@@ -4548,9 +4583,7 @@
         const visible = isPlantPartVisible(part);
         btn.setAttribute("aria-pressed", visible ? "false" : "true");
         btn.title = visible ? "Hide section output" : "Show section output";
-        btn.innerHTML = visible
-          ? '<span class="iconoir iconoir-eye" aria-hidden="true"></span>'
-          : '<span class="iconoir iconoir-eye-closed" aria-hidden="true"></span>';
+        btn.innerHTML = '<span class="utility-current iconoir iconoir-eye-closed" aria-hidden="true"></span><span class="utility-next iconoir iconoir-eye" aria-hidden="true"></span>';
       }
 
       function syncAllPlantPartToggleButtons() {
@@ -4632,9 +4665,7 @@
         const visible = isVesselPartVisible(part);
         btn.setAttribute("aria-pressed", visible ? "false" : "true");
         btn.title = visible ? "Hide section output" : "Show section output";
-        btn.innerHTML = visible
-          ? '<span class="iconoir iconoir-eye" aria-hidden="true"></span>'
-          : '<span class="iconoir iconoir-eye-closed" aria-hidden="true"></span>';
+        btn.innerHTML = '<span class="utility-current iconoir iconoir-eye-closed" aria-hidden="true"></span><span class="utility-next iconoir iconoir-eye" aria-hidden="true"></span>';
       }
 
       function syncAllVesselPartToggleButtons() {
@@ -7991,6 +8022,7 @@
       let snapshotRenderCount = SNAPSHOT_RENDER_BATCH;
       let selectedSnapshotId = null;
       let pendingDeleteSnapshotId = null;
+      let deleteConfirmReturnFocus = null;
       let snapshotDbPromise = null;
       let snapshotWriteQueue = Promise.resolve();
       let snapshotStorageRevision = 0;
@@ -8068,14 +8100,21 @@
         if (!confirmModal) return;
         confirmModal.hidden = true;
         pendingDeleteSnapshotId = null;
+        const target = deleteConfirmReturnFocus?.isConnected ? deleteConfirmReturnFocus
+          : snapshotGallery?.querySelector(".gallery-select") || galleryExportAllBtn;
+        deleteConfirmReturnFocus = null;
+        target?.focus({ preventScroll: true });
       }
 
       function deleteSnapshotById(id) {
         const idx = snapshots.findIndex((s) => s.id === id);
         if (idx < 0) return;
+        const hadGalleryFocus = snapshotGallery?.contains(document.activeElement);
         snapshots.splice(idx, 1);
+        if (selectedSnapshotId === id) selectedSnapshotId = null;
         saveSnapshotsToStorage("Save deleted");
         renderSnapshotGallery();
+        if (hadGalleryFocus) (snapshotGallery?.querySelector(".gallery-select") || galleryExportAllBtn)?.focus({ preventScroll: true });
       }
 
       function requestDeleteSnapshot(id) {
@@ -8086,8 +8125,10 @@
           return;
         }
         pendingDeleteSnapshotId = id;
+        deleteConfirmReturnFocus = document.activeElement;
         if (confirmSkip) confirmSkip.checked = false;
         if (confirmModal) confirmModal.hidden = false;
+        confirmCancelBtn?.focus();
       }
 
       const RANDOMIZABLE_CONTROL_IDS = [
@@ -8163,12 +8204,12 @@
         "emissiveColor",
         "emissiveStrength",
       ];
-      document.addEventListener("pointerdown", (event) => {
+      function updateUtilityInput(event) {
+        if (!["mouse", "touch", "pen"].includes(event.pointerType)) return;
         document.documentElement.dataset.utilityInput = event.pointerType === "mouse" ? "mouse" : "touch";
-      }, true);
-      document.addEventListener("pointermove", (event) => {
-        if (event.pointerType === "mouse") document.documentElement.dataset.utilityInput = "mouse";
-      }, { passive: true });
+      }
+      document.addEventListener("pointerdown", updateUtilityInput, true);
+      document.addEventListener("pointermove", updateUtilityInput, { passive: true });
 
       const RANDOM_LOCK_STORAGE_KEY = "bonsai.randomLocks.v1";
       let randomLockedIds = new Set();
@@ -8204,7 +8245,7 @@
         if (!btn) return;
         btn.setAttribute("aria-pressed", locked ? "true" : "false");
         btn.title = locked ? "Unlock randomization" : "Lock randomization";
-        btn.innerHTML = `<span class="iconoir ${locked ? "iconoir-lock" : "iconoir-lock-slash"}" aria-hidden="true"></span>`;
+        btn.innerHTML = `<span class="utility-current iconoir iconoir-lock" aria-hidden="true"></span><span class="utility-next iconoir ${locked ? "iconoir-lock-slash" : "iconoir-lock"}" aria-hidden="true"></span>`;
       }
 
       function setRandomLock(id, locked) {
@@ -8242,6 +8283,13 @@
             field.appendChild(btn);
           }
           updateRandomLockButton(btn, isRandomLocked(id));
+        });
+        panelRoot.querySelectorAll(".field.has-lock").forEach((field) => {
+          const buttons = Array.from(field.querySelectorAll(".random-lock-btn"));
+          field.style.setProperty("--bo-lock-count", String(buttons.length));
+          buttons.forEach((button, index) => {
+            button.style.right = `calc(${buttons.length - index - 1} * var(--bo-field-action-w))`;
+          });
         });
       }
 
@@ -8705,6 +8753,7 @@
 
       function renderSnapshotGallery(append = false) {
         if (!snapshotGallery) return;
+        closeGalleryMenu();
         const focused = document.activeElement;
         const focusedTile = snapshotGallery.contains(focused) ? focused.closest(".gallery-tile") : null;
         const focusId = focusedTile?.dataset.id;
@@ -8736,7 +8785,15 @@
           item.className = "gallery-tile";
           if (selectedSnapshotId === snap.id) item.classList.add("is-selected");
           item.dataset.id = snap.id;
-          item.tabIndex = 0;
+          item.setAttribute("role", "group");
+          item.setAttribute("aria-label", snap.name || "Save");
+          const select = document.createElement("button");
+          select.type = "button";
+          select.className = "gallery-select";
+          select.dataset.action = "select";
+          select.dataset.id = snap.id;
+          select.setAttribute("aria-label", `Select Save ${snap.name || "Save"}`);
+          select.setAttribute("aria-pressed", String(selectedSnapshotId === snap.id));
           const img = document.createElement("img");
           img.className = "snapshot-thumb";
           img.loading = "lazy";
@@ -8756,29 +8813,22 @@
           const sub = document.createElement("div");
           sub.className = "snapshot-sub";
           const hasPreview = !!(snap.thumb || snap.thumbnail);
-          const previewNote = hasPreview ? "" : " | Recall to render preview";
+          const previewNote = hasPreview ? "" : " | Open to render preview";
           sub.textContent = `${formatSnapshotTime(snap.createdAt)} | seed ${String(snap.state?.seed ?? "-")}${previewNote}`;
           meta.appendChild(name);
           meta.appendChild(sub);
 
-          const row = document.createElement("div");
-          row.className = "gallery-actions";
-          const delBtn = document.createElement("button");
-          delBtn.className = "btn ds-btn btn-ghost ds-btn-ghost";
-          delBtn.dataset.action = "delete";
-          delBtn.dataset.id = snap.id;
-          delBtn.textContent = "Delete";
-          const recallBtn = document.createElement("button");
-          recallBtn.className = "btn ds-btn btn-primary ds-btn-primary";
-          recallBtn.dataset.action = "recall";
-          recallBtn.dataset.id = snap.id;
-          recallBtn.textContent = "Recall";
-          row.appendChild(delBtn);
-          row.appendChild(recallBtn);
-
-          item.appendChild(img);
-          item.appendChild(meta);
-          item.appendChild(row);
+          const menu = document.createElement("button");
+          menu.type = "button";
+          menu.className = "gallery-menu-trigger ds-icon-action";
+          menu.dataset.action = "menu";
+          menu.dataset.id = snap.id;
+          menu.setAttribute("aria-label", `Actions for Save ${snap.name || "Save"}`);
+          menu.setAttribute("aria-haspopup", "menu");
+          menu.setAttribute("aria-expanded", "false");
+          menu.setAttribute("aria-controls", "galleryCardMenu");
+          menu.innerHTML = '<span class="iconoir iconoir-more-horiz" aria-hidden="true"></span>';
+          item.append(img, meta, select, menu);
           fragment.appendChild(item);
         });
         snapshotGallery.appendChild(fragment);
@@ -9891,48 +9941,149 @@
       initFieldReadouts();
       updateEmissiveFieldState();
 
+      let galleryMenuState = null;
+      const galleryCardMenu = document.createElement("div");
+      galleryCardMenu.id = "galleryCardMenu";
+      galleryCardMenu.setAttribute("role", "menu");
+      galleryCardMenu.setAttribute("aria-label", "Save actions");
+      galleryCardMenu.hidden = true;
+      for (const [action, label, icon] of [["recall", "Open", "folder"], ["rename", "Rename", "edit-pencil"], ["delete", "Delete", "trash"]]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn ds-btn ds-btn-ghost";
+        button.dataset.action = action;
+        button.setAttribute("role", "menuitem");
+        button.innerHTML = `<span class="iconoir iconoir-${icon}" aria-hidden="true"></span><span>${label}</span>`;
+        galleryCardMenu.append(button);
+      }
+      document.body.append(galleryCardMenu);
+
+      function closeGalleryMenu(restoreFocus = false) {
+        const previous = galleryMenuState;
+        galleryMenuState = null;
+        if (!galleryCardMenu) return;
+        galleryCardMenu.hidden = true;
+        previous?.trigger.setAttribute("aria-expanded", "false");
+        if (restoreFocus && previous?.trigger.isConnected) previous.trigger.focus({ preventScroll: true });
+      }
+
+      function openGalleryMenu(id, trigger, last = false) {
+        closeGalleryMenu();
+        if (!snapshots.some((snap) => snap.id === id)) return;
+        galleryMenuState = { id, trigger };
+        trigger.setAttribute("aria-expanded", "true");
+        galleryCardMenu.hidden = false;
+        const rect = trigger.getBoundingClientRect();
+        const bounds = panelRoot.getBoundingClientRect();
+        const width = galleryCardMenu.offsetWidth;
+        const height = galleryCardMenu.offsetHeight;
+        const left = Math.max(8, bounds.left + 8, Math.min(rect.right - width, bounds.right - width - 8, innerWidth - width - 8));
+        const bottom = Math.min(bounds.bottom, innerHeight) - 8;
+        const top = rect.bottom + 4 + height <= bottom ? rect.bottom + 4 : Math.max(8, rect.top - height - 4);
+        galleryCardMenu.style.left = `${left}px`;
+        galleryCardMenu.style.top = `${Math.min(top, Math.max(8, innerHeight - height - 8))}px`;
+        const buttons = galleryCardMenu.querySelectorAll("button");
+        buttons[last ? buttons.length - 1 : 0].focus({ preventScroll: true });
+      }
+
+      function openSnapshotById(id) {
+        const snap = snapshots.find((entry) => entry.id === id);
+        if (!snap) return;
+        closeGalleryMenu(true);
+        applyControlState(snap.state);
+        syncHubState("snapshot-recall");
+        backfillSnapshotPreview(id);
+        renderSnapshotGallery();
+        showToast("Save opened");
+      }
+
       function updateGallerySelection() {
         snapshotGallery?.querySelectorAll(".gallery-tile").forEach((tile) => {
-          tile.classList.toggle("is-selected", tile.dataset.id === selectedSnapshotId);
+          const selected = tile.dataset.id === selectedSnapshotId;
+          tile.classList.toggle("is-selected", selected);
+          tile.querySelector(".gallery-select").setAttribute("aria-pressed", String(selected));
         });
       }
 
+      galleryCardMenu.addEventListener("click", (event) => {
+        const action = event.target.closest("button")?.dataset.action;
+        const id = galleryMenuState?.id;
+        if (!id || !action) return;
+        closeGalleryMenu(true);
+        if (action === "recall") openSnapshotById(id);
+        if (action === "delete") requestDeleteSnapshot(id);
+        if (action === "rename") {
+          const snap = snapshots.find((entry) => entry.id === id);
+          if (!snap) return;
+          const name = window.prompt("Rename Save", snap.name || "Save");
+          if (name === null || !name.trim() || name.trim() === snap.name) return;
+          snap.name = name.trim();
+          saveSnapshotsToStorage("Save renamed");
+          renderSnapshotGallery();
+        }
+      });
+      galleryCardMenu.addEventListener("keydown", (event) => {
+        const buttons = Array.from(galleryCardMenu.querySelectorAll("button"));
+        const index = buttons.indexOf(document.activeElement);
+        let next;
+        if (event.key === "ArrowDown") next = (index + 1) % buttons.length;
+        if (event.key === "ArrowUp") next = (index + buttons.length - 1) % buttons.length;
+        if (event.key === "Home") next = 0;
+        if (event.key === "End") next = buttons.length - 1;
+        if (next !== undefined) { event.preventDefault(); buttons[next].focus(); }
+        if (event.key === "Tab") {
+          // Return to the anchor so native Tab follows the card's DOM order.
+          closeGalleryMenu(true);
+        }
+      });
+      document.addEventListener("pointerdown", (event) => {
+        if (galleryMenuState && !galleryCardMenu.contains(event.target) && !galleryMenuState.trigger.contains(event.target)) closeGalleryMenu();
+      });
+      document.addEventListener("focusin", (event) => {
+        if (galleryMenuState && !galleryCardMenu.contains(event.target) && !galleryMenuState.trigger.contains(event.target)) closeGalleryMenu();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && galleryMenuState) { event.preventDefault(); closeGalleryMenu(true); }
+      });
+      document.addEventListener("scroll", () => closeGalleryMenu(true), true);
+      window.addEventListener("resize", () => closeGalleryMenu(true));
+      document.addEventListener("visibilitychange", () => { if (document.hidden) closeGalleryMenu(); });
+
       if (snapshotGallery) {
-        snapshotGallery.addEventListener("click", (e) => {
-          const target = e.target.closest("button[data-action]");
-          if (target) {
-            const id = target.dataset.id;
-            const action = target.dataset.action;
-            const idx = snapshots.findIndex((s) => s.id === id);
-            if (idx < 0) return;
-            if (action === "recall") {
-              applyControlState(snapshots[idx].state);
-              syncHubState("snapshot-recall");
-              backfillSnapshotPreview(id);
-              renderSnapshotGallery();
-              showToast("Save loaded");
-              return;
-            }
-            if (action === "delete") {
-              requestDeleteSnapshot(id);
-            }
+        snapshotGallery.addEventListener("click", (event) => {
+          const button = event.target.closest("button");
+          const tile = event.target.closest(".gallery-tile");
+          if (!tile) return;
+          const id = tile.dataset.id;
+          if (button?.dataset.action === "menu") {
+            if (galleryMenuState?.trigger === button) closeGalleryMenu(true);
+            else openGalleryMenu(id, button);
             return;
           }
-          const tile = e.target.closest(".gallery-tile");
-          if (!tile || !snapshotGallery.contains(tile)) return;
-          const id = tile.dataset.id || null;
+          if (event.detail > 1) return;
+          closeGalleryMenu();
           selectedSnapshotId = selectedSnapshotId === id ? null : id;
           updateGallerySelection();
         });
-        snapshotGallery.addEventListener("keydown", (e) => {
-          if (e.key !== "Enter" && e.key !== " ") return;
-          if (e.target.closest("button")) return;
-          const tile = e.target.closest(".gallery-tile");
-          if (!tile || !snapshotGallery.contains(tile)) return;
-          e.preventDefault();
-          const id = tile.dataset.id || null;
-          selectedSnapshotId = selectedSnapshotId === id ? null : id;
-          updateGallerySelection();
+        snapshotGallery.addEventListener("dblclick", (event) => {
+          if (event.target.closest(".gallery-menu-trigger")) return;
+          const tile = event.target.closest(".gallery-tile");
+          if (tile) { event.preventDefault(); openSnapshotById(tile.dataset.id); }
+        });
+        snapshotGallery.addEventListener("contextmenu", (event) => {
+          const tile = event.target.closest(".gallery-tile");
+          if (!tile) return;
+          event.preventDefault();
+          openGalleryMenu(tile.dataset.id, tile.querySelector(".gallery-menu-trigger"));
+        });
+        snapshotGallery.addEventListener("keydown", (event) => {
+          const tile = event.target.closest(".gallery-tile");
+          if (!tile) return;
+          const trigger = tile.querySelector(".gallery-menu-trigger");
+          if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10") ||
+              (event.target === trigger && ["ArrowDown", "ArrowUp"].includes(event.key))) {
+            event.preventDefault(); openGalleryMenu(tile.dataset.id, trigger, event.key === "ArrowUp");
+          }
         });
       }
       if (galleryLoadMoreBtn) {
@@ -10038,6 +10189,15 @@
         confirmCancelBtn.addEventListener("click", closeDeleteConfirm);
       }
       if (confirmModal) {
+        confirmModal.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); closeDeleteConfirm(); }
+          if (event.key === "Tab") {
+            const controls = Array.from(confirmModal.querySelectorAll("button, input")).filter((el) => !el.disabled && el.getClientRects().length);
+            const first = controls[0], last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+            if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+          }
+        });
         confirmModal.addEventListener("click", (e) => {
           if (e.target === confirmModal) closeDeleteConfirm();
         });
@@ -10670,6 +10830,7 @@
       const appRoot = document.getElementById("app");
 
       function setPanelHidden(on) {
+        closeGalleryMenu();
         const changed = appRoot.classList.contains("panel-hidden") !== !!on;
         if (on) moduleSwitcher.setOpen(false);
         appRoot.classList.toggle("panel-hidden", !!on);

@@ -59,7 +59,7 @@ const probe = `window.__saveProbe = {
    await page.locator('#tbSnapAdd').click();const record=await page.evaluate(()=>window.__saveProbe.stored()[0]);
    await page.evaluate(()=>window.__saveProbe.mutate());
    await page.locator('[data-tab="gallery"].side-btn').click();
-   await page.locator('.gallery-tile').first().hover();await page.locator('[data-action="recall"]').first().click();await page.waitForTimeout(200);
+   await page.locator('.gallery-tile').first().hover();await page.locator('.gallery-menu-trigger').first().click();await page.locator('#galleryCardMenu [data-action="recall"]').click();await page.waitForTimeout(200);
    equal(before,await page.evaluate(()=>window.__saveProbe.signature()),species+' UI Recall');
    references.push({species,id:record.id,signature:before});
   }

@@ -8,7 +8,7 @@ function extract(name) {
   assert.ok(start >= 0);
   return html.slice(start, html.indexOf('\n      }', start) + 8);
 }
-test('lock glyph reflects state through repeated toggles, independently of hover', () => {
+test('lock state remains explicit while CSS action previews are regenerated', () => {
   const context = vm.createContext({});
   vm.runInContext(extract('updateRandomLockButton'), context);
   const attrs = {};
@@ -17,11 +17,11 @@ test('lock glyph reflects state through repeated toggles, independently of hover
     const locked = i % 2 === 0;
     context.updateRandomLockButton(button, locked);
     assert.equal(attrs['aria-pressed'], String(locked));
-    assert.ok(button.innerHTML.includes(locked ? 'iconoir-lock"' : 'iconoir-lock-slash"'));
+    assert.ok(button.innerHTML.includes('utility-current iconoir iconoir-lock'));assert.ok(button.innerHTML.includes(locked ? 'utility-next iconoir iconoir-lock-slash' : 'utility-next iconoir iconoir-lock'));
     assert.equal(button.title, locked ? 'Unlock randomization' : 'Lock randomization');
   }
 });
-test('plant and vessel visibility use hidden pressed state and current-state glyph', () => {
+test('plant and vessel visibility retain hidden pressed state with CSS action icons', () => {
   for (const kind of ['Plant', 'Vessel']) {
     let visible = true;
     const attrs = {};
@@ -35,7 +35,8 @@ test('plant and vessel visibility use hidden pressed state and current-state gly
       visible = i % 2 === 0;
       context[`update${kind}PartToggleButton`]('leaves');
       assert.equal(attrs['aria-pressed'], String(!visible));
-      assert.ok(button.innerHTML.includes(visible ? 'iconoir-eye"' : 'iconoir-eye-closed"'));
+      assert.ok(button.innerHTML.includes('utility-current iconoir iconoir-eye-closed'));
+      assert.ok(button.innerHTML.includes('utility-next iconoir iconoir-eye'));
     }
   }
 });
@@ -56,4 +57,11 @@ test('randomizing vessel choices preserves hidden and visible states', () => {
     control.value='a';
     for(let i=0;i<50;i++){context.randomizeElement(control);assert.equal(control.value,'a');}
   }
+});
+test('input-mode handoff follows mouse, touch and hovering pen without changing toggle state',()=>{
+ const root={dataset:{}};const context=vm.createContext({document:{documentElement:root}});
+ vm.runInContext(extract('updateUtilityInput'),context);
+ for(const [pointerType,expected] of [['mouse','mouse'],['pen','touch'],['mouse','mouse'],['touch','touch'],['','touch']]){
+  context.updateUtilityInput({pointerType});assert.equal(root.dataset.utilityInput,expected);
+ }
 });
